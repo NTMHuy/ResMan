@@ -122,6 +122,7 @@ Restaurant-Management-System/
     ├── unit/
     ├── integration/
     └── e2e/
+```
 
 ## 6. AI-Augmented SDLC
 
@@ -272,4 +273,4 @@ License cụ thể chưa được quyết định.
 * Development
 * Testing
 * Deployment
-```
+
