@@ -122,7 +122,7 @@ Final Outcome: Khách hàng nắm được tiến độ đơn hàng
 **Flow Name:** Thanh Toán
 **Goal:** Khách hàng hoàn tất thanh toán cho đơn hàng đã sử dụng.
 **Actor:** Khách hàng (phối hợp với Nhân viên Order)
-**Entry Point:** Màn hình Thanh toán / Nhân viên Order thực hiện thanh toán
+**Entry Point:** Màn hình Thanh toán / Nhân viên Order ghi nhận thanh toán
 **Preconditions:** Đơn hàng đã ở trạng thái hoàn thành chế biến/phục vụ.
 
 **Main Flow:**
@@ -257,7 +257,7 @@ Nhân viên Order nhận thông báo đơn đã hoàn thành
 ↓
 Nhân viên Order giao món cho khách hàng
 ↓
-Nhân viên Order thực hiện thu tiền / thanh toán (CU-03)
+Khách hàng thực hiện thanh toán; Nhân viên Order ghi nhận giao dịch (CU-03)
 ↓
 Hệ thống cập nhật trạng thái đơn thành "hoàn tất"
 ↓
