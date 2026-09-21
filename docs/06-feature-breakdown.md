@@ -44,7 +44,7 @@ SA-002 Order Management
   └── C-006 Điều phối Hoàn tất Đơn hàng
         └── F-006 Điều Phối Đơn Hàng Đến Bếp & Hoàn Tất
               ├── F-006.1 Chuyển Đơn Đến Hàng Đợi Bếp
-              └── F-006.2 Cập Nhật Trạng Thái Giao Hàng
+              └── F-006.2 Cập Nhật Trạng Thái Giao Món
   └── C-007 Theo dõi Trạng thái Đơn hàng
         └── F-007 Theo Dõi Đơn Hàng
               ├── F-007.1 Xem Trạng Thái Đơn Hàng
@@ -252,7 +252,7 @@ SA-008 AI Recommendation (Future/Suggested)
 
 ### F-006 — Điều Phối Đơn Hàng Đến Bếp & Hoàn Tất
 
-**Description:** Chuyển đơn đã xác nhận vào hàng đợi bếp và cập nhật trạng thái khi đơn được giao cho khách hàng.
+**Description:** Chuyển đơn đã xác nhận vào hàng đợi bếp và cập nhật trạng thái khi món đã được giao cho khách hàng.
 **System Area:** SA-002
 **Logical Component:** C-006
 **Primary Actors:** Nhân viên Order
@@ -268,7 +268,7 @@ SA-008 AI Recommendation (Future/Suggested)
 | ID | Name | Description | Related Use Case | Priority | Dependency |
 |---|---|---|---|---|---|
 | F-006.1 | Chuyển Đơn Đến Hàng Đợi Bếp | Đưa đơn đã xác nhận vào hàng đợi chế biến | UC-008 | Must Have | F-005.2 |
-| F-006.2 | Cập Nhật Trạng Thái Giao Hàng | Đánh dấu đơn đã được giao cho khách hàng | UC-009 | Must Have | F-009.1 |
+| F-006.2 | Cập Nhật Trạng Thái Giao Món | Đánh dấu đơn đã được giao món cho khách hàng | UC-009 | Must Have | F-009.1 |
 
 ---
 
@@ -411,7 +411,7 @@ SA-008 AI Recommendation (Future/Suggested)
 **Related Use Cases:** UC-010
 **Priority:** Must Have
 **MVP Status:** Required for MVP
-**Dependencies:** Phụ thuộc F-006.2 (đơn đã giao).
+**Dependencies:** Phụ thuộc F-006.2 (đơn đã giao món).
 
 **Sub-features:**
 
@@ -583,12 +583,12 @@ SA-008 AI Recommendation (Future/Suggested)
 | F-002 | F-001 | Data dependency | Thực đơn hiển thị phải dựa trên dữ liệu món ăn đã được quản lý |
 | F-003 | F-002, F-004 | Functional + Include | Cần xem thực đơn trước khi đặt; luôn kiểm tra tính hợp lệ khi tạo đơn |
 | F-005 | F-003, F-004 | Functional + Include | Xử lý đơn hàng mới chỉ khả dụng khi đơn đã được tạo; luôn kiểm tra lại tính hợp lệ |
-| F-006 | F-005, F-009 | Sequential | Chỉ điều phối đơn đã xác nhận; cần tín hiệu hoàn thành từ bếp để cập nhật giao hàng |
+| F-006 | F-005, F-009 | Sequential | Chỉ điều phối đơn đã xác nhận; cần tín hiệu hoàn thành từ bếp để cập nhật trạng thái giao món |
 | F-007 | F-003, F-005, F-006, F-009 | Data dependency | Trạng thái hiển thị cho khách hàng tổng hợp từ nhiều nguồn |
 | F-008 | F-006 | Sequential | Hàng đợi bếp chỉ nhận đơn đã được điều phối |
 | F-009 | F-008 | Sequential | Chỉ cập nhật tiến độ cho đơn đã bắt đầu chế biến |
 | F-010 | F-011, F-009 | Data dependency | Giám sát tồn kho dựa trên dữ liệu cập nhật và báo cáo tiêu thụ |
-| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi đơn đã được giao |
+| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi món đã được giao cho khách hàng |
 | F-014 | F-012, F-010, F-006 | Data dependency | Báo cáo tổng hợp dữ liệu từ thanh toán, tồn kho, và đơn hàng |
 | F-015 | F-007, F-010 | Data dependency | Dashboard hiển thị dữ liệu thời gian thực từ đơn hàng và tồn kho |
 | F-016 | F-003, F-002 | Data dependency + Extend | Gợi ý cần lịch sử đơn hàng; mở rộng trải nghiệm xem thực đơn |
@@ -652,7 +652,7 @@ Nhân viên Order xử lý đơn (F-005)
         ↓
 Nhân viên Bếp chế biến (F-008, F-009)
         ↓
-Đơn được giao và ghi nhận thanh toán (F-006.2, F-012)
+Đơn được giao món và ghi nhận thanh toán (F-006.2, F-012)
         ↓
 Tồn kho được cập nhật và giám sát (F-011, F-010)
         ↓
