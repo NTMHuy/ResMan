@@ -129,7 +129,7 @@ flowchart TD
 **Related User Flows:** OS-03, CU-03.
 **Related Use Cases:** UC-010.
 **Priority:** Must Have.
-**Dependencies:** Phụ thuộc SA-002 (đơn hàng phải ở trạng thái "đã giao"); cung cấp dữ liệu cho SA-007.
+**Dependencies:** Phụ thuộc SA-002 (đơn hàng phải ở trạng thái "đã giao món"); cung cấp dữ liệu cho SA-007.
 
 ---
 
