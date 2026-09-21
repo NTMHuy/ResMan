@@ -387,7 +387,7 @@
 **Category:** Order Processing
 **Primary Actor:** Nhân viên Order
 **Supporting Actors:** Khách hàng
-**Goal:** Đánh dấu đơn hàng đã được giao cho khách hàng.
+**Goal:** Đánh dấu đơn hàng đã được giao món cho khách hàng.
 **Priority:** Must Have
 **Related User Flow:** OS-03
 **Dependencies:** Phụ thuộc UC-013 (bếp đã hoàn thành chế biến).
@@ -401,8 +401,8 @@
 #### Main Success Flow
 1. Nhân viên Order nhận thông báo đơn đã chế biến xong.
 2. Nhân viên Order giao món cho khách hàng.
-3. Nhân viên Order xác nhận hoàn tất giao món trên hệ thống.
-4. Hệ thống cập nhật trạng thái đơn thành "đã giao".
+3. Nhân viên Order xác nhận hoàn tất việc giao món trên hệ thống.
+4. Hệ thống cập nhật trạng thái đơn thành "đã giao món".
 5. Use Case hoàn tất.
 
 #### Alternative Flows
@@ -415,7 +415,7 @@
 - Không có quy tắc riêng.
 
 #### Postconditions
-- Đơn hàng chuyển sang trạng thái "đã giao", sẵn sàng cho UC-010.
+- Đơn hàng chuyển sang trạng thái "đã giao món", sẵn sàng cho UC-010.
 
 #### Related Use Cases
 - Dẫn đến: UC-010.
@@ -433,7 +433,7 @@
 **Dependencies:** Phụ thuộc UC-009.
 
 #### Preconditions
-- Đơn hàng đang ở trạng thái "đã giao".
+- Đơn hàng đang ở trạng thái "đã giao món".
 
 #### Trigger
 - Khách hàng thực hiện thanh toán.
@@ -441,7 +441,7 @@
 #### Main Success Flow
 1. Nhân viên Order tổng hợp hoá đơn cho đơn hàng.
 2. Khách hàng thực hiện thanh toán.
-3. Nhân viên Order ghi nhận giao dịch vào hệ thống.
+3. Nhân viên Order ghi nhận giao dịch thanh toán vào hệ thống.
 4. Hệ thống cập nhật trạng thái đơn thành "hoàn tất".
 5. Use Case hoàn tất.
 
@@ -449,13 +449,13 @@
 - Không xác định — hình thức thanh toán cụ thể chưa được xác nhận (xem Mục 16).
 
 #### Exception Flows
-- Thanh toán thất bại → hệ thống giữ trạng thái đơn ở "đã giao, chưa thanh toán" và cho phép thử lại.
+- Thanh toán thất bại → hệ thống giữ trạng thái đơn ở "đã giao món, chưa thanh toán" và cho phép thử lại.
 
 #### Business Rules
 - BR-006: Đơn hàng chỉ được đóng (trạng thái "hoàn tất") khi giao dịch thanh toán đã được ghi nhận thành công (Derived).
 
 #### Postconditions
-- Đơn hàng chuyển sang trạng thái "hoàn tất" và đã thanh toán.
+- Đơn hàng chuyển sang trạng thái "hoàn tất" sau khi giao dịch thanh toán được ghi nhận.
 
 #### Related Use Cases
 - Liên quan: UC-021 (dữ liệu thanh toán được tổng hợp vào báo cáo).
