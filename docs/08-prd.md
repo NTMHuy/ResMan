@@ -292,7 +292,7 @@ flowchart TD
 
 ### F-012 — Ghi Nhận Thanh Toán
 
-**Purpose:** Ghi nhận giao dịch sau khi khách hàng thanh toán và đóng đơn hàng.
+**Purpose:** Ghi nhận giao dịch sau khi khách hàng thanh toán và đóng đơn hàng. Khách hàng là người thực hiện thanh toán; Nhân viên Order chịu trách nhiệm ghi nhận giao dịch trên hệ thống.
 **Primary Actor:** Nhân viên Order
 **Related Actors:** Khách hàng
 **Related System Area:** SA-005
