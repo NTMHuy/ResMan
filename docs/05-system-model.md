@@ -176,7 +176,7 @@ flowchart TD
 | C-003 | Khởi tạo Đơn hàng | SA-002 | Tiếp nhận lựa chọn món và tạo đơn hàng mới | Must Have |
 | C-004 | Kiểm tra Tính hợp lệ Đơn hàng | SA-002 | Xác minh món ăn còn hợp lệ trước khi tạo/xác nhận đơn (dùng chung) | Must Have |
 | C-005 | Tiếp nhận & Xác nhận Đơn hàng | SA-002 | Xem, xác nhận, hoặc từ chối đơn hàng mới | Must Have |
-| C-006 | Điều phối Hoàn tất Đơn hàng | SA-002 | Chuyển đơn đến bếp và cập nhật trạng thái giao hàng | Must Have |
+| C-006 | Điều phối Hoàn tất Đơn hàng | SA-002 | Chuyển đơn đến bếp và cập nhật trạng thái giao món | Must Have |
 | C-007 | Theo dõi Trạng thái Đơn hàng | SA-002 | Cung cấp trạng thái đơn hàng cho khách hàng; xử lý huỷ đơn | Must Have |
 | C-008 | Quản lý Hàng đợi Bếp | SA-003 | Sắp xếp và hiển thị thứ tự đơn cần chế biến | Must Have |
 | C-009 | Theo dõi Chế biến Món ăn | SA-003 | Cập nhật trạng thái chế biến; báo cáo thiếu nguyên liệu | Must Have |
@@ -247,7 +247,7 @@ flowchart TD
 **Related Actors:** Nhân viên Order, Nhân viên Bếp.
 **Related Use Cases:** UC-008, UC-009.
 **Business Inputs:** Đơn hàng đã xác nhận (từ C-005); thông báo chế biến hoàn tất (từ C-009).
-**Business Outputs:** Đơn hàng trong hàng đợi bếp; đơn hàng ở trạng thái "đã giao".
+**Business Outputs:** Đơn hàng trong hàng đợi bếp; đơn hàng ở trạng thái "đã giao món".
 **Dependencies:** Phụ thuộc C-005 và C-009 (SA-003); là nguồn đầu vào cho C-012.
 
 ### C-007 — Theo dõi Trạng thái Đơn hàng
@@ -306,7 +306,7 @@ flowchart TD
 **Responsibility:** Ghi nhận giao dịch thanh toán và đóng đơn hàng.
 **Related Actors:** Nhân viên Order, Khách hàng.
 **Related Use Cases:** UC-010.
-**Business Inputs:** Đơn hàng ở trạng thái "đã giao" (từ C-006); thông tin thanh toán.
+**Business Inputs:** Đơn hàng ở trạng thái "đã giao món" (từ C-006); thông tin thanh toán.
 **Business Outputs:** Đơn hàng ở trạng thái "hoàn tất"; dữ liệu giao dịch.
 **Dependencies:** Phụ thuộc C-006; cung cấp dữ liệu cho C-014.
 
@@ -391,7 +391,7 @@ flowchart TD
 | Khách hàng | SA-005 | C-012 | Thực hiện thanh toán (phối hợp với Nhân viên Order) |
 | Khách hàng | SA-008 | C-016 | Xem gợi ý món ăn *(Suggested)* |
 | Nhân viên Order | SA-002 | C-005 | Xác nhận/từ chối đơn hàng |
-| Nhân viên Order | SA-002 | C-006 | Chuyển đơn đến bếp, cập nhật giao hàng |
+| Nhân viên Order | SA-002 | C-006 | Chuyển đơn đến bếp, cập nhật trạng thái giao món |
 | Nhân viên Order | SA-005 | C-012 | Ghi nhận thanh toán |
 | Nhân viên Bếp | SA-003 | C-008 | Xem và tiếp nhận hàng đợi chế biến |
 | Nhân viên Bếp | SA-003 | C-009 | Cập nhật trạng thái chế biến, báo cáo thiếu nguyên liệu |
@@ -466,7 +466,7 @@ Quy trình này phản ánh đúng luồng E2E-01 và E2E-02 trong `03-user-flow
 | SA-002 Order Management | depends on | SA-001 Menu Management | Đơn hàng chỉ có thể được tạo dựa trên món ăn hợp lệ trong thực đơn |
 | SA-003 Kitchen Operations | depends on | SA-002 Order Management | Bếp chỉ xử lý các đơn đã được xác nhận |
 | SA-003 Kitchen Operations | ↔ (hai chiều) | SA-004 Inventory Management | Bếp tiêu thụ nguyên liệu; kho báo cáo tình trạng thiếu hụt ngược lại cho bếp |
-| SA-005 Payment | depends on | SA-002 Order Management | Thanh toán chỉ thực hiện khi đơn hàng đã ở trạng thái "đã giao" |
+| SA-005 Payment | depends on | SA-002 Order Management | Thanh toán được ghi nhận khi đơn hàng đã ở trạng thái "đã giao món" |
 | SA-007 Reporting & Monitoring | depends on | SA-002 Order Management | Báo cáo cần dữ liệu đơn hàng đã hoàn tất |
 | SA-007 Reporting & Monitoring | depends on | SA-004 Inventory Management | Báo cáo cần dữ liệu tồn kho |
 | SA-007 Reporting & Monitoring | depends on | SA-005 Payment | Báo cáo doanh thu cần dữ liệu giao dịch |
