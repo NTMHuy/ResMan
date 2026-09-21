@@ -25,7 +25,7 @@ Trở thành một hệ thống cốt lõi hỗ trợ trọn vẹn vòng đời 
 ### 2.1 Mục Tiêu Chính (Primary Goals)
 
 - Cải thiện hiệu quả, độ chính xác, và sự phối hợp trong vận hành nhà hàng bằng cách kết nối Khách hàng, nhân viên, và Quản lý qua một nền tảng thống nhất.
-- Hỗ trợ trọn vẹn một vòng đời đơn hàng end-to-end: đặt món → xác nhận → chế biến → giao hàng → thanh toán → cập nhật tồn kho → báo cáo.
+- Hỗ trợ trọn vẹn một vòng đời đơn hàng end-to-end: đặt món → xác nhận → chế biến → giao món cho khách → thanh toán → cập nhật tồn kho → báo cáo.
 
 ### 2.2 Mục Tiêu Phụ (Secondary Goals)
 
@@ -83,7 +83,7 @@ Nhân viên Order xác nhận đơn
         ↓
 Nhân viên Bếp chế biến món ăn
         ↓
-Đơn được giao và ghi nhận thanh toán
+Món được giao cho khách và ghi nhận thanh toán
         ↓
 Tồn kho được cập nhật và giám sát
         ↓
@@ -96,7 +96,7 @@ flowchart TD
     B --> C[Nhân viên Order: Xác nhận đơn]
     C --> D[Chuyển đơn đến hàng đợi bếp]
     D --> E[Nhân viên Bếp: Chế biến]
-    E --> F[Nhân viên Order: Giao đơn & ghi nhận thanh toán]
+    E --> F[Nhân viên Order: Giao món cho khách & ghi nhận thanh toán]
     F --> G[Nhân viên Kho: Cập nhật & giám sát tồn kho]
     G --> H[Quản lý: Xem báo cáo tổng hợp]
 ```
@@ -220,7 +220,7 @@ flowchart TD
 
 ### F-006 — Điều Phối Đơn Hàng Đến Bếp & Hoàn Tất
 
-**Purpose:** Chuyển đơn đến bếp và cập nhật trạng thái giao hàng.
+**Purpose:** Chuyển đơn đến bếp và cập nhật trạng thái giao món cho khách hàng.
 **Primary Actor:** Nhân viên Order
 **Related Actors:** Nhân viên Bếp
 **Related System Area:** SA-002
@@ -252,7 +252,7 @@ flowchart TD
 **Functional Requirements:** FR-008
 **Priority:** Must Have
 **MVP Status:** Required for MVP
-**Dependencies:** Phụ thuộc F-006.
+**Dependencies:** Phụ thuộc F-006 (đơn đã được giao món cho khách hàng).
 
 ### F-009 — Cập Nhật Tiến Độ Chế Biến
 
@@ -292,7 +292,7 @@ flowchart TD
 
 ### F-012 — Ghi Nhận Thanh Toán
 
-**Purpose:** Ghi nhận giao dịch và đóng đơn hàng.
+**Purpose:** Ghi nhận giao dịch sau khi khách hàng thanh toán và đóng đơn hàng.
 **Primary Actor:** Nhân viên Order
 **Related Actors:** Khách hàng
 **Related System Area:** SA-005
@@ -300,7 +300,7 @@ flowchart TD
 **Functional Requirements:** FR-012
 **Priority:** Must Have
 **MVP Status:** Required for MVP
-**Dependencies:** Phụ thuộc F-006.
+**Dependencies:** Phụ thuộc F-006 (đơn đã được giao món cho khách hàng).
 
 ### F-013 — Quản Lý Nhân Viên
 
@@ -396,7 +396,7 @@ flowchart TD
 
 **Primary Actor:** Tất cả 5 actor
 **Trigger:** Khách hàng đặt món.
-**Main Steps:** Đặt món → xác nhận → chuyển bếp → chế biến → giao hàng → thanh toán.
+**Main Steps:** Đặt món → xác nhận → chuyển bếp → chế biến → giao món cho khách → khách hàng thanh toán → Nhân viên Order ghi nhận giao dịch.
 **Expected Outcome:** Đơn hàng hoàn tất, dữ liệu phản ánh vào báo cáo.
 **Related Features:** F-002 đến F-012 (toàn bộ chuỗi Order Management, Kitchen Operations, Payment).
 
@@ -438,7 +438,7 @@ flowchart TD
 | F-003 / FR-003 | Khởi đầu vòng đời đơn hàng | Hành trình cốt lõi (bước 2) | F-002, F-004 |
 | F-004 / FR-004 | Đảm bảo tính đúng đắn đơn hàng | Hỗ trợ bước 2, 3 | F-001, F-002 |
 | F-005 / FR-005 | Xử lý đơn hàng | Hành trình cốt lõi (bước 3) | F-003, F-004 |
-| F-006 / FR-006 | Kết nối Order–Kitchen–Giao hàng | Hành trình cốt lõi (bước 4, 6) | F-005, F-009 |
+| F-006 / FR-006 | Kết nối Order–Kitchen–Giao món cho khách | Hành trình cốt lõi (bước 4, 6) | F-005, F-009 |
 | F-007 / FR-007 | Hiển thị tiến độ cho khách hàng | Song song toàn bộ hành trình | F-003, F-005, F-006, F-009 |
 | F-008 / FR-008 | Vận hành bếp | Hành trình cốt lõi (bước 5) | F-006 |
 | F-009 / FR-009 | Hoàn thành chế biến | Hành trình cốt lõi (bước 5) | F-008 |
@@ -448,7 +448,7 @@ flowchart TD
 | F-013 / FR-013 | Quản lý nhân sự cơ bản | Hỗ trợ vận hành chung | Không có |
 | F-014 / FR-014 | Báo cáo cho Quản lý | Hành trình cốt lõi (bước 8) | F-012, F-010, F-006 |
 
-**Quy trình MVP hoàn chỉnh:** Quản lý thiết lập thực đơn và nhân sự → Khách hàng xem thực đơn và tạo đơn → Nhân viên Order xử lý đơn → đơn được chuyển đến bếp → Nhân viên Bếp chế biến (có báo cáo thiếu nguyên liệu nếu cần) → đơn được giao và thanh toán → tồn kho được cập nhật và giám sát → Quản lý xem báo cáo tổng hợp. Đây là tập hợp **tối thiểu nhưng đầy đủ** để chứng minh mục tiêu chính của dự án.
+**Quy trình MVP hoàn chỉnh:** Quản lý thiết lập thực đơn và nhân sự → Khách hàng xem thực đơn và tạo đơn → Nhân viên Order xử lý đơn → đơn được chuyển đến bếp → Nhân viên Bếp chế biến (có báo cáo thiếu nguyên liệu nếu cần) → món được giao cho khách → khách hàng thanh toán và Nhân viên Order ghi nhận giao dịch → tồn kho được cập nhật và giám sát → Quản lý xem báo cáo tổng hợp. Đây là tập hợp **tối thiểu nhưng đầy đủ** để chứng minh mục tiêu chính của dự án.
 
 ## 13. Ưu Tiên Tính Năng
 
@@ -472,7 +472,7 @@ flowchart TD
 | F-008 | F-006 | Sequential | Chỉ nhận đơn đã điều phối |
 | F-009 | F-008 | Sequential | Chỉ cập nhật đơn đã bắt đầu chế biến |
 | F-010 | F-011, F-009 | Data | Cần dữ liệu cập nhật và báo cáo tiêu thụ |
-| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi đơn đã giao |
+| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi món đã được giao cho khách hàng |
 | F-014 | F-012, F-010, F-006 | Data | Báo cáo tổng hợp từ nhiều nguồn dữ liệu |
 | F-015 | F-007, F-010 | Data | Không thuộc critical path MVP |
 | F-016 | F-002, F-003 | Data + Extend | Không thuộc critical path MVP |
@@ -484,13 +484,13 @@ flowchart TD
 - **F-003:** Given khách hàng đã chọn ít nhất một món còn hàng, When khách hàng xác nhận đặt món, Then hệ thống phải tạo một đơn hàng mới ở trạng thái "chờ xác nhận" và từ chối các món hết hàng.
 - **F-004:** Given một đơn hàng đang được tạo hoặc xác nhận, When hệ thống kiểm tra tính hợp lệ, Then hệ thống phải trả về kết quả hợp lệ/không hợp lệ kèm danh sách món bị ảnh hưởng nếu có.
 - **F-005:** Given một đơn hàng ở trạng thái "chờ xác nhận", When Nhân viên Order xác nhận hoặc từ chối, Then đơn phải chuyển đúng trạng thái tương ứng, kèm lý do nếu bị từ chối.
-- **F-006:** Given một đơn hàng đã được xác nhận, When hệ thống/Nhân viên Order điều phối đơn, Then đơn phải xuất hiện trong hàng đợi bếp; Given đơn đã chế biến xong, When Nhân viên Order xác nhận giao hàng, Then đơn phải chuyển sang trạng thái "đã giao".
+- **F-006:** Given một đơn hàng đã được xác nhận, When hệ thống/Nhân viên Order điều phối đơn, Then đơn phải xuất hiện trong hàng đợi bếp; Given đơn đã chế biến xong, When Nhân viên Order xác nhận giao món cho khách, Then đơn phải chuyển sang trạng thái "đã giao món".
 - **F-007:** Given một đơn hàng đã tồn tại, When khách hàng mở màn hình theo dõi, Then trạng thái hiển thị phải là trạng thái mới nhất; Given đơn còn ở trạng thái cho phép huỷ, When khách hàng chọn huỷ, Then đơn phải chuyển sang "đã huỷ".
 - **F-008:** Given có đơn hàng trong hàng đợi bếp, When Nhân viên Bếp mở màn hình hàng đợi, Then đơn phải hiển thị đúng thứ tự ưu tiên; When chọn bắt đầu chế biến, Then đơn chuyển sang "đang chế biến".
 - **F-009:** Given một đơn đang chế biến, When Nhân viên Bếp đánh dấu hoàn thành, Then trạng thái phải cập nhật và Nhân viên Order phải được thông báo; When thiếu nguyên liệu, Then hệ thống phải thông báo cho Nhân viên Kho và Order.
 - **F-010:** Given dữ liệu tồn kho hiện có, When Nhân viên Kho xem màn hình tồn kho, Then số lượng phải chính xác; Given tồn kho xuống dưới ngưỡng, When hệ thống kiểm tra, Then phải phát cảnh báo.
 - **F-011:** Given một nguyên liệu cần cập nhật, When Nhân viên Kho nhập số lượng thay đổi hợp lệ, Then hệ thống phải lưu lại; When số lượng nhập là số âm không hợp lệ, Then hệ thống phải từ chối cập nhật.
-- **F-012:** Given một đơn hàng ở trạng thái "đã giao", When Nhân viên Order ghi nhận thanh toán, Then đơn phải chuyển sang "hoàn tất".
+- **F-012:** Given một đơn hàng ở trạng thái "đã giao món", When khách hàng thực hiện thanh toán và Nhân viên Order ghi nhận giao dịch, Then đơn phải chuyển sang "hoàn tất".
 - **F-013:** Given Quản lý đang quản lý nhân sự, When thêm/sửa/xoá một nhân viên, Then thay đổi phải được lưu chính xác.
 - **F-014:** Given có dữ liệu đơn hàng/tồn kho/thanh toán, When Quản lý mở báo cáo, Then hệ thống phải hiển thị tổng hợp doanh thu, số lượng đơn hàng, và tồn kho.
 - **F-015** *(Post-MVP)*: Given có dữ liệu đơn hàng và tồn kho, When Quản lý mở dashboard, Then hệ thống phải hiển thị tình trạng hiện tại theo thời gian thực.
