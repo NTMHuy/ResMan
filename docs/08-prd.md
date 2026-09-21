@@ -589,3 +589,208 @@ AI được sử dụng xuyên suốt vòng đời phát triển dự án — ph
 - **Câu hỏi chưa giải quyết:** 9 câu hỏi (OQ-01 đến OQ-09) được tổng hợp từ tất cả tài liệu trước, chưa có câu nào bị tự ý quyết định thay cho dự án.
 
 Tài liệu này là **tài liệu yêu cầu sản phẩm trung tâm** của Hệ thống Quản lý Nhà hàng, sẵn sàng làm nền tảng cho các hoạt động phát triển có hỗ trợ AI tiếp theo.
+
+---
+
+# 23. UI/UX Generation Specification
+
+> **Purpose:** This section is the authoritative UI specification for AI-assisted frontend generation. When generating or modifying UI, AI must use this section together with Sections 3, 4, 7, 8, 9, 10, 12, 15 and 16 of this PRD. AI must not invent business functionality that is not defined by this PRD.
+
+## 23.1 UI Generation Principles
+
+1. UI must be derived from confirmed actors, features, functional requirements, user flows and business rules in this PRD.
+2. Each screen must have a unique Screen ID and must map to one or more Feature IDs.
+3. Each interactive element must correspond to a documented user action or requirement.
+4. Features marked Post-MVP or Future must not appear in the MVP UI unless explicitly requested.
+5. AI may choose visual layout and component composition, but must not invent new business rules, actors, permissions or workflows.
+6. Every important data view must define loading, empty, error and success states.
+7. Destructive actions must require an explicit confirmation step when the business flow requires confirmation.
+8. Responsive behavior must be considered for desktop, tablet and mobile layouts.
+
+## 23.2 Application Areas
+
+| Area ID | Area | Primary Actor | Related Features |
+|---|---|---|---|
+| UI-A01 | Customer Ordering | Khách hàng | F-002, F-003, F-007 |
+| UI-A02 | Order Staff Operations | Nhân viên Order | F-005, F-006, F-012 |
+| UI-A03 | Kitchen Operations | Nhân viên Bếp | F-008, F-009 |
+| UI-A04 | Inventory Operations | Nhân viên Kho | F-010, F-011 |
+| UI-A05 | Management | Quản lý | F-001, F-013, F-014 |
+| UI-A06 | Authentication & Access | Tất cả actor có tài khoản | Theo quyền truy cập của actor |
+
+## 23.3 Screen Specification
+
+Every screen generated from this PRD must contain the following metadata:
+
+| Field | Required |
+|---|---|
+| Screen ID | Yes |
+| Screen Name | Yes |
+| Actor | Yes |
+| Feature IDs | Yes |
+| User Flow | Yes, when applicable |
+| Purpose | Yes |
+| Entry Point | Yes |
+| Main Actions | Yes |
+| Data Displayed | Yes |
+| Form Inputs | When applicable |
+| Validation Rules | When applicable |
+| Success State | Yes |
+| Empty State | Yes |
+| Loading State | Yes |
+| Error State | Yes |
+| Permission Rule | Yes |
+| Navigation | Yes |
+| Responsive Behavior | Yes |
+
+## 23.4 MVP Screen Inventory
+
+### Customer
+
+| Screen ID | Screen | Features |
+|---|---|---|
+| SCR-C01 | Customer Menu | F-002 |
+| SCR-C02 | Dish Detail | F-002 |
+| SCR-C03 | Cart / Create Order | F-003, F-004 |
+| SCR-C04 | Order Confirmation | F-003 |
+| SCR-C05 | My Orders | F-007 |
+| SCR-C06 | Order Tracking | F-007 |
+
+### Order Staff
+
+| Screen ID | Screen | Features |
+|---|---|---|
+| SCR-O01 | Order Queue | F-005 |
+| SCR-O02 | Order Detail | F-005, F-006 |
+| SCR-O03 | Payment / Complete Order | F-012 |
+
+### Kitchen Staff
+
+| Screen ID | Screen | Features |
+|---|---|---|
+| SCR-K01 | Kitchen Queue | F-008 |
+| SCR-K02 | Kitchen Order Detail | F-008, F-009 |
+
+### Inventory Staff
+
+| Screen ID | Screen | Features |
+|---|---|---|
+| SCR-W01 | Inventory Dashboard | F-010 |
+| SCR-W02 | Inventory Detail | F-010, F-011 |
+| SCR-W03 | Stock Update | F-011 |
+
+### Manager
+
+| Screen ID | Screen | Features |
+|---|---|---|
+| SCR-M01 | Manager Dashboard | F-014 |
+| SCR-M02 | Menu Management | F-001 |
+| SCR-M03 | Employee Management | F-013 |
+| SCR-M04 | Operational Reports | F-014 |
+
+## 23.5 Navigation & Access Rules
+
+- Customer navigation must expose only customer capabilities.
+- Order Staff navigation must expose order-processing and payment capabilities.
+- Kitchen Staff navigation must expose kitchen capabilities.
+- Inventory Staff navigation must expose inventory capabilities.
+- Manager navigation must expose management, menu, employee and reporting capabilities.
+- A user must not see navigation items for capabilities outside the user's role.
+- Navigation labels should use business terminology consistently with this PRD.
+- Exact URL paths may be selected during implementation, but each route must map to a stable Screen ID.
+
+## 23.6 UI State Requirements
+
+For every screen that loads or mutates data, AI-generated UI must account for:
+
+- Loading
+- Loaded with data
+- Empty data
+- Validation error
+- Business-rule error
+- Network/server error
+- Successful mutation
+- Disabled/in-progress action where applicable
+
+## 23.7 Component Requirements
+
+AI may derive reusable components from repeated UI patterns, including:
+
+- Navigation / sidebar
+- Header
+- Role-specific dashboard cards
+- Data table
+- Status badge
+- Search/filter controls
+- Form controls
+- Modal/dialog
+- Confirmation dialog
+- Order card
+- Order status timeline
+- Menu/dish card
+- Inventory status indicator
+- Notification/toast
+- Pagination where required by the data volume
+
+Component creation must not introduce functionality that is not mapped to a Feature ID or requirement.
+
+## 23.8 Form & Validation Rules
+
+Forms must:
+
+- clearly label every required input;
+- display validation feedback near the relevant field;
+- prevent submission when required data is invalid;
+- preserve valid user input when validation fails;
+- show a clear success or error result after submission.
+
+Business validation must follow the Business Rules in Section 16 and Functional Requirements in Section 8.
+
+## 23.9 AI UI Generation Contract
+
+When asked to build UI from this PRD, AI must work in this order:
+
+1. Identify the target actor.
+2. Identify the target Feature IDs.
+3. Identify the related User Flow and Use Case.
+4. Identify the required Screen IDs.
+5. Extract functional requirements and business rules.
+6. Define screen states and permitted actions.
+7. Design the information hierarchy.
+8. Build reusable components.
+9. Implement responsive layouts.
+10. Verify that every interaction can be traced back to this PRD.
+
+If information required for implementation is not defined in this PRD, AI must mark it as an **Open Question / Implementation Decision** rather than silently inventing a business rule.
+
+## 23.10 UI Traceability
+
+| UI Element | Must Trace To |
+|---|---|
+| Screen | Feature / User Flow |
+| Navigation item | Actor permission + Feature |
+| Button / action | Functional Requirement / Use Case |
+| Form field | Functional Requirement |
+| Validation | Business Rule / Functional Requirement |
+| Status | Order / Inventory business flow |
+| Dashboard metric | Reporting requirement |
+| AI feature | Explicit AI Product Feature scope |
+
+## 23.11 MVP UI Boundary
+
+The MVP UI includes only Features F-001 through F-014. F-015 and F-016 must remain excluded from the MVP interface unless the project scope is explicitly changed.
+
+## 23.12 UI Acceptance Criteria
+
+A generated screen is considered aligned with the PRD only when:
+
+- its Screen ID is defined;
+- its actor is defined;
+- its Feature IDs are defined;
+- all primary actions map to requirements;
+- role access is respected;
+- required states are handled;
+- no undocumented business workflow is introduced;
+- the screen supports the corresponding user flow;
+- responsive behavior is defined;
+- the screen can be traced back to the PRD without relying on undocumented assumptions.
