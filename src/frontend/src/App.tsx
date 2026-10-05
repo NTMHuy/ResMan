@@ -1,6 +1,8 @@
 /**
- * ResMan - Enterprise Restaurant OS
- * Modular Restaurant Management & Dining Platform
+ * ResMan - Restaurant Management & Dining Platform
+ *
+ * The frontend uses the same business capabilities with different
+ * presentation shells for each role/device.
  */
 
 import React, { useState } from 'react';
@@ -24,37 +26,43 @@ import { KDSView } from './components/kds/KDSView';
 import { InventoryAuditView } from './components/inventory/InventoryAuditView';
 import { StaffShiftsView } from './components/staff/StaffShiftsView';
 import { ReportsTelemetryView } from './components/reports/ReportsTelemetryView';
+import type { ActiveTab, UserRole, KDSTicket, LiveOrder } from './types';
+
+const DEFAULT_TAB_BY_ROLE: Record<UserRole, ActiveTab> = {
+  Manager: 'reporting-analytics',
+  'Order Staff': 'order-management',
+  'Kitchen / KDS': 'kitchen-display-system',
+  Inventory: 'inventory-stock',
+  'Customer View': 'customer-ordering'
+};
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('menu-management');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(DEFAULT_TAB_BY_ROLE.Manager);
   const [currentRole, setCurrentRole] = useState<UserRole>('Manager');
 
-  // Core Application Datasets
   const [menuItems, setMenuItems] = useState(INITIAL_MENU_ITEMS);
   const [kdsTickets, setKdsTickets] = useState<KDSTicket[]>(INITIAL_KDS_TICKETS);
   const [liveOrders, setLiveOrders] = useState<LiveOrder[]>(INITIAL_LIVE_ORDERS);
   const [inventoryItems, setInventoryItems] = useState(INITIAL_INVENTORY_ITEMS);
   const [staff, setStaff] = useState(INITIAL_STAFF);
-  const [voidLogs, setVoidLogs] = useState(INITIAL_VOID_LOGS);
-
-  // Toast System
+  const [voidLogs] = useState(INITIAL_VOID_LOGS);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info', title?: string) => {
     const id = `${Date.now()}-${Math.random()}`;
-    const newToast: ToastMessage = { id, message, type, title };
-    setToasts((prev) => [...prev, newToast]);
-
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    setToasts((prev) => [...prev, { id, message, type, title }]);
+    window.setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   };
 
   const handleDismissToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Cross-module integration: Dispatch order to KDS
+  const handleRoleChange = (role: UserRole) => {
+    setCurrentRole(role);
+    setActiveTab(DEFAULT_TAB_BY_ROLE[role]);
+  };
+
   const handleSendOrderToKDS = (order: LiveOrder) => {
     const newTicket: KDSTicket = {
       id: order.id,
@@ -80,7 +88,6 @@ export default function App() {
     setKdsTickets((prev) => [newTicket, ...prev]);
   };
 
-  // Cross-module integration: Customer placed order
   const handleCustomerPlacedOrder = (cartItems: any[], table: string) => {
     const newOrderId = `ORD-${Math.floor(1050 + Math.random() * 50)}`;
     const subtotal = cartItems.reduce((acc, it) => acc + it.quantity * it.menuItem.price, 0);
@@ -90,7 +97,7 @@ export default function App() {
 
     const newOrder: LiveOrder = {
       id: newOrderId,
-      table: table,
+      table,
       guests: 2,
       status: 'pending',
       statusBadge: 'Khách vừa gửi từ QR',
@@ -115,101 +122,71 @@ export default function App() {
       serviceCharge,
       vat,
       grandTotal,
-      logs: [
-        {
-          time: new Date().toLocaleTimeString('vi-VN'),
-          title: 'Khách quét QR gọi món',
-          description: `Bàn ${table} tự tạo đơn hàng trực tiếp qua điện thoại.`,
-          isCurrent: true
-        }
-      ]
+      logs: [{
+        time: new Date().toLocaleTimeString('vi-VN'),
+        title: 'Khách quét QR gọi món',
+        description: `Bàn ${table} tự tạo đơn hàng trực tiếp.`,
+        isCurrent: true
+      }]
     };
 
     setLiveOrders((prev) => [newOrder, ...prev]);
-
-    // Also send directly to KDS
     handleSendOrderToKDS(newOrder);
   };
 
-  return (
-    <div className="min-h-screen bg-surface flex text-on-surface font-sans antialiased selection:bg-secondary-container selection:text-on-secondary-container">
-      {/* Left Navigation Sidebar */}
-      <Sidebar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        branchName="Downtown #04"
-      />
+  const isCustomer = currentRole === 'Customer View';
 
-      {/* Main Content Viewport */}
-      <div className="flex-1 flex flex-col pl-64 min-w-0">
-        {/* Top Floating App Header */}
+  return (
+    <div className={`min-h-screen bg-surface text-on-surface font-sans antialiased selection:bg-secondary-container selection:text-on-secondary-container ${
+      isCustomer ? '' : 'flex'
+    }`}>
+      {!isCustomer && (
+        <Sidebar
+          activeTab={activeTab}
+          currentRole={currentRole}
+          onTabChange={setActiveTab}
+          branchName="Downtown #04"
+        />
+      )}
+
+      <div className={`flex-1 flex flex-col min-w-0 ${isCustomer ? '' : 'pl-64'}`}>
         <Header
           currentRole={currentRole}
-          onRoleChange={setCurrentRole}
+          onRoleChange={handleRoleChange}
           onTabChange={setActiveTab}
         />
 
-        {/* Scrollable View Canvas */}
-        <main className="flex-1 mt-16 p-6 max-w-7xl w-full mx-auto">
+        <main className={`flex-1 mt-16 w-full mx-auto ${isCustomer ? 'max-w-none p-0' : 'max-w-[1600px] p-6'}`}>
           {activeTab === 'menu-management' && (
-            <MenuCatalogView
-              menuItems={menuItems}
-              onMenuItemsChange={setMenuItems}
-              showToast={showToast}
-            />
+            <MenuCatalogView menuItems={menuItems} onMenuItemsChange={setMenuItems} showToast={showToast} />
           )}
 
           {activeTab === 'customer-ordering' && (
-            <CustomerOrderView
-              menuItems={menuItems}
-              showToast={showToast}
-              onPlaceOrder={handleCustomerPlacedOrder}
-            />
+            <CustomerOrderView menuItems={menuItems} showToast={showToast} onPlaceOrder={handleCustomerPlacedOrder} />
           )}
 
           {activeTab === 'order-management' && (
-            <LiveOrdersView
-              orders={liveOrders}
-              onOrdersChange={setLiveOrders}
-              showToast={showToast}
-              onSendToKDS={handleSendOrderToKDS}
-            />
+            <LiveOrdersView orders={liveOrders} onOrdersChange={setLiveOrders} showToast={showToast} onSendToKDS={handleSendOrderToKDS} />
           )}
 
           {activeTab === 'kitchen-display-system' && (
-            <KDSView
-              tickets={kdsTickets}
-              onTicketsChange={setKdsTickets}
-              showToast={showToast}
-            />
+            <KDSView tickets={kdsTickets} onTicketsChange={setKdsTickets} showToast={showToast} />
           )}
 
           {activeTab === 'inventory-stock' && (
-            <InventoryAuditView
-              items={inventoryItems}
-              onItemsChange={setInventoryItems}
-              showToast={showToast}
-            />
+            <InventoryAuditView items={inventoryItems} onItemsChange={setInventoryItems} showToast={showToast} />
           )}
 
           {activeTab === 'employee-management' && (
-            <StaffShiftsView
-              staff={staff}
-              onStaffChange={setStaff}
-              showToast={showToast}
-            />
+            <StaffShiftsView staff={staff} onStaffChange={setStaff} showToast={showToast} />
           )}
 
           {activeTab === 'reporting-analytics' && (
-            <ReportsTelemetryView
-              voidLogs={voidLogs}
-              showToast={showToast}
-            />
+            <ReportsTelemetryView voidLogs={voidLogs} showToast={showToast} />
           )}
         </main>
       </div>
 
-      {/* Floating Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
     </div>
   );
