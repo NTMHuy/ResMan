@@ -186,7 +186,7 @@ export const LiveOrdersView: React.FC<LiveOrdersViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-4 w-full pb-20 lg:pb-0">
       {/* Title Header & Shift Telemetry */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -198,7 +198,7 @@ export const LiveOrdersView: React.FC<LiveOrdersViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Shift telemetry block */}
           <div className="hidden sm:flex items-center gap-3 bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-surface-container-high/50 text-xs">
             <div className="flex flex-col">
@@ -215,18 +215,18 @@ export const LiveOrdersView: React.FC<LiveOrdersViewProps> = ({
           <button
             type="button"
             onClick={() => setIsNewOrderModalOpen(true)}
-            className="min-h-[40px] px-4 rounded-lg bg-primary hover:bg-inverse-surface text-on-primary font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+            className="min-h-[44px] px-4 rounded-lg bg-primary hover:bg-inverse-surface text-on-primary font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4" />
-            <span>Tạo Đơn Tại Bàn (F-003)</span>
+            <span>Tạo Đơn Tại Bàn</span>
           </button>
         </div>
       </div>
 
       {/* Main Split Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
         {/* Left Column: Orders Queue List (4 cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-3">
+        <div className="lg:col-span-4 flex flex-col gap-3 lg:sticky lg:top-4">
           <div className="bg-surface-container-lowest p-3 rounded-xl shadow-xs border border-surface-container-high/60 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-tabular-data text-xs uppercase font-bold text-on-surface">
@@ -274,7 +274,7 @@ export const LiveOrdersView: React.FC<LiveOrdersViewProps> = ({
           </div>
 
           {/* Cards List */}
-          <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1 lg:max-h-[calc(100vh-220px)]">
             {filteredOrders.map((ord) => {
               const isSelected = selectedOrderId === ord.id;
               const isPending = ord.status === 'pending';
@@ -469,7 +469,7 @@ export const LiveOrdersView: React.FC<LiveOrdersViewProps> = ({
             </div>
 
             {/* Action Buttons Toolbar */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
               <button
                 type="button"
                 onClick={handlePrintDraftReceipt}
