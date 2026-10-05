@@ -133,12 +133,12 @@ export const KDSView: React.FC<KDSViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full gap-4">
+    <div className="flex flex-col w-full gap-4 min-w-0">
       {/* Top Filter & KDS Operations Bar */}
-      <div className="w-full bg-surface-container-lowest shadow-sm rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 border border-surface-container-high/40">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="w-full bg-surface-container-lowest shadow-sm rounded-xl p-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 border border-surface-container-high/40 sticky top-0 z-20">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Station selector */}
-          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg w-full md:w-auto overflow-x-auto">
             <button
               type="button"
               onClick={() => {
@@ -291,7 +291,7 @@ export const KDSView: React.FC<KDSViewProps> = ({
       </div>
 
       {/* Ticket Grid Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 items-start">
         {filteredTickets.map((ticket) => {
           const isUrgent = ticket.isUrgent;
           const isTakeaway = ticket.orderType === 'TAKEAWAY';
@@ -358,7 +358,7 @@ export const KDSView: React.FC<KDSViewProps> = ({
               </div>
 
               {/* Items Recipe Rows */}
-              <div className="p-3 flex-1 space-y-2">
+              <div className="p-3 flex-1 space-y-2 min-h-[180px]">
                 {ticket.items.map((item) => (
                   <div
                     key={item.id}
@@ -459,7 +459,7 @@ export const KDSView: React.FC<KDSViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleStartPrepTicket(ticket.id)}
-                    className="w-full min-h-[44px] rounded-lg bg-secondary text-on-secondary hover:bg-on-secondary-fixed-variant text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition-transform shadow-xs cursor-pointer"
+                    className="w-full min-h-[48px] rounded-lg bg-secondary text-on-secondary hover:bg-on-secondary-fixed-variant text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition-transform shadow-xs cursor-pointer"
                   >
                     <Play className="w-4 h-4" />
                     <span>BẮT ĐẦU NẤU TOÀN BỘ</span>
@@ -468,7 +468,7 @@ export const KDSView: React.FC<KDSViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleBumpTicket(ticket.id)}
-                    className="w-full min-h-[44px] rounded-lg bg-primary hover:bg-inverse-surface text-on-primary text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition-transform shadow-xs cursor-pointer"
+                    className="w-full min-h-[48px] rounded-lg bg-primary hover:bg-inverse-surface text-on-primary text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition-transform shadow-xs cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4 text-secondary-fixed" />
                     <span>BÁO XONG VÉ BẾP (BUMP)</span>
