@@ -26,6 +26,7 @@ import { KDSView } from './components/kds/KDSView';
 import { InventoryAuditView } from './components/inventory/InventoryAuditView';
 import { StaffShiftsView } from './components/staff/StaffShiftsView';
 import { ReportsTelemetryView } from './components/reports/ReportsTelemetryView';
+import { ManagerDashboard } from './components/manager/ManagerDashboard';
 import type { ActiveTab, UserRole, KDSTicket, LiveOrder } from './types';
 
 const DEFAULT_TAB_BY_ROLE: Record<UserRole, ActiveTab> = {
@@ -182,7 +183,7 @@ export default function App() {
           )}
 
           {activeTab === 'reporting-analytics' && (
-            <ReportsTelemetryView voidLogs={voidLogs} showToast={showToast} />
+            <ManagerDashboard orders={liveOrders} inventoryItems={inventoryItems} staff={staff} showToast={showToast} />
           )}
         </main>
       </div>
