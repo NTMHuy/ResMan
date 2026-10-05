@@ -61,7 +61,7 @@ Nhân viên Order xác nhận đơn (F-005)
         ↓
 Nhân viên Bếp chế biến món ăn (F-008, F-009)
         ↓
-Đơn được giao và ghi nhận thanh toán (F-006.2, F-012)
+Món được giao cho khách hàng và ghi nhận thanh toán (F-006.2, F-012)
         ↓
 Tồn kho được cập nhật và giám sát (F-011, F-010)
         ↓
@@ -74,7 +74,7 @@ flowchart TD
     B --> C[Nhân viên Order: Xác nhận đơn]
     C --> D[Chuyển đơn đến hàng đợi bếp]
     D --> E[Nhân viên Bếp: Chế biến]
-    E --> F[Nhân viên Order: Giao đơn & ghi nhận thanh toán]
+    E --> F[Nhân viên Order: Giao món cho khách & ghi nhận thanh toán]
     F --> G[Nhân viên Kho: Cập nhật & giám sát tồn kho]
     G --> H[Quản lý: Xem báo cáo tổng hợp]
 ```
@@ -114,7 +114,7 @@ Hành trình này bao phủ toàn bộ 5 actor và toàn bộ vòng đời một
 | F-008 | F-006 | Sequential | Hàng đợi bếp chỉ nhận đơn đã được điều phối |
 | F-009 | F-008 | Sequential | Chỉ cập nhật tiến độ cho đơn đã bắt đầu chế biến |
 | F-010 | F-011, F-009 | Data | Giám sát tồn kho cần dữ liệu cập nhật và báo cáo tiêu thụ |
-| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi đơn đã được giao |
+| F-012 | F-006 | Sequential | Chỉ ghi nhận thanh toán khi món đã được giao cho khách hàng |
 | F-014 | F-012, F-010, F-006 | Data | Báo cáo tổng hợp là điểm cuối, phụ thuộc nhiều Feature khác nhất |
 | F-013 | Không có | Độc lập | Có thể triển khai song song với các Feature khác |
 | F-015 *(Post-MVP)* | F-007, F-010 | Data | Không nằm trong critical path của MVP |
@@ -246,7 +246,7 @@ flowchart TD
 | F-008 | Phase 3 | Must Have | Required for MVP | F-006 | Cần đơn được điều phối đến bếp |
 | F-009 | Phase 3 | Must Have | Required for MVP | F-008 | Cần đơn trong hàng đợi bếp |
 | F-007 | Phase 3 | Must Have | Required for MVP | F-003, F-005, F-006, F-009 | Tổng hợp trạng thái từ nhiều nguồn, hoàn thiện cùng luồng bếp |
-| F-012 | Phase 4 | Must Have | Required for MVP | F-006 | Cần đơn đã giao |
+| F-012 | Phase 4 | Must Have | Required for MVP | F-006 | Cần món đã được giao cho khách hàng |
 | F-011 | Phase 4 | Must Have | Required for MVP | Không có | Có thể song song, nhưng đặt cùng phase với giám sát để có ý nghĩa demo |
 | F-010 | Phase 4 | Must Have | Required for MVP | F-011, F-009 | Cần dữ liệu cập nhật và tiêu thụ |
 | F-014 | Phase 5 | Must Have | Required for MVP | F-012, F-010, F-006 | Điểm tổng hợp cuối cùng của MVP |
@@ -284,7 +284,7 @@ F-008 (Hàng đợi bếp)
         ↓
 F-009 (Cập nhật tiến độ chế biến)
         ↓
-F-006.2 (Cập nhật giao hàng)
+F-006.2 (Cập nhật giao món)
         ↓
 F-012 (Ghi nhận thanh toán)
         ↓
@@ -336,7 +336,7 @@ flowchart LR
 4. Luồng KS-01, KS-02, CU-02 có thể thực hiện trọn vẹn.
 
 **Phase 4 hoàn thành khi:**
-1. Nhân viên Order ghi nhận được thanh toán và đơn chuyển sang trạng thái hoàn tất.
+1. Khách hàng thực hiện thanh toán; Nhân viên Order ghi nhận giao dịch và đơn chuyển sang trạng thái hoàn tất.
 2. Nhân viên Kho cập nhật được số lượng tồn kho sau khi sử dụng hoặc nhập hàng.
 3. Hệ thống cảnh báo khi tồn kho xuống dưới ngưỡng.
 4. Luồng OS-03, CU-03, WH-01, WH-02 có thể thực hiện trọn vẹn.
