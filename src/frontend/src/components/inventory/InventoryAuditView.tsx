@@ -124,7 +124,7 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-5 w-full pb-6">
       {/* Title & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -136,11 +136,11 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={handleExportCSV}
-            className="min-h-[40px] px-3.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+            className="min-h-[44px] px-3.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <Download className="w-4 h-4 text-on-surface-variant" />
             <span>Xuất Báo Cáo Kho (CSV)</span>
@@ -149,7 +149,7 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
           <button
             type="button"
             onClick={() => setAdjustItem(items[0])}
-            className="min-h-[40px] px-4 rounded-lg bg-primary hover:bg-inverse-surface text-on-primary font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+            className="min-h-[44px] px-4 rounded-lg bg-primary hover:bg-inverse-surface text-on-primary font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Phiếu Nhập / Điều Chỉnh Kho</span>
@@ -158,8 +158,8 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
       </div>
 
       {/* 4 KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface-container-lowest p-4 rounded-xl shadow-xs border border-surface-container-high/60 flex items-center justify-between">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="bg-surface-container-lowest p-4 rounded-xl shadow-xs border border-surface-container-high/60 flex items-center justify-between min-w-0">
           <div className="space-y-1">
             <span className="font-tabular-data text-[11px] uppercase tracking-wider text-on-surface-variant font-medium">
               Tổng số mặt hàng SKU
@@ -316,7 +316,7 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
 
       {/* Inventory Table & Zone Tabs */}
       <div className="bg-surface-container-lowest rounded-xl shadow-xs border border-surface-container-high/60 overflow-hidden space-y-3 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
           {/* Storage Zone tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {[
@@ -371,7 +371,7 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 px-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface focus:outline-none border border-surface-container cursor-pointer"
+              className="h-10 px-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface focus:outline-none border border-surface-container cursor-pointer"
             >
               <option value="ALL">Tất cả trạng thái</option>
               <option value="IN_STOCK">Đủ tồn kho</option>
@@ -382,18 +382,18 @@ export const InventoryAuditView: React.FC<InventoryAuditViewProps> = ({
         </div>
 
         {/* Data Table */}
-        <div className="overflow-x-auto rounded-lg border border-surface-container">
+        <div className="overflow-x-auto rounded-lg border border-surface-container max-h-[560px]">
           <table className="w-full text-left text-xs">
             <thead className="bg-surface-container-low text-on-surface-variant font-tabular-data border-b border-surface-container">
               <tr>
-                <th className="py-2.5 px-3 uppercase font-semibold">Mã SKU</th>
-                <th className="py-2.5 px-3 uppercase font-semibold">Tên nguyên liệu</th>
-                <th className="py-2.5 px-3 uppercase font-semibold">Vị trí lưu kho</th>
-                <th className="py-2.5 px-3 uppercase font-semibold text-center">ĐVT</th>
-                <th className="py-2.5 px-3 uppercase font-semibold text-right">Tồn thực tế</th>
-                <th className="py-2.5 px-3 uppercase font-semibold text-right">Mức tối thiểu</th>
-                <th className="py-2.5 px-3 uppercase font-semibold text-center">Trạng thái</th>
-                <th className="py-2.5 px-3 uppercase font-semibold text-center">Thao tác</th>
+                <th className="py-2.5 px-3 uppercase font-semibold sticky top-0 bg-surface-container-low">Mã SKU</th>
+                <th className="py-2.5 px-3 uppercase font-semibold sticky top-0 bg-surface-container-low">Tên nguyên liệu</th>
+                <th className="py-2.5 px-3 uppercase font-semibold sticky top-0 bg-surface-container-low">Vị trí lưu kho</th>
+                <th className="py-2.5 px-3 uppercase font-semibold text-center sticky top-0 bg-surface-container-low">ĐVT</th>
+                <th className="py-2.5 px-3 uppercase font-semibold text-right sticky top-0 bg-surface-container-low">Tồn thực tế</th>
+                <th className="py-2.5 px-3 uppercase font-semibold text-right sticky top-0 bg-surface-container-low">Mức tối thiểu</th>
+                <th className="py-2.5 px-3 uppercase font-semibold text-center sticky top-0 bg-surface-container-low">Trạng thái</th>
+                <th className="py-2.5 px-3 uppercase font-semibold text-center sticky top-0 bg-surface-container-low">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-container/60">
