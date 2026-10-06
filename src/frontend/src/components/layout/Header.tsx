@@ -39,12 +39,12 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onRoleChange, onTab
   };
 
   return (
-    <header className={`fixed top-0 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-6 border-b border-surface-container-high/40 ${
-      isCustomer ? 'left-0' : 'left-64'
+    <header className={`fixed top-0 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-3 sm:px-4 lg:px-6 border-b border-surface-container-high/40 ${
+      isCustomer ? 'left-0' : 'lg:left-64'
     }`}>
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] uppercase tracking-wider font-tabular-data text-on-surface-variant">Demo role</span>
-        <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="hidden xl:inline text-[10px] uppercase tracking-wider font-tabular-data text-on-surface-variant">Demo role</span>
+        <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg overflow-x-auto max-w-[calc(100vw-130px)] sm:max-w-[calc(100vw-180px)]">
           {ROLE_CONFIG.map((btn) => {
             const Icon = btn.icon;
             const isSelected = currentRole === btn.role;
@@ -53,21 +53,21 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onRoleChange, onTab
                 key={btn.role}
                 type="button"
                 onClick={() => handleRoleSelect(btn.role, btn.targetTab)}
-                className={`min-h-[36px] px-3 rounded font-tabular-data text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`min-h-[40px] px-2 sm:px-3 rounded font-tabular-data text-xs flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-surface-container-lowest text-on-surface font-bold shadow-xs border border-surface-container'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/50 font-medium'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isSelected ? 'text-secondary' : 'text-on-surface-variant'}`} />
-                <span>{btn.label}</span>
+                <span className="hidden sm:inline">{btn.label}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 shrink-0">
         <div className="hidden md:flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-surface-container-high/50">
           <Radio className="w-3.5 h-3.5 text-secondary animate-pulse" />
           <span className="font-tabular-data text-xs text-on-surface font-medium">Đồng bộ</span>
