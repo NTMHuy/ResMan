@@ -59,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = NAV_BY_ROLE[currentRole];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col border-r border-surface-container-high/40 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+    <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col border-r border-surface-container-high/40 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="flex flex-col h-full">
         <div className="h-16 px-4 flex items-center gap-2.5 border-b border-surface-container/60">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary">
