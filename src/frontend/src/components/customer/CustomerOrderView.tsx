@@ -138,9 +138,9 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full gap-4">
+    <div className="flex flex-col items-center w-full gap-3 pb-4">
       {/* Device View Mode Switcher */}
-      <div className="w-full flex items-center justify-between pb-2 border-b border-surface-container/60">
+      <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2 border-b border-surface-container/60">
         <div>
           <h2 className="font-headline font-bold text-lg text-on-surface">
             Giao Diện Thực Khách Gọi Món QR (F-002 / F-003)
@@ -150,7 +150,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+        <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setViewMode('mobile')}
@@ -182,7 +182,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
       {/* Main Container framed based on viewMode */}
       <div
         className={`w-full bg-surface-container-lowest border border-surface-container-high/60 shadow-md rounded-2xl overflow-hidden transition-all relative flex flex-col ${
-          viewMode === 'mobile' ? 'max-w-md' : 'max-w-4xl'
+          viewMode === 'mobile' ? 'max-w-md' : 'max-w-6xl'
         }`}
       >
         {/* Table & Brand Banner */}
@@ -256,7 +256,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
         </div>
 
         {/* Category Filters & Search */}
-        <div className="p-3 bg-surface-container-lowest border-b border-surface-container/60 space-y-2.5">
+        <div className="p-3 sm:p-4 bg-surface-container-lowest border-b border-surface-container/60 space-y-2.5">
           <div className="relative">
             <Search className="w-4 h-4 text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -297,9 +297,9 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
 
         {/* Food Items List / Grid */}
         <div
-          className={`p-3 overflow-y-auto max-h-[520px] pb-24 ${
+          className={`p-3 sm:p-4 overflow-y-auto max-h-[560px] pb-24 ${
             viewMode === 'tablet'
-              ? 'grid grid-cols-2 gap-3'
+              ? 'grid grid-cols-2 lg:grid-cols-3 gap-3'
               : 'flex flex-col gap-3'
           }`}
         >
@@ -316,7 +316,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                     : 'bg-surface-container-lowest border-surface-container-high/60 shadow-xs hover:border-secondary/40'
                 }`}
               >
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -358,7 +358,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleUpdateQty(item.id, -1)}
-                          className="w-5 h-5 rounded bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer"
+                          className="w-7 h-7 rounded bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
@@ -368,7 +368,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleUpdateQty(item.id, 1)}
-                          className="w-5 h-5 rounded bg-primary text-on-primary hover:bg-inverse-surface flex items-center justify-center cursor-pointer"
+                          className="w-7 h-7 rounded bg-primary text-on-primary hover:bg-inverse-surface flex items-center justify-center cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -437,8 +437,8 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
 
       {/* MODAL: Tùy biến món & Modifier */}
       {modifierItem && (
-        <div className="fixed inset-0 bg-primary/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest rounded-xl max-w-sm w-full p-5 shadow-xl space-y-4 border border-surface-container">
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-surface-container-lowest rounded-t-2xl sm:rounded-xl max-w-sm w-full p-5 shadow-xl space-y-4 border border-surface-container">
             <div className="flex items-center justify-between pb-2 border-b border-surface-container">
               <div>
                 <h3 className="font-headline font-bold text-sm text-on-surface">
@@ -498,7 +498,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                   value={specialNote}
                   onChange={(e) => setSpecialNote(e.target.value)}
                   placeholder="Ví dụ: Nước dùng thật nóng, để đá riêng..."
-                  className="w-full h-9 px-3 rounded-lg bg-surface-container-low border border-surface-container focus:outline-none"
+                  className="w-full h-11 px-3 rounded-lg bg-surface-container-low border border-surface-container focus:outline-none"
                 />
               </div>
             </div>
@@ -507,7 +507,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
               <button
                 type="button"
                 onClick={() => setModifierItem(null)}
-                className="min-h-[38px] rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface text-xs font-semibold cursor-pointer"
+                className="min-h-[44px] rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface text-xs font-semibold cursor-pointer"
               >
                 Hủy
               </button>
@@ -569,7 +569,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleUpdateQty(c.menuItem.id, -1)}
-                      className="w-5 h-5 rounded bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer"
+                      className="w-7 h-7 rounded bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface cursor-pointer"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
@@ -579,7 +579,7 @@ export const CustomerOrderView: React.FC<CustomerOrderViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleUpdateQty(c.menuItem.id, 1)}
-                      className="w-5 h-5 rounded bg-primary text-on-primary hover:bg-inverse-surface flex items-center justify-center cursor-pointer"
+                      className="w-7 h-7 rounded bg-primary text-on-primary hover:bg-inverse-surface flex items-center justify-center cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
