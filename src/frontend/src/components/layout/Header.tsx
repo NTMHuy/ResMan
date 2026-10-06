@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onRoleChange, onTab
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
         </button>
 
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-xs">
+        <div className="w-8 h-8 rounded-full brand-gradient flex items-center justify-center text-on-primary shadow-xs">
           <User className="w-4 h-4" />
         </div>
       </div>
