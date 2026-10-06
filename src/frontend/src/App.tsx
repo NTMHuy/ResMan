@@ -150,7 +150,7 @@ export default function App() {
         />
       )}
 
-      <div className={`flex-1 flex flex-col min-w-0 ${isCustomer ? '' : 'pl-64'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${isCustomer ? '' : 'lg:pl-64'}`}>
         <Header
           currentRole={currentRole}
           onRoleChange={handleRoleChange}
