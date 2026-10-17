@@ -3,6 +3,7 @@
  * Modular Restaurant Management & Dining Platform
  */
 
+
 import React, { useState } from 'react';
 import {
   INITIAL_MENU_ITEMS,
