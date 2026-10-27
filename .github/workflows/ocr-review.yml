@@ -22,7 +22,7 @@ jobs:
         uses: alibaba/open-code-review@main
         with:
           llm_url: 'https://api.openai.com/v1'
-          llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          llm_auth_token: ${{ vars.OCR_LLM_AUTH_TOKEN }}
           llm_model: 'gpt-4o'
           llm_use_anthropic: 'false'
           sticky_summary: 'true'
