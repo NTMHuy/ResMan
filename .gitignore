@@ -74,3 +74,14 @@ ENV/
 # ==============================
 *.pid
 *.seed
+
+# ==============================
+# Playwright / Maestro test outputs
+# ==============================
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+*.apk
+*.aab
+*.ipa

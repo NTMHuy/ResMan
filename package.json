@@ -1,0 +1,13 @@
+{
+  "name": "resman-e2e-tests",
+  "private": true,
+  "description": "End-to-end testing tools for the ResMan project",
+  "scripts": {
+    "test:e2e:web": "playwright test",
+    "test:e2e:web:ui": "playwright test --ui",
+    "test:e2e:web:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
