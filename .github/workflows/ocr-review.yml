@@ -23,6 +23,6 @@ jobs:
         with:
           llm_url: 'https://api.groq.com/openai/v1'
           llm_auth_token: ${{ secrets.GROQ_API_KEY }}
-          llm_model: 'openai/gpt-oss-20b'
+          llm_model: 'llama-3.3-70b-versatile'
           llm_use_anthropic: 'false'
           sticky_summary: 'true'
