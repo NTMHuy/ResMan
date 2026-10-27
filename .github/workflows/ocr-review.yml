@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   review:
+    if: ${{ secrets.OCR_LLM_AUTH_TOKEN != '' }}
     name: AI Code Review
     runs-on: ubuntu-latest
 
@@ -19,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Review Pull Request
-        uses: alibaba/open-code-review@main
+        uses: alibaba/open-code-review@v1
         with:
           llm_url: 'https://api.openai.com/v1'
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
