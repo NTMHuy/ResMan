@@ -363,7 +363,21 @@ Snapshot các món tại thời điểm khách đặt.
 
 `line_total` phải được backend tính và kiểm tra theo `unit_price × quantity`; ghi chú tùy chỉnh nằm trong `order_items.note`. Không tin giá/total do client gửi lên.
 
-### 4.4 Kitchen Operations
+#### DB-12 — `order_status_history`
+
+Lưu vết bất biến cho mọi lần chuyển trạng thái của đơn hàng.
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| id | BIGINT | PK | ID lịch sử |
+| order_id | BIGINT | NN, FK → orders.id | Đơn hàng |
+| from_status | VARCHAR(30) | NULL | Trạng thái trước; NULL khi tạo đơn |
+| to_status | VARCHAR(30) | NN | Trạng thái sau |
+| changed_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên thực hiện; NULL nếu khách/hệ thống |
+| reason | TEXT | NULL | Lý do |
+| changed_at | TIMESTAMPTZ | NN, DF now() | Thời điểm thay đổi |
+
+Mỗi lần cập nhật `orders.status` phải tạo bản ghi lịch sử trong cùng transaction. Không cập nhật/xóa các dòng lịch sử cũ.
 
 ### 4.5 Kitchen Operations
 
@@ -382,7 +396,7 @@ Mỗi đơn chỉ có một vé bếp và một trạm chế biến trong MVP.
 | started_at | TIMESTAMPTZ | NULL | Bắt đầu chế biến |
 | completed_at | TIMESTAMPTZ | NULL | Hoàn tất vé |
 
-Unique đề xuất: `(order_id, kitchen_station_id)` nếu mỗi đơn chỉ có một vé cho mỗi trạm. Nếu nghiệp vụ cho phép nhiều đợt gửi cùng trạm, cần thay bằng mã đợt/sequence thay vì áp unique này.
+Ràng buộc `UNIQUE(order_id)` bảo đảm một đơn chỉ có tối đa một vé bếp trong MVP.
 
 #### DB-14 — `kitchen_ticket_items`
 
