@@ -51,15 +51,15 @@ model User {
   employee     Employee?
   createdOrders Order[] @relation("OrderCreator")
   confirmedOrders Order[] @relation("OrderConfirmer")
-  orderHistory OrderStatusHistory[]
-  itemHistory  OrderItemStatusHistory[]
+  orderHistory OrderStatusHistory[] @relation("OrderStatusActor")
+  itemHistory  OrderItemStatusHistory[] @relation("OrderItemStatusActor")
   openedSessions DiningSession[] @relation("SessionOpener")
   closedSessions DiningSession[] @relation("SessionCloser")
-  stockMovements StockMovement[]
-  shortageReports ShortageReport[]
+  stockMovements StockMovement[] @relation("StockMovementActor")
+  shortageReports ShortageReport[] @relation("ShortageReporter")
   openingChecks DailyInventoryRecord[] @relation("OpeningChecker")
   closingChecks DailyInventoryRecord[] @relation("ClosingChecker")
-  payments Payment[]
+  payments Payment[] @relation("PaymentActor")
   @@map("users")
 }
 
@@ -98,6 +98,7 @@ model KitchenStation {
   menuItems   MenuItem[]
   orders      Order[]
   tickets     KitchenTicket[]
+  orderItems  OrderItem[]
   @@map("kitchen_stations")
 }
 
@@ -237,6 +238,7 @@ model OrderItem {
   menuItem          MenuItem @relation(fields: [menuItemId, kitchenStationId], references: [id, kitchenStationId], onDelete: Restrict)
   kitchenStation    KitchenStation @relation(fields: [kitchenStationId], references: [id], onDelete: Restrict)
   history           OrderItemStatusHistory[]
+  shortageReports   ShortageReport[]
   @@index([orderId, status])
   @@map("order_items")
 }
@@ -250,7 +252,7 @@ model OrderStatusHistory {
   actorId     BigInt?  @map("actor_id")
   changedAt   DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
   order       Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  actor       User? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  actor       User? @relation("OrderStatusActor", fields: [actorId], references: [id], onDelete: Restrict)
   @@index([orderId, changedAt(sort: Desc)])
   @@map("order_status_history")
 }
@@ -264,7 +266,7 @@ model OrderItemStatusHistory {
   actorId     BigInt?  @map("actor_id")
   changedAt   DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
-  actor       User? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  actor       User? @relation("OrderItemStatusActor", fields: [actorId], references: [id], onDelete: Restrict)
   @@index([orderItemId, changedAt(sort: Desc)])
   @@map("order_item_status_history")
 }
@@ -316,7 +318,7 @@ model StockMovement {
   createdBy      BigInt   @map("created_by")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   ingredient     Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
-  actor          User @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  actor          User @relation("StockMovementActor", fields: [createdBy], references: [id], onDelete: Restrict)
   @@index([ingredientId, createdAt(sort: Desc)])
   @@map("stock_movements")
 }
@@ -332,7 +334,7 @@ model ShortageReport {
   resolvedAt    DateTime? @map("resolved_at") @db.Timestamptz(6)
   orderItem     OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
   ingredient    Ingredient? @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
-  reporter      User @relation(fields: [reportedBy], references: [id], onDelete: Restrict)
+  reporter      User @relation("ShortageReporter", fields: [reportedBy], references: [id], onDelete: Restrict)
   @@index([status, createdAt(sort: Desc)])
   @@map("shortage_reports")
 }
@@ -376,7 +378,7 @@ model Payment {
   paidAt        DateTime @default(now()) @map("paid_at") @db.Timestamptz(6)
   recordedBy    BigInt   @map("recorded_by")
   order         Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  actor         User @relation(fields: [recordedBy], references: [id], onDelete: Restrict)
+  actor         User @relation("PaymentActor", fields: [recordedBy], references: [id], onDelete: Restrict)
   @@index([paidAt(sort: Desc)])
   @@map("payments")
 }
