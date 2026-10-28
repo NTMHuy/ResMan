@@ -761,3 +761,54 @@ Mỗi bản ghi kiểm kê ngày/nguyên liệu cần có ngày, số lượng �
 | DD-09 | Hủy món | Khách và Order Staff được hủy khi món còn QUEUED |
 | DD-10 | Tài khoản khách | OPTIONAL — đăng nhập tùy chọn, guest vẫn đặt được |
 
+---
+
+## 16. Quyết định kiến trúc và nghiệp vụ đã được xác nhận (28/10/2026)
+
+Phần này là căn cứ cập nhật cho các mô tả cũ còn khác biệt trong tài liệu.
+
+### 16.1 Kiến trúc đa nền tảng
+
+ResMan sử dụng một backend API trung tâm để phục vụ các giao diện web quản lý, tablet khách hàng, giao diện nhân viên/KDS và ứng dụng mobile nếu triển khai. Định hướng backend đã chọn là Node.js/NestJS, cơ sở dữ liệu PostgreSQL và Prisma ORM/migrations. Client không kết nối trực tiếp đến PostgreSQL; xác thực, phân quyền và quy tắc nghiệp vụ phải được thực thi ở backend.
+
+### 16.2 Customer và tablet theo bàn
+
+- Mỗi tablet được đăng ký và gán với một dining_table.
+- Đăng nhập khách là tùy chọn; guest ordering vẫn được hỗ trợ.
+- orders.customer_id nullable để ghi nhận khách đã đăng nhập ở đúng đơn.
+- Không lưu customer identity chỉ ở dining_sessions vì một bàn/phiên có thể có nhiều khách.
+- Khi kết thúc lượt khách, phải kết thúc/xóa customer session trên tablet; không tái sử dụng danh tính khách trước cho người tiếp theo.
+- Device credential/token phải được lưu an toàn; chỉ lưu hash nếu token được dùng như bí mật xác thực.
+
+### 16.3 Đơn hàng và state machine món
+
+- Một đơn chỉ gồm các món cùng kitchen station; backend kiểm tra trước khi tạo đơn và database giữ ràng buộc nhất quán.
+- order_items là nguồn trạng thái chuẩn của từng món; không duy trì trạng thái trùng trong kitchen_ticket_items.
+- Trạng thái: PENDING_CONFIRMATION → QUEUED → PREPARING → READY → SERVED; nhánh CANCELLED và REJECTED có lý do phù hợp.
+- Khách/Order Staff chỉ hủy khi QUEUED; sau khi PREPARING không được hủy theo quyền này.
+- Bếp có thể REJECTED món không thể chế biến và ghi lý do; món khác trong đơn vẫn tiếp tục.
+- order_item_status_history ghi mọi lần chuyển trạng thái. orders.status chỉ là trạng thái tổng hợp của toàn đơn, không thay thế trạng thái từng món.
+- kitchen_tickets là bản ghi dispatch cho đơn và trạm; không lưu bản sao trạng thái item.
+
+### 16.4 Tồn kho và availability
+
+- Không có recipe/định mức số lượng theo khẩu phần và không tự động trừ kho.
+- menu_item_ingredients chỉ ánh xạ nguyên liệu bắt buộc cho món.
+- Backend tính trạng thái tự động hết hàng khi một nguyên liệu được ánh xạ có số dư bằng 0 hoặc thấp hơn low_stock_threshold. Trạng thái thủ công do Quản lý đặt không được tự động ghi đè.
+- Giới hạn của cách làm này phải được thể hiện trong giao diện: đây là cảnh báo/khóa món theo ngưỡng nguyên liệu, không phải tính toán đủ nguyên liệu theo số phần.
+- inventory_balances là số dư hiện tại; stock_movements là sổ lịch sử.
+- Kiểm kê đầu/cuối ngày lưu số đếm thực tế trong daily_inventory_records. Tổng nhập trong ngày được tổng hợp từ stock_movements loại IN.
+- Khi chốt kiểm kê cuối ngày, chênh lệch được ghi thành movement ADJUSTMENT cùng transaction cập nhật balance.
+
+### 16.5 Trách nhiệm module và công nghệ
+
+| Thành phần | Trách nhiệm |
+|---|---|
+| NestJS API | Authentication, authorization, validation, business rules, transactions |
+| PostgreSQL | Dữ liệu quan hệ, FK, unique/check constraints, indexes |
+| Prisma | Data access, schema mapping, versioned migrations |
+| Web/tablet/mobile clients | Hiển thị giao diện và gọi API; không chứa logic bảo mật cốt lõi |
+
+### 16.6 Những nội dung ngoài MVP
+
+Không đưa recipe/consumption, supplier/purchase order, split payment, loyalty, multi-branch hoặc AI recommendation vào migration MVP. Các nội dung Future/Post-MVP vẫn cần được duyệt riêng trước khi mở rộng schema.
