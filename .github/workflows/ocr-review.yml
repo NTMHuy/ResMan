@@ -1,0 +1,28 @@
+name: Open Code Review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Review Pull Request
+        uses: alibaba/open-code-review@main
+        with:
+          llm_url: 'https://api.groq.com/openai/v1'
+          llm_auth_token: ${{ secrets.GROQ_API_KEY }}
+          llm_model: 'llama-3.3-70b-versatile'
+          llm_use_anthropic: 'false'
+          sticky_summary: 'true'
