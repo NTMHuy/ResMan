@@ -873,3 +873,88 @@ Các điểm thiết kế quan trọng:
 - `src/frontend/src/components/kds/KDSView.tsx` — Giao diện KDS.
 - `src/frontend/src/components/inventory/InventoryAuditView.tsx` — Giao diện kho.
 - `src/frontend/src/components/staff/StaffShiftsView.tsx` — Giao diện nhân sự.
+
+---
+
+## 17. Phụ lục cập nhật ERD theo quyết định DD-07 đến DD-10 — 28/10/2026
+
+Phụ lục này có hiệu lực ưu tiên hơn các mô tả/bảng quyết định cũ có nội dung mâu thuẫn. Số lượng bảng trong phần tổng kết trước đây không còn là số lượng cuối cùng sau cập nhật này.
+
+### 17.1 Điều chỉnh vòng đời món
+
+`order_items` là nguồn dữ liệu chuẩn cho trạng thái từng món. Bổ sung/đảm bảo các trường:
+- `status`: QUEUED, PREPARING, READY, SERVED, REJECTED, CANCELLED (món mới trước khi dispatch có thể ở trạng thái PENDING_CONFIRMATION).
+- `cancellation_reason`, `rejection_reason` hoặc một cặp trường `terminal_reason` + `terminal_action` để lưu lý do kết thúc.
+- `status_changed_at`, `status_changed_by` để truy vết lần cập nhật gần nhất; lịch sử đầy đủ nên dùng bảng `order_item_status_history` (item_id, from_status, to_status, reason, actor_id, changed_at).
+
+Không duy trì một bản trạng thái nghiệp vụ thứ hai trong `kitchen_ticket_items`; KDS đọc/cập nhật trạng thái từ `order_items`. Nếu `kitchen_ticket_items` chỉ chứa FK và không có thuộc tính nghiệp vụ riêng, cân nhắc bỏ bảng nối và truy vấn order_items theo kitchen_ticket/order. Không tạo hai nguồn trạng thái song song.
+
+### 17.2 Bổ sung định danh khách và tablet gắn bàn
+
+| Bảng | Cột chính | Quy tắc |
+|---|---|---|
+| customers | id, display_name, phone/email (nullable theo chính sách), password_hash, status, created_at, updated_at | Tài khoản khách; không lưu mật khẩu rõ |
+| table_devices | id, device_code, dining_table_id FK, device_name, status, last_seen_at, created_at | Một thiết bị được gán một bàn; device_code duy nhất |
+| orders | customer_id FK NULL | Đơn guest có customer_id NULL; đơn của khách đăng nhập lưu customer_id trực tiếp |
+| dining_sessions | Giữ nguyên | Gắn các đơn tại chỗ với phiên phục vụ/bàn |
+
+Không cần bắt buộc đăng nhập để tạo đơn. Không gắn customer_id chỉ ở dining_session vì nhiều khách/tài khoản có thể sử dụng cùng bàn trong một phiên.
+
+### 17.3 Bổ sung mapping món — nguyên liệu để tự động khóa món
+
+Thêm bảng nối `menu_item_ingredients`:
+- `menu_item_id` FK → menu_items
+- `ingredient_id` FK → ingredients
+- PK/UNIQUE(menu_item_id, ingredient_id)
+- Không có quantity, unit_per_serving hoặc recipe.
+
+Mục đích duy nhất là xác định nguyên liệu bắt buộc của món. Nếu một nguyên liệu được mapping có tồn hiện tại bằng 0 hoặc dưới `ingredients.low_stock_threshold`, hệ thống tự động đánh dấu món không khả dụng và chặn đơn mới; cần lưu/hiển thị nguyên liệu và lý do gây khóa. Khi tồn được cập nhật và vượt ngưỡng, món có thể được khôi phục trạng thái bán theo chính sách đã định.
+
+**Giới hạn:** Vì không có định mức, hệ thống không thể xác định lượng tồn có đủ cho 1, 5 hay 20 phần món. Không tự động trừ kho khi đặt món, bắt đầu nấu hoặc hoàn thành món. Ngưỡng tồn là ngưỡng cảnh báo/khóa theo chính sách, không phải công thức tiêu hao.
+
+### 17.4 Mô hình kiểm kê đầu ngày/cuối ngày
+
+Thêm bảng `daily_inventory_records` với một bản ghi cho mỗi nguyên liệu trong mỗi ngày:
+
+| Cột | Ý nghĩa |
+|---|---|
+| id PK | Định danh bản ghi |
+| ingredient_id FK | Nguyên liệu được kiểm kê |
+| inventory_date DATE | Ngày kiểm kê |
+| opening_quantity DECIMAL(12,3) | Số lượng thực tế đầu ngày |
+| received_quantity DECIMAL(12,3) | Tổng lượng nhập thêm trong ngày |
+| closing_quantity DECIMAL(12,3) | Số lượng thực tế cuối ngày |
+| note TEXT NULL | Ghi chú |
+| checked_by FK → users | Nhân viên xác nhận |
+| opening_checked_at TIMESTAMP | Thời điểm kiểm đầu ngày |
+| closing_checked_at TIMESTAMP NULL | Thời điểm kiểm cuối ngày |
+| UNIQUE(ingredient_id, inventory_date) | Một bản ghi/nguyên liệu/ngày |
+
+Quy tắc dữ liệu:
+- `opening_quantity` và `closing_quantity` là số đếm thực tế, không phải số tự tính.
+- `received_quantity` là tổng lượng hàng nhập trong ngày; từng lần nhập chi tiết vẫn ghi `stock_movements` loại IN để truy vết.
+- Khi chốt số cuối ngày, hệ thống cập nhật `inventory_balances.quantity_on_hand` theo số kiểm thực tế. Chênh lệch giữa số dư trước đó và số kiểm thực tế phải được ghi thành movement điều chỉnh (ADJUSTMENT) để giữ lịch sử.
+- Không suy ra lượng tiêu thụ chính xác bằng opening + received - closing, vì chênh lệch còn có thể gồm tiêu thụ, hao hụt và sai số kiểm đếm.
+- Nếu `closing_quantity` thấp hơn `ingredients.low_stock_threshold`, tạo cảnh báo nhập hàng cho ngày kế tiếp.
+- Không yêu cầu bảng nhà cung cấp, purchase order hay quy trình duyệt mua hàng trong MVP.
+
+### 17.5 Cập nhật các quyết định thiết kế
+
+| ID | Quyết định | Kết quả schema |
+|---|---|---|
+| DD-07 | Một đơn chỉ thuộc một trạm bếp | Giữ UNIQUE(order_id) trên kitchen_tickets; kiểm tra mọi menu_item cùng kitchen_station_id |
+| DD-08 | Tự động khóa món khi thiếu nguyên liệu | Thêm menu_item_ingredients; dùng inventory_balances + low_stock_threshold; không recipe/định mức |
+| DD-09 | Hủy món khi còn hàng đợi | order_items.status và order_item_status_history; Customer/Order Staff được hủy khi QUEUED |
+| DD-10 | Tài khoản khách tùy chọn | Thêm customers, table_devices; orders.customer_id nullable |
+| INV-01 | Kiểm kê hàng ngày | Thêm daily_inventory_records; stock_movements vẫn là sổ lịch sử nhập/điều chỉnh |
+
+### 17.6 Quan hệ ERD bổ sung/điều chỉnh
+
+- CUSTOMER 1-N ORDER; ORDER.customer_id nullable.
+- DINING_TABLE 1-N TABLE_DEVICE theo lịch sử gán thiết bị (nếu chỉ một thiết bị hiện hành, áp dụng unique/active rule phù hợp).
+- MENU_ITEM N-N INGREDIENT qua MENU_ITEM_INGREDIENT.
+- INGREDIENT 1-N DAILY_INVENTORY_RECORD.
+- USER 1-N DAILY_INVENTORY_RECORD (người kiểm kê).
+- ORDER_ITEM 1-N ORDER_ITEM_STATUS_HISTORY.
+- Một ORDER chỉ có một KITCHEN_TICKET và mọi món trong đơn phải có cùng kitchen_station_id.
+
