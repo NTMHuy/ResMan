@@ -694,3 +694,70 @@ Mô hình mục tiêu được đề xuất là một hệ thống quản lý nh
 - `src/frontend/src/components/reports/ReportsTelemetryView.tsx`
 
 **Ghi chú nhánh:** Tài liệu được tạo trên `member/minhhuy` theo yêu cầu. Tại thời điểm kiểm tra, nhánh này đang chậm hơn `main` 19 commit và không có commit riêng đi trước `main`; nội dung phân tích UI phản ánh source code đang có trên chính nhánh `member/minhhuy`. Không có thay đổi nào được thực hiện trên `main`.
+
+---
+
+## 18. Phụ lục quyết định nghiệp vụ đã xác nhận — 28/10/2026
+
+Phụ lục này là phần cập nhật có hiệu lực và **ưu tiên hơn các mô tả mâu thuẫn ở những mục trước**.
+
+### 18.1 Đặt món, tài khoản khách và thiết bị tại bàn
+
+- Mỗi tablet đặt tại nhà hàng được cấu hình gắn với một bàn cụ thể thông qua mã thiết bị/bàn; không cho khách tự chọn một bàn khác trên thiết bị đã gán.
+- Khách có thể đặt món ở chế độ khách (guest) hoặc đăng nhập tài khoản. Đăng nhập là tùy chọn, không phải điều kiện để đặt món.
+- Khi khách đăng nhập, các đơn mới được liên kết với tài khoản khách để tích lũy lịch sử đặt món; đơn guest vẫn được liên kết với bàn và dining session.
+- Cần có thao tác đăng xuất/kết thúc phiên khách trên tablet dùng chung để tránh gắn đơn của khách tiếp theo vào tài khoản trước đó.
+- Tài khoản khách ở MVP chỉ phục vụ định danh và lịch sử đơn cơ bản. Loyalty/tích điểm và AI Recommendation vẫn là phạm vi tương lai, không tự động được đưa vào MVP.
+
+### 18.2 Trạng thái từng món và xử lý bếp
+
+Nguồn trạng thái thực thi là từng `order_item`, không phải chỉ trạng thái tổng của đơn. Luồng chuẩn:
+
+`PENDING_CONFIRMATION → QUEUED → PREPARING → READY → SERVED`
+
+Các nhánh kết thúc:
+- `REJECTED`: Bếp từ chối món và bắt buộc lưu lý do, người thực hiện, thời điểm.
+- `CANCELLED`: Món bị hủy hợp lệ và phải lưu lý do, người thực hiện, thời điểm.
+
+Quy tắc:
+- Khách hoặc Nhân viên Order được hủy món khi món còn `QUEUED`, tức bếp chưa tiếp nhận/bắt đầu chế biến.
+- Sau khi bếp chuyển món sang `PREPARING`, khách không thể tự hủy trực tiếp; trường hợp ngoại lệ cần nhân viên có thẩm quyền xử lý theo chính sách riêng.
+- Bếp có thể từ chối món nếu không thể chế biến; phải nhập lý do và hệ thống thông báo cho Nhân viên Order/khách.
+- Đơn có thể tiếp tục với các món còn lại. Trạng thái tổng đơn được tổng hợp từ trạng thái các món và tiến trình phục vụ; phải biểu diễn trường hợp hoàn thành một phần, bị từ chối một phần hoặc hủy một phần.
+- Ghi chú tùy chỉnh của khách được lưu tại `order_items.note`; không xây dựng hệ thống modifier/options trong MVP.
+
+### 18.3 Trạm bếp — DD-07 = ONE
+
+Một đơn chỉ chứa các món thuộc **một trạm bếp**. Khi tạo đơn, backend phải xác thực tất cả món có cùng `kitchen_station_id`; nếu giỏ hàng có món thuộc trạm khác, hệ thống yêu cầu khách tạo đơn riêng. Mỗi đơn có tối đa một kitchen ticket. Không tự chia một đơn thành nhiều ticket.
+
+### 18.4 Tồn kho — kiểm kê đầu ngày/cuối ngày và nhập hàng
+
+Nghiệp vụ kho được giới hạn ở:
+1. Đầu ngày: nhân viên kho kiểm đếm và ghi số lượng thực tế đầu ngày.
+2. Trong ngày: ghi nhận lượng hàng nhập thêm; từng lần nhập có thể lưu thành stock movement, tổng lượng nhập được tổng hợp theo ngày/nguyên liệu.
+3. Cuối ngày: nhân viên kho kiểm đếm và ghi số lượng thực tế cuối ngày.
+4. Nếu số lượng cuối ngày thấp hơn ngưỡng tối thiểu của nguyên liệu, hệ thống cảnh báo để nhân viên kho/quản lý lên kế hoạch nhập hàng ngày tiếp theo.
+
+Mỗi bản ghi kiểm kê ngày/nguyên liệu cần có ngày, số lượng đầu ngày, tổng số lượng nhập trong ngày, số lượng cuối ngày, ghi chú và nhân viên xác nhận. Số lượng đầu/cuối ngày là số đếm thực tế. Không suy ra lượng tiêu thụ chính xác bằng phép trừ vì MVP không theo dõi định mức nguyên liệu và không tự động trừ kho theo đơn.
+
+**DD-08 = AUTO:** Hệ thống tự động đánh dấu món không khả dụng và chặn đơn mới khi nguyên liệu bắt buộc được liên kết với món có số lượng tồn được ghi nhận bằng 0 hoặc thấp hơn ngưỡng tối thiểu. Hệ thống hiển thị nguyên liệu gây thiếu và lý do. Nhân viên kho/quản lý cập nhật lại trạng thái khả dụng khi kiểm kê/nhập hàng cho thấy nguyên liệu đã đủ. Cơ chế này chỉ chính xác trong phạm vi dữ liệu kiểm kê và mapping nguyên liệu đã khai báo; không dự đoán được lượng tiêu hao theo số phần món vì không có recipe/định mức.
+
+### 18.5 Tài khoản khách — DD-10 = OPTIONAL
+
+Đăng nhập khách hàng là tùy chọn. Hệ thống hỗ trợ guest ordering và account ordering. `orders.customer_id` có thể NULL; nếu khách đã đăng nhập thì lưu customer_id trực tiếp trên từng đơn để giữ lịch sử chính xác kể cả khi một bàn có nhiều người dùng/tài khoản khác nhau. Tablet được ánh xạ với bàn thông qua thực thể thiết bị-bàn.
+
+### 18.6 Danh sách quyết định đã chốt
+
+| ID | Quyết định | Kết quả |
+|---|---|---|
+| DD-01 | Trạm bếp | Một đơn chỉ chứa món thuộc một trạm; tối đa một ticket/đơn |
+| DD-02 | Tùy chỉnh món | Dùng ghi chú tự do `order_items.note`, không có modifier |
+| DD-03 | Thanh toán | Một payment/đơn; không chia thanh toán trong MVP |
+| DD-04 | Định mức nguyên liệu | Không quản lý recipe/định lượng |
+| DD-05 | Tự động trừ kho | Không tự động trừ; kiểm kê và cập nhật thủ công |
+| DD-06 | Tài khoản khách | Quyết định cũ “không có tài khoản” được thay bằng DD-10 |
+| DD-07 | Đơn nhiều trạm | ONE — không cho phép một đơn chứa nhiều trạm |
+| DD-08 | Thiếu nguyên liệu | AUTO — tự động khóa món dựa trên tồn/ngưỡng đã kiểm kê |
+| DD-09 | Hủy món | Khách và Order Staff được hủy khi món còn QUEUED |
+| DD-10 | Tài khoản khách | OPTIONAL — đăng nhập tùy chọn, guest vẫn đặt được |
+
