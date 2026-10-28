@@ -636,3 +636,42 @@ Phụ lục này cập nhật và thay thế mọi mô tả trước đây có n
 | DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
 | DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
 
+---
+
+## 21. Quyết định nghiệp vụ bổ sung đã được xác nhận (28/10/2026)
+
+Phần này làm rõ các yêu cầu đã được chủ dự án xác nhận và được ưu tiên khi nội dung cũ ở các mục trước chưa mô tả đủ chi tiết.
+
+### 21.1 Thiết bị và tài khoản khách hàng
+
+- Mỗi tablet đặt món tại nhà hàng được gán cố định với một bàn.
+- Khách có thể đặt món không cần đăng nhập (guest checkout).
+- Khách có thể đăng ký/đăng nhập tùy chọn để lưu lịch sử đặt món và hỗ trợ cá nhân hóa trong tương lai.
+- Đơn hàng lưu customer_id khi khách đã đăng nhập; đơn guest không có customer_id.
+- Khi khách kết thúc lượt sử dụng hoặc đăng xuất, thiết bị phải xóa liên kết khách hiện tại trước khi phục vụ lượt khách tiếp theo. Không được mặc định khách đăng nhập trước vẫn là người đặt đơn sau.
+- Chương trình thành viên/khuyến mãi và AI recommendation vẫn ngoài MVP trừ khi được duyệt riêng.
+
+### 21.2 Quy tắc đơn hàng và bếp
+
+- Một đơn chỉ chứa các món thuộc cùng một trạm bếp. Nếu giỏ hàng có món thuộc nhiều trạm, hệ thống yêu cầu tách thành các đơn riêng; không tự động chia một đơn thành nhiều vé bếp.
+- Khách có thể ghi yêu cầu riêng bằng văn bản trong ghi chú của từng món; MVP không có modifier/options cấu hình sẵn.
+- Sau khi Order Staff xác nhận và điều phối, món vào hàng đợi bếp (QUEUED). Bếp nhận món và bắt đầu chế biến; sau khi hoàn tất, bếp chuyển món sang READY để Order Staff giao đúng bàn.
+- Khách và Order Staff chỉ được hủy món khi món còn QUEUED và bếp chưa nhận/bắt đầu chế biến.
+- Bếp có thể từ chối món không thể chế biến và phải cung cấp lý do. Việc từ chối một món không tự động hủy các món còn lại trong cùng đơn.
+- Trạng thái từng món là nguồn chuẩn cho tiến độ bếp; mọi thay đổi phải có lịch sử trạng thái, tác nhân, thời gian và lý do nếu có.
+- Món có thể bị khóa bán tự động nếu nguyên liệu bắt buộc được cấu hình cho món có tồn bằng 0 hoặc dưới ngưỡng tồn đã thiết lập. Hệ thống phải hiển thị nguyên liệu/lý do và chặn tạo đơn mới cho món đó.
+- Vì MVP không có định mức nguyên liệu theo khẩu phần, hệ thống không thể tính chính xác lượng nguyên liệu đủ cho một số phần món bất kỳ và không tự động trừ kho theo đơn.
+
+### 21.3 Quy trình kiểm kê kho
+
+- Nhân viên Kho ghi nhận số lượng thực tế đầu ngày và cuối ngày.
+- Mọi lần nhập thêm trong ngày được ghi riêng trong sổ biến động kho.
+- Tổng nhập trong ngày được tổng hợp từ các bản ghi nhập kho, không lưu lặp thành một trường tổng nhập trong bản ghi kiểm kê.
+- Khi chốt số lượng cuối ngày, hệ thống đối chiếu số đếm thực tế với số dư hiện tại; chênh lệch được ghi thành biến động điều chỉnh để số dư và sổ lịch sử nhất quán.
+- Nếu số lượng kiểm kê cuối ngày thấp hơn ngưỡng, hệ thống tạo cảnh báo để nhân viên Kho chuẩn bị bổ sung cho ngày tiếp theo.
+- Không suy diễn lượng tiêu thụ chính xác từ chênh lệch đầu ngày + nhập - cuối ngày vì chênh lệch có thể gồm tiêu thụ, hao hụt và sai số kiểm đếm.
+
+### 21.4 Thanh toán và phạm vi dữ liệu
+
+- MVP hỗ trợ tối đa một lần ghi nhận thanh toán cho mỗi đơn; không chia hóa đơn hoặc split payment.
+- Không đưa bảng công thức/định mức nguyên liệu, nhà cung cấp, đơn mua hàng, loyalty hoặc AI recommendation vào schema MVP.
