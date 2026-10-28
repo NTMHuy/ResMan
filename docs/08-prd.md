@@ -592,4 +592,47 @@ Tài liệu này là **tài liệu yêu cầu sản phẩm trung tâm** của H�
 
 ---
 
+---
+
+## 21. Phụ lục yêu cầu đã xác nhận — 28/10/2026
+
+Phụ lục này cập nhật và thay thế mọi mô tả trước đây có nội dung mâu thuẫn.
+
+### 21.1 Đặt món tại bàn và tài khoản khách
+
+- **FR-CUS-01:** Mỗi tablet tại nhà hàng phải được cấu hình gắn với một bàn cụ thể. Đơn tạo từ tablet phải tự động gắn với bàn đã cấu hình.
+- **FR-CUS-02:** Khách có thể đặt món không cần tài khoản.
+- **FR-CUS-03:** Khách có thể đăng ký/đăng nhập tùy chọn. Khi đăng nhập, đơn phát sinh phải liên kết với tài khoản khách để lưu lịch sử đặt món.
+- **FR-CUS-04:** Tablet dùng chung phải hỗ trợ đăng xuất/kết thúc phiên khách trước khi người tiếp theo sử dụng.
+- **FR-CUS-05:** Mỗi món trong đơn có trường ghi chú tự do để khách ghi yêu cầu đặc biệt; không có danh sách modifier/options cấu hình sẵn trong MVP.
+
+### 21.2 Xử lý món và phối hợp bếp
+
+- **FR-KIT-01:** Sau khi Nhân viên Order xác nhận và điều phối, các món trong đơn được đưa vào hàng đợi của một trạm bếp duy nhất.
+- **FR-KIT-02:** Bếp có thể tiếp nhận món, bắt đầu chế biến và đánh dấu món hoàn thành. Nhân viên Order nhìn thấy món READY để giao đúng bàn.
+- **FR-KIT-03:** Trạng thái được quản lý ở cấp món: QUEUED, PREPARING, READY, SERVED, REJECTED, CANCELLED.
+- **FR-KIT-04:** Bếp có thể từ chối một món không thể chế biến; bắt buộc ghi lý do. Hệ thống phải thông báo lý do cho Nhân viên Order và hiển thị kết quả phù hợp cho khách.
+- **FR-KIT-05:** Khách hoặc Nhân viên Order có thể hủy món khi món đang QUEUED và bếp chưa tiếp nhận. Khi món đã PREPARING, khách không thể tự hủy.
+- **FR-KIT-06:** Từ chối/hủy một món không tự động hủy các món còn lại trong đơn. Đơn phải thể hiện kết quả từng món và trạng thái tổng hợp phù hợp.
+- **FR-KIT-07:** Một đơn chỉ được chứa các món thuộc cùng một trạm bếp. Nếu khách chọn món từ nhiều trạm, hệ thống yêu cầu tách thành các đơn riêng; không tự chia ticket.
+
+### 21.3 Kiểm kê và nhập hàng
+
+- **FR-INV-01:** Nhân viên kho ghi nhận số lượng thực tế đầu ngày cho từng nguyên liệu.
+- **FR-INV-02:** Nhân viên kho ghi nhận lượng hàng nhập thêm trong ngày. Mỗi lần nhập phải lưu thời điểm, số lượng, người ghi nhận và ghi chú nếu có.
+- **FR-INV-03:** Nhân viên kho ghi nhận số lượng thực tế cuối ngày cho từng nguyên liệu.
+- **FR-INV-04:** Hệ thống lưu lịch sử kiểm kê theo ngày và nguyên liệu, gồm số lượng đầu ngày, tổng lượng nhập trong ngày, số lượng cuối ngày, ghi chú và người xác nhận.
+- **FR-INV-05:** Hệ thống cảnh báo khi số lượng cuối ngày thấp hơn ngưỡng tối thiểu để nhân viên kho/quản lý lên kế hoạch nhập hàng vào ngày tiếp theo.
+- **FR-INV-06:** Không tự động trừ tồn kho theo đơn hàng hoặc số món chế biến. Không tính lượng tiêu thụ chính xác nếu không có định mức nguyên liệu.
+- **FR-INV-07:** Hệ thống tự động chuyển món sang không khả dụng và chặn đơn mới nếu nguyên liệu bắt buộc được khai báo cho món có tồn kho bằng 0 hoặc dưới ngưỡng tối thiểu. Lý do và nguyên liệu gây thiếu phải được hiển thị. Khi tồn được cập nhật đủ, món có thể được mở bán lại theo quy tắc hệ thống/quản lý.
+- **FR-INV-08:** Việc tự động khóa món dựa trên mapping món-nguyên liệu và số liệu kiểm kê hiện có; hệ thống không cam kết dự đoán đủ nguyên liệu cho một số lượng phần đặt cụ thể vì MVP không có recipe/định lượng.
+
+### 21.4 Quy tắc và quyết định nghiệp vụ
+
+| ID | Quyết định | Trạng thái |
+|---|---|---|
+| DD-07 | Một đơn chỉ thuộc một trạm bếp | Đã xác nhận — ONE |
+| DD-08 | Tự động khóa món khi nguyên liệu thiếu theo ngưỡng tồn đã ghi nhận | Đã xác nhận — AUTO |
+| DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
+| DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
 
