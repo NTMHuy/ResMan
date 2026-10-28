@@ -69,7 +69,7 @@ CREATE TABLE menu_items (
   price NUMERIC(14,2) NOT NULL CHECK (price >= 0),
   image_url VARCHAR(1000),
   availability_status VARCHAR(30) NOT NULL DEFAULT 'AVAILABLE'
-    CHECK (availability_status IN ('AVAILABLE','MANUAL_UNAVAILABLE','AUTO_OUT_OF_STOCK','INACTIVE')),
+    CHECK (availability_status IN ('AVAILABLE','MANUAL_UNAVAILABLE','AUTO_OUT_OF_STOCK')),
   availability_reason TEXT,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
