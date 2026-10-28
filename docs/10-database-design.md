@@ -89,7 +89,7 @@ PRD xác nhận hệ thống cho một nhà hàng và loại trừ đa nhà hàn
 
 ### 2.3 Danh tính khách hàng
 
-PRD OQ-06 chưa quyết định khách có tài khoản hay không. Do đó:
+Theo quyết định DD-06, khách không có tài khoản đăng nhập trong MVP. Do đó:
 - Không tạo `customers`, `customer_accounts` hoặc hồ sơ đăng nhập khách hàng trong MVP.
 - Khách được định danh theo phiên phục vụ tại bàn, không phải tài khoản cá nhân.
 - Bảng `dining_sessions` liên kết phiên với bàn; đơn tại chỗ tham chiếu phiên này.
@@ -300,14 +300,14 @@ Phiên phục vụ gắn với một bàn. Khách không đăng nhập; thiết 
 |---|---|---|---|
 | id | BIGINT | PK | ID phiên |
 | table_id | BIGINT | NN, FK → dining_tables.id | Bàn đang phục vụ |
-| session_code | VARCHAR(64) | NN, UQ | Mã phiên ngẫu nhiên, khó đoán |
+| session_token_hash | VARCHAR(255) | NN, UQ | Hash của mã phiên ngẫu nhiên; không lưu mã truy cập thô |
 | status | VARCHAR(20) | NN, CHECK | OPEN / CLOSED |
 | opened_at | TIMESTAMPTZ | NN, DF now() | Thời điểm mở phiên |
 | closed_at | TIMESTAMPTZ | NULL | Thời điểm đóng phiên |
 | opened_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên mở phiên |
 | closed_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên đóng phiên |
 
-Quy tắc: một bàn chỉ có tối đa một phiên OPEN tại cùng thời điểm (partial unique index theo table_id). Đóng phiên không xóa đơn lịch sử. Nếu session_code được dùng như bí mật truy cập, chỉ lưu hash và không lưu token thô.
+Quy tắc: một bàn chỉ có tối đa một phiên OPEN tại cùng thời điểm (partial unique index theo table_id). Đóng phiên không xóa đơn lịch sử. Backend sinh mã truy cập ngẫu nhiên, chỉ trả mã gốc một lần cho QR/thiết bị; database chỉ lưu hash trong `session_token_hash`.
 
 #### DB-10 — `orders`
 
