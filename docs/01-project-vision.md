@@ -147,4 +147,28 @@ Các điểm sau đây chưa được quyết định và cần được làm r�
 - Những chỉ số báo cáo nào được xem là thiết yếu cho Quản lý trong phiên bản đầu tiên?
 - Tính năng đánh giá/phản hồi của khách hàng có được mong đợi trong phiên bản đầu tiên không, hay sẽ được hoãn lại cùng với tính năng gợi ý?
 
-Các mục này được liệt kê như những câu hỏi còn bỏ ngỏ chứ không phải quyết định đã được xác nhận, và cần được làm rõ trước khi chuyển sang giai đoạn thiết kế use case và user flow chi tiết.
+Các nội dung trên đã được nhóm thảo luận, thống nhất và xác nhận là các quyết định nghiệp vụ chính thức của phiên bản MVP. Đây sẽ là cơ sở để triển khai các giai đoạn tiếp theo, bao gồm thiết kế use case, user flow, kiến trúc hệ thống và thiết kế cơ sở dữ liệu. Mọi thay đổi sau này cần được cập nhật và thống nhất lại trong tài liệu dự án.
+
+---
+
+## 11. Cập nhật phạm vi theo quyết định nghiệp vụ — 28/10/2026
+
+Phần này cập nhật các mô tả cũ có thể mâu thuẫn trong tài liệu.
+
+### 11.1 Khách hàng và thiết bị tại bàn
+- Tablet tại nhà hàng được gắn cố định với một bàn cụ thể; đơn phát sinh từ tablet tự động gắn với bàn đó.
+- Khách có thể đặt món không cần tài khoản hoặc đăng ký/đăng nhập tùy chọn.
+- Khi đăng nhập, đơn được liên kết với tài khoản để lưu lịch sử đặt món; tablet dùng chung phải hỗ trợ đăng xuất/kết thúc phiên khách.
+- Loyalty và AI Recommendation vẫn là tính năng tương lai, không mặc nhiên thuộc MVP.
+
+### 11.2 Bếp và đơn hàng
+- Một đơn chỉ chứa món thuộc một trạm bếp; nếu chọn món ở nhiều trạm, khách cần tạo các đơn riêng.
+- Theo dõi trạng thái ở từng món: chờ bếp tiếp nhận, đang chế biến, hoàn thành, đã giao, bị từ chối hoặc bị hủy.
+- Bếp phải nhập lý do khi từ chối món. Khách/Nhân viên Order chỉ được hủy món khi món còn trong hàng đợi và bếp chưa tiếp nhận.
+- Yêu cầu tùy chỉnh món được ghi bằng ghi chú tự do; không có modifier/options cấu hình sẵn trong MVP.
+
+### 11.3 Kho
+- Nghiệp vụ kho MVP chỉ gồm kiểm kê số lượng thực tế đầu ngày, ghi nhận hàng nhập thêm trong ngày và kiểm kê cuối ngày.
+- Nếu số lượng cuối ngày dưới ngưỡng tối thiểu, hệ thống cảnh báo để chuẩn bị nhập hàng ngày tiếp theo.
+- Không tự động trừ kho theo đơn và không tính lượng tiêu thụ chính xác khi chưa có định mức nguyên liệu.
+- Hệ thống tự động khóa món mới khi nguyên liệu bắt buộc được khai báo cho món không đáp ứng ngưỡng tồn đã cấu hình; hiển thị nguyên liệu và lý do. Việc này dựa trên dữ liệu kiểm kê/mapping, không phải dự báo định lượng theo số phần.
