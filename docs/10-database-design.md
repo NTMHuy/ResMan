@@ -1,7 +1,7 @@
 # Thiết Kế Cơ Sở Dữ Liệu ResMan (Database Design & ERD)
 
 > **Loại tài liệu:** Database Design  
-> **Phiên bản:** 1.0  
+> **Phiên bản:** 1.1  
 > **Ngày cập nhật:** 28/10/2026  
 > **Nhánh:** `member/minhhuy`  
 > **Nguồn yêu cầu chính:** [`docs/08-prd.md`](08-prd.md)  
@@ -48,15 +48,15 @@ Quy tắc:
 | Đơn hàng, chi tiết đơn, lịch sử trạng thái | Có | F-003 đến F-007 |
 | Vé bếp, món trong vé bếp, trạm bếp | Có | F-006, F-008, F-009; UI có KDS theo trạm |
 | Nguyên liệu, tồn kho, biến động kho | Có | F-009 đến F-011 |
-| Công thức/định mức nguyên liệu | Có ở mức liên kết đơn giản | UI hiển thị nguyên liệu theo món; hỗ trợ phân tích tiêu hao, nhưng thời điểm tự động trừ kho chưa chốt |
+| Công thức/định mức nguyên liệu | Không | MVP không quản lý recipe; Kho cập nhật nhập/xuất thủ công |
 | Báo cáo | Không tạo bảng báo cáo riêng | Báo cáo tổng hợp từ đơn, thanh toán và tồn kho |
-| Tài khoản khách hàng/hồ sơ khách hàng | Chưa đưa vào | OQ-06 chưa xác nhận khách cần tài khoản hay không |
+| Tài khoản khách hàng/hồ sơ khách hàng | Không | Khách không cần tài khoản; đặt món theo bàn/phiên |
 | Ca làm việc | Chưa đưa vào | PRD F-013 chỉ xác nhận hồ sơ và vai trò nhân viên; UI có shift không đủ để mở rộng phạm vi |
 | Nhà cung cấp/đơn mua hàng | Không | Chuỗi cung ứng nâng cao nằm ngoài phạm vi |
 | Đa nhà hàng/chi nhánh/kho nhiều địa điểm | Không | Out of Scope |
 | AI Recommendation | Không | F-016 là Future |
 | Notification center tổng quát | Không tạo bảng riêng trong MVP | Chưa có yêu cầu dữ liệu/thông báo tổng quát; có thể bổ sung khi chốt kênh thông báo |
-| Modifier/tùy chọn món | Có cấu trúc mở rộng gắn với UI, cần xác nhận phạm vi MVP | UI hiện có lựa chọn thêm/bớt món; PRD chưa đặc tả đầy đủ |
+| Modifier/tùy chọn món | Không | Chỉ lưu ghi chú tùy chỉnh trong order_items.note |
 
 ---
 
@@ -90,10 +90,11 @@ PRD xác nhận hệ thống cho một nhà hàng và loại trừ đa nhà hàn
 ### 2.3 Danh tính khách hàng
 
 PRD OQ-06 chưa quyết định khách có tài khoản hay không. Do đó:
-- Không tạo `customers`, `customer_accounts` hoặc lịch sử khách hàng cá nhân trong MVP.
-- Đơn hàng có thể gắn với bàn và được tạo từ giao diện khách hoặc do Nhân viên Order tạo hộ.
-- Nếu cần theo dõi đơn không đăng nhập, có thể bổ sung cơ chế mã theo dõi an toàn ở API; không lưu token thô trong database.
-- AI Recommendation cần định danh khách hàng qua nhiều lần đặt món nên vẫn nằm ngoài schema MVP.
+- Không tạo `customers`, `customer_accounts` hoặc hồ sơ đăng nhập khách hàng trong MVP.
+- Khách được định danh theo phiên phục vụ tại bàn, không phải tài khoản cá nhân.
+- Bảng `dining_sessions` liên kết phiên với bàn; đơn tại chỗ tham chiếu phiên này.
+- Phiên có mã ngẫu nhiên khó đoán; nếu dùng mã như bí mật truy cập, chỉ lưu hash.
+- AI Recommendation dựa trên lịch sử cá nhân không nằm trong schema MVP.
 
 ### 2.4 Định danh nhân viên và vai trò
 
@@ -120,22 +121,18 @@ PRD OQ-06 chưa quyết định khách có tài khoản hay không. Do đó:
 | DB-06 | menu_categories | Danh mục món | Menu |
 | DB-07 | kitchen_stations | Trạm chế biến | Kitchen |
 | DB-08 | menu_items | Thông tin món ăn | Menu |
-| DB-09 | modifier_groups | Nhóm tùy chọn món | Menu - UI extension |
-| DB-10 | modifier_options | Tùy chọn trong nhóm | Menu - UI extension |
-| DB-11 | menu_item_modifier_groups | Nhóm tùy chọn được áp dụng cho món | Menu - UI extension |
-| DB-12 | dining_tables | Danh sách bàn | Dining |
-| DB-13 | orders | Đơn hàng | Order |
-| DB-14 | order_items | Các món trong đơn | Order |
-| DB-15 | order_item_modifiers | Tùy chọn được chọn trong từng món của đơn | Order - UI extension |
-| DB-16 | order_status_history | Lịch sử trạng thái đơn | Order |
-| DB-17 | kitchen_tickets | Phiếu/vé bếp theo đơn và trạm | Kitchen |
-| DB-18 | kitchen_ticket_items | Các món cần chế biến trong vé bếp | Kitchen |
-| DB-19 | ingredients | Danh mục nguyên liệu | Inventory |
-| DB-20 | menu_item_ingredients | Định mức nguyên liệu theo món | Inventory |
-| DB-21 | inventory_balances | Số lượng tồn hiện tại | Inventory |
-| DB-22 | stock_movements | Lịch sử nhập/xuất/điều chỉnh/hao hụt | Inventory |
-| DB-23 | shortage_reports | Báo cáo thiếu nguyên liệu từ bếp | Inventory / Kitchen |
-| DB-24 | payments | Giao dịch thanh toán | Payment |
+| DB-09 | dining_tables | Danh sách bàn | Dining |
+| DB-10 | orders | Đơn hàng | Order |
+| DB-11 | order_items | Các món trong đơn | Order |
+| DB-12 | order_status_history | Lịch sử trạng thái đơn | Order |
+| DB-13 | kitchen_tickets | Phiếu/vé bếp theo đơn và trạm | Kitchen |
+| DB-14 | kitchen_ticket_items | Các món cần chế biến trong vé bếp | Kitchen |
+| DB-15 | ingredients | Danh mục nguyên liệu | Inventory |
+| DB-16 | inventory_balances | Số lượng tồn hiện tại | Inventory |
+| DB-17 | stock_movements | Lịch sử nhập/xuất/điều chỉnh/hao hụt | Inventory |
+| DB-18 | shortage_reports | Báo cáo thiếu nguyên liệu từ bếp | Inventory / Kitchen |
+| DB-19 | payments | Giao dịch thanh toán | Payment |
+| DB-20 | dining_sessions | Phiên phục vụ gắn với bàn | Dining |
 
 Bảng báo cáo không được lưu riêng ở MVP. KPI được truy vấn/tổng hợp từ dữ liệu nghiệp vụ.
 
@@ -247,7 +244,7 @@ Không đưa bảng ca làm việc vào MVP vì PRD F-013 mới xác nhận qu�
 
 #### DB-07 — `kitchen_stations`
 
-Danh mục trạm bếp/quầy pha chế được UI KDS sử dụng để phân luồng món.
+Danh mục trạm bếp/quầy chế biến. Mỗi đơn trong MVP chỉ được gán một trạm.
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -263,7 +260,7 @@ Danh mục trạm bếp/quầy pha chế được UI KDS sử dụng để phân
 |---|---|---|---|
 | id | BIGINT | PK | ID món |
 | category_id | BIGINT | NN, FK → menu_categories.id | Danh mục |
-| kitchen_station_id | BIGINT | NULL, FK → kitchen_stations.id | Trạm chế biến mặc định |
+| kitchen_station_id | BIGINT | NN, FK → kitchen_stations.id | Trạm chế biến phụ trách món |
 | code | VARCHAR(40) | NN, UQ | Mã món |
 | name | VARCHAR(150) | NN | Tên món |
 | description | TEXT | NULL | Mô tả |
@@ -276,43 +273,11 @@ Danh mục trạm bếp/quầy pha chế được UI KDS sử dụng để phân
 
 Không xóa cứng món đã được tham chiếu bởi đơn hàng. `order_items` lưu snapshot tên và giá nên báo cáo/lịch sử không bị thay đổi khi menu được cập nhật.
 
-### 4.3 Modifier / tùy chọn món — phần mở rộng từ UI
-
-PRD chưa đặc tả chi tiết modifier, nhưng UI có các lựa chọn như thêm trứng, ít đường, không hành. Thiết kế dưới đây hỗ trợ giao diện hiện có; cần xác nhận nhóm có đưa toàn bộ chức năng này vào MVP hay không.
-
-#### DB-09 — `modifier_groups`
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| id | BIGINT | PK | ID nhóm |
-| name | VARCHAR(100) | NN | Tên nhóm |
-| selection_type | VARCHAR(20) | NN, CHECK | SINGLE / MULTIPLE |
-| is_required | BOOLEAN | NN, DF false | Có bắt buộc chọn |
-| min_select | INTEGER | NN, DF 0, CHECK >= 0 | Số lựa chọn tối thiểu |
-| max_select | INTEGER | NULL, CHECK > 0 | Số lựa chọn tối đa nếu có |
-| is_active | BOOLEAN | NN, DF true | Đang hoạt động |
-
-#### DB-10 — `modifier_options`
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| id | BIGINT | PK | ID lựa chọn |
-| modifier_group_id | BIGINT | NN, FK → modifier_groups.id | Nhóm cha |
-| name | VARCHAR(120) | NN | Tên lựa chọn |
-| price_delta | NUMERIC(14,2) | NN, DF 0 | Phần giá cộng/trừ |
-| is_active | BOOLEAN | NN, DF true | Đang hoạt động |
-
-#### DB-11 — `menu_item_modifier_groups`
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| menu_item_id | BIGINT | PK, FK → menu_items.id | Món áp dụng |
-| modifier_group_id | BIGINT | PK, FK → modifier_groups.id | Nhóm lựa chọn |
-| display_order | INTEGER | NN, DF 0 | Thứ tự hiển thị |
+### 4.3 Dining & Order
 
 ### 4.4 Dining & Order
 
-#### DB-12 — `dining_tables`
+#### DB-09 — `dining_tables`
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -324,9 +289,27 @@ PRD chưa đặc tả chi tiết modifier, nhưng UI có các lựa chọn như 
 | status | VARCHAR(20) | NN, DF 'ACTIVE', CHECK | ACTIVE / INACTIVE |
 | created_at | TIMESTAMPTZ | NN, DF now() | Ngày tạo |
 
-Không tạo `dining_sessions` ở MVP vì PRD chưa yêu cầu quản lý phiên sử dụng bàn. Đơn mang đi có thể để `table_id` NULL.
+Đơn tại chỗ phải gắn với một phiên phục vụ (`dining_sessions`). Đơn mang đi không cần phiên và có `dining_session_id` NULL.
 
-#### DB-13 — `orders`
+
+#### DB-20 — `dining_sessions`
+
+Phiên phục vụ gắn với một bàn. Khách không đăng nhập; thiết bị khách truy cập phiên đã được mở cho bàn.
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| id | BIGINT | PK | ID phiên |
+| table_id | BIGINT | NN, FK → dining_tables.id | Bàn đang phục vụ |
+| session_code | VARCHAR(64) | NN, UQ | Mã phiên ngẫu nhiên, khó đoán |
+| status | VARCHAR(20) | NN, CHECK | OPEN / CLOSED |
+| opened_at | TIMESTAMPTZ | NN, DF now() | Thời điểm mở phiên |
+| closed_at | TIMESTAMPTZ | NULL | Thời điểm đóng phiên |
+| opened_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên mở phiên |
+| closed_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên đóng phiên |
+
+Quy tắc: một bàn chỉ có tối đa một phiên OPEN tại cùng thời điểm (partial unique index theo table_id). Đóng phiên không xóa đơn lịch sử. Nếu session_code được dùng như bí mật truy cập, chỉ lưu hash và không lưu token thô.
+
+#### DB-10 — `orders`
 
 Bảng trung tâm của vòng đời đơn hàng.
 
@@ -335,7 +318,8 @@ Bảng trung tâm của vòng đời đơn hàng.
 | id | BIGINT | PK | ID đơn |
 | order_code | VARCHAR(40) | NN, UQ | Mã đơn hiển thị |
 | order_type | VARCHAR(20) | NN, CHECK | DINE_IN / TAKEAWAY |
-| table_id | BIGINT | NULL, FK → dining_tables.id | Bàn nếu ăn tại chỗ |
+| table_id | BIGINT | NULL, FK → dining_tables.id | Bàn nếu ăn tại chỗ; khớp với bàn của phiên |
+| dining_session_id | BIGINT | NULL, FK → dining_sessions.id | Phiên phục vụ; bắt buộc với DINE_IN |
 | guest_count | INTEGER | NULL, CHECK > 0 | Số khách nếu biết |
 | created_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên tạo hộ; NULL nếu khách tự tạo |
 | status | VARCHAR(30) | NN, CHECK | PENDING_CONFIRMATION / CONFIRMED / REJECTED / CANCELLED / IN_KITCHEN / PREPARING / READY / SERVED / COMPLETED |
@@ -351,8 +335,8 @@ Bảng trung tâm của vòng đời đơn hàng.
 | updated_at | TIMESTAMPTZ | NN, DF now() | Thời điểm cập nhật |
 
 Ràng buộc nghiệp vụ:
-- `order_type = 'DINE_IN'` thì `table_id` phải có giá trị.
-- `order_type = 'TAKEAWAY'` thì `table_id` có thể NULL.
+- `order_type = 'DINE_IN'` thì `table_id` và `dining_session_id` phải có giá trị; bàn trên đơn phải khớp bàn của phiên.
+- `order_type = 'TAKEAWAY'` thì `table_id` và `dining_session_id` phải NULL.
 - Đơn bị từ chối phải có `rejection_reason`.
 - Đơn bị hủy phải lưu lý do nếu quy trình yêu cầu.
 - Chỉ đơn hợp lệ mới được xác nhận.
@@ -361,7 +345,7 @@ Ràng buộc nghiệp vụ:
 
 **Lưu ý trạng thái:** PRD có trạng thái nghiệp vụ chờ xác nhận, đã xác nhận, từ chối, hủy, chuyển bếp, đang chế biến, hoàn tất và giao món. Tên mã ở trên là chuẩn hóa kỹ thuật; cần chốt một state machine cuối cùng trước khi viết migration. `COMPLETED` chỉ được dùng sau khi payment được ghi nhận thành công; không đồng nhất `READY` với `COMPLETED`.
 
-#### DB-14 — `order_items`
+#### DB-11 — `order_items`
 
 Snapshot các món tại thời điểm khách đặt.
 
@@ -377,49 +361,21 @@ Snapshot các món tại thời điểm khách đặt.
 | note | TEXT | NULL | Ghi chú riêng cho món |
 | created_at | TIMESTAMPTZ | NN, DF now() | Thời điểm thêm |
 
-`line_total` phải được backend tính và kiểm tra theo `unit_price × quantity` cùng các modifier đã chọn. Không tin giá/total do client gửi lên.
+`line_total` phải được backend tính và kiểm tra theo `unit_price × quantity`; ghi chú tùy chỉnh nằm trong `order_items.note`. Không tin giá/total do client gửi lên.
 
-#### DB-15 — `order_item_modifiers`
-
-Lưu lựa chọn modifier của từng dòng đơn, nếu chức năng modifier được duyệt.
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| id | BIGINT | PK | ID lựa chọn |
-| order_item_id | BIGINT | NN, FK → order_items.id | Dòng đơn |
-| modifier_option_id | BIGINT | NULL, FK → modifier_options.id | Lựa chọn gốc |
-| option_name_snapshot | VARCHAR(120) | NN | Tên lựa chọn tại thời điểm đặt |
-| price_delta_snapshot | NUMERIC(14,2) | NN, DF 0 | Phần giá tại thời điểm đặt |
-
-Snapshot giúp đơn cũ không đổi khi quản lý đổi tên hoặc giá modifier.
-
-#### DB-16 — `order_status_history`
-
-Lưu vết mọi lần chuyển trạng thái.
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| id | BIGINT | PK | ID lịch sử |
-| order_id | BIGINT | NN, FK → orders.id | Đơn hàng |
-| from_status | VARCHAR(30) | NULL | Trạng thái trước; NULL khi tạo đơn |
-| to_status | VARCHAR(30) | NN | Trạng thái sau |
-| changed_by_user_id | BIGINT | NULL, FK → users.id | Nhân viên thực hiện; NULL nếu hệ thống/khách |
-| reason | TEXT | NULL | Lý do |
-| changed_at | TIMESTAMPTZ | NN, DF now() | Thời điểm thay đổi |
-
-Mỗi thay đổi trạng thái đơn và bản ghi lịch sử phải nằm trong cùng transaction.
+### 4.4 Kitchen Operations
 
 ### 4.5 Kitchen Operations
 
-#### DB-17 — `kitchen_tickets`
+#### DB-13 — `kitchen_tickets`
 
-Một đơn có thể được chia thành các vé theo trạm chế biến.
+Mỗi đơn chỉ có một vé bếp và một trạm chế biến trong MVP.
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | id | BIGINT | PK | ID vé bếp |
-| order_id | BIGINT | NN, FK → orders.id | Đơn nguồn |
-| kitchen_station_id | BIGINT | NN, FK → kitchen_stations.id | Trạm phụ trách |
+| order_id | BIGINT | NN, UQ, FK → orders.id | Đơn nguồn; một vé bếp/đơn |
+| kitchen_station_id | BIGINT | NN, FK → kitchen_stations.id | Trạm duy nhất phụ trách đơn |
 | status | VARCHAR(20) | NN, CHECK | QUEUED / PREPARING / READY / CANCELLED |
 | priority | INTEGER | NN, DF 0 | Mức ưu tiên |
 | dispatched_at | TIMESTAMPTZ | NN | Thời điểm vào hàng đợi |
@@ -428,7 +384,7 @@ Một đơn có thể được chia thành các vé theo trạm chế biến.
 
 Unique đề xuất: `(order_id, kitchen_station_id)` nếu mỗi đơn chỉ có một vé cho mỗi trạm. Nếu nghiệp vụ cho phép nhiều đợt gửi cùng trạm, cần thay bằng mã đợt/sequence thay vì áp unique này.
 
-#### DB-18 — `kitchen_ticket_items`
+#### DB-14 — `kitchen_ticket_items`
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -440,11 +396,11 @@ Unique đề xuất: `(order_id, kitchen_station_id)` nếu mỗi đơn chỉ c�
 | started_at | TIMESTAMPTZ | NULL | Thời điểm bắt đầu |
 | completed_at | TIMESTAMPTZ | NULL | Thời điểm hoàn thành |
 
-Một `order_item` chỉ thuộc một trạm/vé trong thiết kế MVP. Nếu cần chia cùng một món qua nhiều trạm, mô hình cần thay đổi.
+Mỗi `order_item` thuộc vé bếp duy nhất của đơn. Backend chỉ chấp nhận các món cùng một trạm; nếu đơn có món thuộc nhiều trạm, cần điều chỉnh quyết định nghiệp vụ trước khi triển khai.
 
 ### 4.6 Inventory
 
-#### DB-19 — `ingredients`
+#### DB-15 — `ingredients`
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -459,22 +415,7 @@ Một `order_item` chỉ thuộc một trạm/vé trong thiết kế MVP. Nếu 
 
 OQ-03 chưa quyết định ai/cách thiết lập ngưỡng tồn thấp. Cột này cho phép cấu hình sau khi nhóm chốt chính sách; không tự mặc định một ngưỡng cụ thể.
 
-#### DB-20 — `menu_item_ingredients`
-
-Liên kết món ăn với nguyên liệu và lượng dùng theo một đơn vị phục vụ.
-
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| menu_item_id | BIGINT | PK, FK → menu_items.id | Món ăn |
-| ingredient_id | BIGINT | PK, FK → ingredients.id | Nguyên liệu |
-| quantity_per_item | NUMERIC(14,3) | NN, CHECK > 0 | Lượng nguyên liệu cho một món |
-| note | TEXT | NULL | Ghi chú định mức |
-
-`quantity_per_item` phải dùng cùng đơn vị chuẩn `ingredients.base_unit`. Ví dụ nguyên liệu có base unit là gram thì recipe cũng lưu gram. Không tự động chuyển đổi kg/g hoặc lít/ml nếu chưa có quy tắc chuyển đổi rõ ràng.
-
-Bảng này hỗ trợ định mức dữ liệu; thời điểm trừ kho tự động vẫn là câu hỏi mở. Khi chưa chốt, hệ thống chỉ ghi nhận nhập/xuất/điều chỉnh do nghiệp vụ được duyệt.
-
-#### DB-21 — `inventory_balances`
+#### DB-16 — `inventory_balances`
 
 Số lượng hiện tại của mỗi nguyên liệu tại nhà hàng đơn lẻ.
 
@@ -485,9 +426,9 @@ Số lượng hiện tại của mỗi nguyên liệu tại nhà hàng đơn l�
 | quantity_on_hand | NUMERIC(14,3) | NN, DF 0, CHECK >= 0 | Số lượng tồn hiện tại |
 | updated_at | TIMESTAMPTZ | NN, DF now() | Thời điểm cập nhật |
 
-Mỗi nguyên liệu có một dòng số dư. Việc thay đổi số dư phải đi kèm bản ghi `stock_movements` trong cùng transaction.
+Mỗi nguyên liệu có một dòng số dư. Nhân viên Kho cập nhật nhập/xuất/điều chỉnh thủ công; mọi thay đổi phải đi kèm `stock_movements` trong cùng transaction. MVP không tự động tính tiêu hao theo món hoặc đơn.
 
-#### DB-22 — `stock_movements`
+#### DB-17 — `stock_movements`
 
 Sổ cái ghi nhận mọi biến động tồn kho.
 
@@ -511,9 +452,9 @@ Quy ước:
 - Không xóa hoặc sửa lịch sử biến động đã ghi nhận; sai sót phải được điều chỉnh bằng một movement mới.
 - `reference_type/reference_id` chỉ để truy vết nguồn nghiệp vụ; nếu cần ràng buộc FK mạnh cho từng nguồn, dùng các cột FK riêng hoặc bảng liên kết chuyên biệt.
 
-#### DB-23 — `shortage_reports`
+#### DB-18 — `shortage_reports`
 
-Bếp báo thiếu nguyên liệu để Kho và Order phối hợp xử lý theo BR-007/BR-008.
+Bếp báo thiếu nguyên liệu để Kho và Order phối hợp xử lý theo BR-007/BR-008. MVP không có recipe/định mức liên kết món với nguyên liệu.
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
@@ -531,7 +472,7 @@ Thông báo tới Order và Kho có thể được phát qua application event/i
 
 ### 4.7 Payment
 
-#### DB-24 — `payments`
+#### DB-19 — `payments`
 
 Ghi nhận khoản thanh toán cho đơn hàng.
 
@@ -561,36 +502,27 @@ erDiagram
     ROLES ||--o{ ROLE_PERMISSIONS : grants
     PERMISSIONS ||--o{ ROLE_PERMISSIONS : included
     USERS ||--o| EMPLOYEES : profile
-
     MENU_CATEGORIES ||--o{ MENU_ITEMS : contains
-    KITCHEN_STATIONS ||--o{ MENU_ITEMS : default_station
-    MODIFIER_GROUPS ||--o{ MODIFIER_OPTIONS : contains
-    MENU_ITEMS ||--o{ MENU_ITEM_MODIFIER_GROUPS : enables
-    MODIFIER_GROUPS ||--o{ MENU_ITEM_MODIFIER_GROUPS : assigned
-    DINING_TABLES ||--o{ ORDERS : serves
-
+    KITCHEN_STATIONS ||--o{ MENU_ITEMS : assigned_station
+    DINING_TABLES ||--o{ DINING_SESSIONS : has_sessions
+    USERS ||--o{ DINING_SESSIONS : opens_or_closes
+    DINING_TABLES ||--o{ ORDERS : referenced_by
+    DINING_SESSIONS ||--o{ ORDERS : groups
     USERS ||--o{ ORDERS : creates
     USERS ||--o{ ORDERS : confirms
     ORDERS ||--|{ ORDER_ITEMS : contains
     MENU_ITEMS ||--o{ ORDER_ITEMS : referenced_by
-    ORDER_ITEMS ||--o{ ORDER_ITEM_MODIFIERS : selected
-    MODIFIER_OPTIONS ||--o{ ORDER_ITEM_MODIFIERS : snapshot_from
     ORDERS ||--o{ ORDER_STATUS_HISTORY : records
     USERS ||--o{ ORDER_STATUS_HISTORY : changes
-
-    ORDERS ||--o{ KITCHEN_TICKETS : dispatches
+    ORDERS ||--o| KITCHEN_TICKETS : dispatches
     KITCHEN_STATIONS ||--o{ KITCHEN_TICKETS : handles
     KITCHEN_TICKETS ||--|{ KITCHEN_TICKET_ITEMS : contains
     ORDER_ITEMS ||--o| KITCHEN_TICKET_ITEMS : prepared_as
-
-    MENU_ITEMS ||--o{ MENU_ITEM_INGREDIENTS : recipe
-    INGREDIENTS ||--o{ MENU_ITEM_INGREDIENTS : used_in
     INGREDIENTS ||--o| INVENTORY_BALANCES : balance
     INGREDIENTS ||--o{ STOCK_MOVEMENTS : movement
     ORDER_ITEMS ||--o{ SHORTAGE_REPORTS : shortage_for
     INGREDIENTS ||--o{ SHORTAGE_REPORTS : shortage_of
     USERS ||--o{ SHORTAGE_REPORTS : reports
-
     ORDERS ||--o| PAYMENTS : paid_by
     USERS ||--o{ PAYMENTS : records
 ```
@@ -603,15 +535,17 @@ erDiagram
 | Role - Permission | N-N | Thông qua role_permissions |
 | User - Employee | 1-0..1 | Một tài khoản nhân viên có tối đa một hồ sơ nhân sự |
 | Category - Menu Item | 1-N | Một danh mục có nhiều món |
+| Dining Table - Dining Session | 1-N | Một bàn có nhiều phiên theo thời gian; tối đa một phiên OPEN tại một thời điểm |
+| Dining Session - Order | 1-N | Một phiên có thể có nhiều đơn; đơn tại chỗ thuộc một phiên |
 | Menu Item - Order Item | 1-N | Một món có thể xuất hiện ở nhiều đơn |
 | Order - Order Item | 1-N | Một đơn gồm ít nhất một dòng món |
 | Order - Status History | 1-N | Một đơn có nhiều lần thay đổi trạng thái |
-| Order - Kitchen Ticket | 1-N | Một đơn có thể đi qua nhiều trạm bếp |
+| Order - Kitchen Ticket | 1-0..1 | Một đơn có tối đa một vé bếp và một trạm trong MVP |
 | Kitchen Ticket - Ticket Item | 1-N | Một vé có nhiều món cần chế biến |
-| Menu Item - Ingredient | N-N | Thông qua menu_item_ingredients |
+
 | Ingredient - Stock Movement | 1-N | Một nguyên liệu có nhiều biến động |
 | Ingredient - Inventory Balance | 1-1 | Mỗi nguyên liệu có một số dư trong nhà hàng đơn lẻ |
-| Order - Payment | 1-0..1 | Một đơn có tối đa một thanh toán được ghi nhận trong giả định MVP |
+| Order - Payment | 1-0..1 | Một đơn có tối đa một thanh toán được ghi nhận theo DD-03 |
 
 ---
 
@@ -630,14 +564,12 @@ erDiagram
 | Bảng | Constraint |
 |---|---|
 | menu_items | price >= 0 |
-| modifier_options | price_delta có thể âm/dương nhưng tổng giá dòng không âm |
 | dining_tables | capacity IS NULL OR capacity > 0 |
 | orders | guest_count IS NULL OR guest_count > 0 |
 | orders | order_type thuộc DINE_IN, TAKEAWAY |
 | orders | DINE_IN yêu cầu table_id |
 | order_items | quantity > 0, unit_price >= 0, line_total >= 0 |
 | ingredients | low_stock_threshold IS NULL OR >= 0 |
-| menu_item_ingredients | quantity_per_item > 0 |
 | inventory_balances | quantity_on_hand >= 0 |
 | stock_movements | quantity_delta <> 0; dấu phù hợp movement_type |
 | payments | amount > 0 |
@@ -659,7 +591,7 @@ erDiagram
 Thiết kế hướng đến chuẩn hóa tối thiểu 3NF cho dữ liệu nghiệp vụ:
 
 1. **1NF:** Các cột chứa giá trị đơn; danh sách món trong đơn không lưu thành chuỗi JSON hoặc text trong bảng orders.
-2. **2NF:** Các bảng nối N-N như role_permissions và menu_item_ingredients có khóa kép; thuộc tính phụ thuộc toàn bộ khóa.
+2. **2NF:** Bảng nối N-N role_permissions có khóa kép; thuộc tính phụ thuộc toàn bộ khóa.
 3. **3NF:** Thông tin vai trò nằm trong roles, danh mục món nằm trong menu_categories, nguyên liệu nằm trong ingredients; không lặp lại tên danh mục/nguyên liệu ở các bảng giao dịch trừ snapshot có mục đích lịch sử.
 
 ### 7.1 Những dữ liệu có chủ đích được lặp lại
@@ -668,8 +600,6 @@ Thiết kế hướng đến chuẩn hóa tối thiểu 3NF cho dữ liệu nghi
 |---|---|---|
 | Tên món | order_items.item_name_snapshot | Bảo toàn lịch sử đơn khi menu đổi tên |
 | Giá món | order_items.unit_price | Bảo toàn giá tại thời điểm đặt |
-| Tên modifier | order_item_modifiers.option_name_snapshot | Bảo toàn lựa chọn cũ |
-| Giá modifier | order_item_modifiers.price_delta_snapshot | Không để thay đổi giá tùy chọn làm đổi đơn cũ |
 
 ### 7.2 Dữ liệu không nên lưu trùng
 
@@ -686,11 +616,10 @@ Thiết kế hướng đến chuẩn hóa tối thiểu 3NF cho dữ liệu nghi
 ### 8.1 Tạo đơn hàng
 
 Một transaction:
-1. Kiểm tra tất cả menu_items tồn tại, đang AVAILABLE và giá hiện tại hợp lệ.
-2. Kiểm tra bàn tồn tại/đang hoạt động nếu DINE_IN.
+1. Kiểm tra menu_items tồn tại, đang AVAILABLE, giá hợp lệ và cùng kitchen_station_id.
+2. Kiểm tra bàn đang hoạt động và dining_session đang OPEN nếu DINE_IN.
 3. Tạo orders với PENDING_CONFIRMATION.
 4. Tạo các order_items với snapshot tên và giá.
-5. Tạo order_item_modifiers nếu được sử dụng.
 6. Tạo order_status_history với from_status NULL và to_status PENDING_CONFIRMATION.
 7. Commit.
 
@@ -708,8 +637,8 @@ Transaction xác nhận:
 
 Transaction điều phối:
 1. Chỉ cho phép đơn CONFIRMED được dispatch.
-2. Phân nhóm order_items theo kitchen_station_id của menu_items.
-3. Tạo kitchen_tickets và kitchen_ticket_items theo trạm.
+2. Lấy kitchen_station_id duy nhất từ các món trong đơn.
+3. Tạo một kitchen_ticket và các kitchen_ticket_items cho toàn bộ order_items.
 4. Cập nhật đơn sang IN_KITCHEN và dispatched_at.
 5. Ghi lịch sử trạng thái.
 6. Commit.
@@ -752,11 +681,11 @@ Không cho phép cập nhật số dư trực tiếp mà không tạo movement t
 
 ### 8.6 Thời điểm tiêu hao nguyên liệu
 
-PRD yêu cầu cập nhật tồn kho sau khi sử dụng hoặc nhập hàng, nhưng chưa chốt thời điểm tự động trừ theo công thức. Do đó:
-- Thiết kế đã có menu_item_ingredients để lưu định mức.
-- Không tự động trừ tồn khi khách mới tạo đơn.
-- Chưa chọn thời điểm trừ tại xác nhận, bắt đầu chế biến hay hoàn thành món.
-- Cần quyết định OQ liên quan trước khi bật tự động tiêu hao.
+Theo quyết định DD-04 và DD-05:
+- MVP không quản lý công thức/định mức nguyên liệu cho từng món.
+- MVP không tự động trừ tồn theo đơn hoặc trạng thái chế biến.
+- Nhân viên Kho chủ động ghi nhận nhập, xuất, điều chỉnh và hao hụt.
+- Mọi thao tác cập nhật phải ghi stock_movements cùng transaction.
 
 ---
 
@@ -776,9 +705,11 @@ Index chỉ tạo khi phục vụ truy vấn thực tế; không index mọi c�
 | orders | (table_id, created_at DESC) | Lịch sử đơn theo bàn |
 | order_items | (order_id) | Lấy chi tiết đơn |
 | order_status_history | (order_id, changed_at DESC) | Timeline đơn |
+| kitchen_tickets | UNIQUE(order_id) | Một vé bếp/đơn |
 | kitchen_tickets | (kitchen_station_id, status, dispatched_at) | KDS theo trạm và trạng thái |
 | kitchen_ticket_items | (kitchen_ticket_id, status) | Lọc món trong vé |
 | ingredients | UNIQUE(code) | Tra cứu nguyên liệu |
+| dining_sessions | UNIQUE(session_code), (table_id, status) | Tra cứu và kiểm soát phiên bàn |
 | stock_movements | (ingredient_id, created_at DESC) | Lịch sử biến động nguyên liệu |
 | shortage_reports | (status, created_at DESC) | Danh sách báo thiếu đang mở |
 | payments | UNIQUE(order_id) | Một thanh toán/đơn trong giả định MVP |
@@ -794,15 +725,15 @@ PostgreSQL tự tạo index cho PK và UNIQUE constraint. Không tạo thêm ind
 |---|---|---|
 | F-001 / FR-001 Quản lý món ăn | menu_categories, menu_items, kitchen_stations | Lưu danh mục, món, giá, trạng thái và trạm |
 | F-002 / FR-002 Xem thực đơn | menu_categories, menu_items | Đọc menu và trạng thái còn/hết |
-| F-003 / FR-003 Tạo đơn | orders, order_items, dining_tables | Lưu đơn và các món |
+| F-003 / FR-003 Tạo đơn | orders, order_items, dining_tables, dining_sessions | Lưu đơn, các món và phiên phục vụ |
 | F-004 / FR-004 Kiểm tra hợp lệ | menu_items, orders, order_items | Kiểm tra trạng thái món và dữ liệu đơn |
 | F-005 / FR-005 Xử lý đơn mới | orders, order_status_history, users | Xác nhận/từ chối, lưu lý do và tác nhân |
-| F-006 / FR-006 Điều phối bếp/giao món | orders, kitchen_tickets, kitchen_ticket_items | Điều phối và cập nhật vòng đời |
+| F-006 / FR-006 Điều phối bếp/giao món | orders, kitchen_tickets, kitchen_ticket_items | Một vé bếp cho mỗi đơn, cập nhật vòng đời |
 | F-007 / FR-007 Theo dõi/hủy đơn | orders, order_status_history | Đọc trạng thái mới nhất, lưu hủy |
 | F-008 / FR-008 Hàng đợi bếp | kitchen_tickets, kitchen_ticket_items, kitchen_stations | Hiển thị hàng đợi theo trạm |
 | F-009 / FR-009 Tiến độ chế biến/thiếu nguyên liệu | kitchen_ticket_items, shortage_reports | Cập nhật món, báo thiếu |
 | F-010 / FR-010 Giám sát tồn | ingredients, inventory_balances | Hiển thị số lượng và cảnh báo |
-| F-011 / FR-011 Cập nhật tồn | ingredients, inventory_balances, stock_movements | Cập nhật số dư và lịch sử |
+| F-011 / FR-011 Cập nhật tồn | ingredients, inventory_balances, stock_movements | Kho cập nhật thủ công số dư và lịch sử |
 | F-012 / FR-012 Thanh toán | payments, orders, order_status_history | Ghi nhận giao dịch và đóng đơn |
 | F-013 / FR-013 Quản lý nhân viên | users, roles, permissions, role_permissions, employees | Hồ sơ, tài khoản, vai trò |
 | F-014 / FR-014 Báo cáo | orders, order_items, payments, ingredients, inventory_balances, stock_movements | Tổng hợp doanh thu, đơn, tồn |
@@ -819,20 +750,19 @@ Các mục sau đã được giữ nguyên trạng thái chưa quyết định t
 | OQ-03 | Ai/cách thiết lập ngưỡng tồn thấp? | low_stock_threshold và quyền cập nhật | Cột nullable; chờ chính sách |
 | OQ-04 | Điều kiện chính xác để hủy đơn? | Status transition, cancellation_reason | Theo BR-003: chỉ hủy khi chờ xác nhận |
 | OQ-05 | Chuyển đơn sang KDS tự động hay thủ công? | Thời điểm tạo ticket và người dispatch | Có dispatched_at; chỉ tạo sau xác nhận |
-| OQ-06 | Khách có cần tài khoản? | Customer/User/session/tracking | Chưa tạo customer account |
 | OQ-07 | Xóa món đang nằm trong đơn chưa hoàn tất? | FK và soft delete | Giữ FK lịch sử; dùng INACTIVE/deleted_at |
 | OQ-09 | Có thông báo SMS/Email hay chỉ trong ứng dụng? | Notification/outbox/integration | Chưa tạo notification center tổng quát |
 
-### 11.1 Các quyết định thiết kế bổ sung cần nhóm duyệt
+### 11.1 Các quyết định đã được chủ dự án xác nhận
 
-| ID | Quyết định | Đề xuất hiện tại | Lý do |
-|---|---|---|---|
-| DD-01 | Một đơn có thể chia nhiều trạm bếp? | Có, một ticket cho mỗi trạm | UI KDS có station |
-| DD-02 | Một order item có thuộc nhiều ticket? | Không trong MVP | Đơn giản hóa điều phối |
-| DD-03 | Một đơn có thể thanh toán nhiều lần/chia bill? | Không trong MVP; một payment/đơn | PRD chưa yêu cầu split payment |
-| DD-04 | Có modifier trong MVP? | Chuẩn bị bảng, cần xác nhận | UI có modifier nhưng PRD chưa đặc tả |
-| DD-05 | Có tự động trừ kho theo recipe? | Chưa bật cho đến khi chốt thời điểm | Tránh sai tồn khi hủy/thiếu món |
-| DD-06 | Có lưu ca làm việc? | Không trong MVP | PRD chỉ xác nhận hồ sơ/vai trò |
+| ID | Quyết định | Kết quả áp dụng vào schema |
+|---|---|---|
+| DD-01 | Phân chia trạm bếp | Một đơn chỉ thuộc một trạm và có tối đa một kitchen_ticket |
+| DD-02 | Modifier | Không có bảng modifier; chỉ lưu ghi chú tùy chỉnh trong order_items.note |
+| DD-03 | Thanh toán | Một đơn có một payment; không hỗ trợ chia hóa đơn/thanh toán nhiều lần trong MVP |
+| DD-04 | Định mức nguyên liệu | Không có bảng recipe |
+| DD-05 | Tự động trừ kho | Không tự động trừ; nhân viên Kho cập nhật nhập/xuất/điều chỉnh thủ công |
+| DD-06 | Tài khoản khách hàng | Không có tài khoản khách; dùng dining_sessions gắn với bàn để nhận diện phiên phục vụ |
 
 ---
 
@@ -899,18 +829,19 @@ Các mục sau đã được giữ nguyên trạng thái chưa quyết định t
 
 ## 15. Kết luận và bước tiếp theo
 
-Mô hình đề xuất gồm 24 bảng, chia thành Identity/Staff, Menu, Order, Kitchen, Inventory và Payment. Đây là mô hình quan hệ cho phạm vi MVP cùng một số cấu trúc mở rộng được đánh dấu riêng để hỗ trợ giao diện hiện tại.
+Mô hình sau khi chốt quyết định gồm 20 bảng, chia thành Identity/Staff, Menu, Dining/Order, Kitchen, Inventory và Payment; không còn bảng modifier hoặc recipe.
 
 Các điểm thiết kế quan trọng:
 - `orders` và `order_items` là trung tâm vòng đời đơn.
 - `order_status_history` lưu vết chuyển trạng thái.
-- `kitchen_tickets` và `kitchen_ticket_items` tách tiến độ chế biến khỏi thông tin đơn hàng.
+- `kitchen_tickets` và `kitchen_ticket_items` tách tiến độ chế biến khỏi thông tin đơn hàng; mỗi đơn chỉ có một vé và một trạm bếp.
+- `dining_sessions` liên kết lượt đặt món của khách không đăng nhập với bàn phục vụ.
 - `inventory_balances` giữ số dư hiện tại; `stock_movements` là lịch sử biến động.
 - `payments` ghi nhận giao dịch và liên kết với đơn.
-- `menu_item_ingredients` hỗ trợ định mức, nhưng chưa tự động trừ kho cho đến khi nhóm quyết định thời điểm tiêu hao.
+- Tồn kho chỉ thay đổi qua thao tác nhập/xuất/điều chỉnh thủ công của nhân viên Kho; không có recipe và không tự động trừ kho.
 - Không có bảng riêng cho báo cáo, AI, khách hàng có tài khoản, nhà cung cấp, chi nhánh hoặc ca làm việc trong MVP hiện tại.
 
-**Bước tiếp theo sau khi duyệt ERD:** chốt các quyết định DD/OQ ảnh hưởng trực tiếp đến schema, sau đó chuyển mô hình này thành PostgreSQL DDL/migration và kiểm tra schema bằng migration test. Chưa nên viết migration production trước khi các điểm về modifier, thanh toán, chia trạm bếp và tiêu hao kho được xác nhận.
+**Bước tiếp theo sau khi duyệt ERD:** chốt các quyết định DD/OQ ảnh hưởng trực tiếp đến schema, sau đó chuyển mô hình này thành PostgreSQL DDL/migration và kiểm tra schema bằng migration test. Các quyết định DD-01 đến DD-06 đã được xác nhận. Bước tiếp theo là rà soát OQ còn mở và state machine/điều kiện phiên bàn trước khi tạo migration.
 
 ---
 
