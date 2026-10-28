@@ -54,7 +54,7 @@ orders.status là trạng thái tổng hợp phục vụ danh sách đơn, khôn
 
 ### 3.3 Trạng thái khả dụng món
 
-menu_items.availability_status gồm AVAILABLE, MANUAL_UNAVAILABLE, AUTO_OUT_OF_STOCK, INACTIVE. Trạng thái tự động do backend tính lại khi số dư/ngưỡng/mapping nguyên liệu thay đổi. Trạng thái thủ công của Quản lý không được tự động ghi đè. Nếu có nhiều nguyên liệu thiếu, API trả danh sách nguyên liệu và lý do.
+menu_items.availability_status gồm AVAILABLE, MANUAL_UNAVAILABLE, AUTO_OUT_OF_STOCK. Cột is_active quản lý việc món còn được sử dụng trong hệ thống; không dùng thêm trạng thái INACTIVE để tránh lưu trùng ý nghĩa. Trạng thái tự động do backend tính lại khi số dư/ngưỡng/mapping nguyên liệu thay đổi. Trạng thái thủ công của Quản lý không được tự động ghi đè. Nếu có nhiều nguyên liệu thiếu, API trả danh sách nguyên liệu và lý do.
 
 Giới hạn quan trọng: mapping menu_item_ingredients chỉ xác định nguyên liệu bắt buộc, không có định mức. Hệ thống không thể tính đủ nguyên liệu cho số phần bất kỳ; không tự động trừ tồn.
 
