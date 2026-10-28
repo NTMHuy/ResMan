@@ -147,7 +147,7 @@ Các điểm sau đây chưa được quyết định và cần được làm r�
 - Những chỉ số báo cáo nào được xem là thiết yếu cho Quản lý trong phiên bản đầu tiên?
 - Tính năng đánh giá/phản hồi của khách hàng có được mong đợi trong phiên bản đầu tiên không, hay sẽ được hoãn lại cùng với tính năng gợi ý?
 
-- Các mục này được liệt kê như những câu hỏi còn bỏ ngỏ chứ không phải quyết định đã được xác nhận, và cần được làm rõ trước khi chuyển sang giai đoạn thiết kế use case và user flow chi tiết.
+Các nội dung trên đã được nhóm thảo luận, thống nhất và xác nhận là các quyết định nghiệp vụ chính thức của phiên bản MVP. Đây sẽ là cơ sở để triển khai các giai đoạn tiếp theo, bao gồm thiết kế use case, user flow, kiến trúc hệ thống và thiết kế cơ sở dữ liệu. Mọi thay đổi sau này cần được cập nhật và thống nhất lại trong tài liệu dự án.
 
 ---
 
