@@ -147,7 +147,7 @@ Các điểm sau đây chưa được quyết định và cần được làm r�
 - Những chỉ số báo cáo nào được xem là thiết yếu cho Quản lý trong phiên bản đầu tiên?
 - Tính năng đánh giá/phản hồi của khách hàng có được mong đợi trong phiên bản đầu tiên không, hay sẽ được hoãn lại cùng với tính năng gợi ý?
 
-Các mục này được liệt kê như những câu hỏi còn bỏ ngỏ chứ không phải quyết định đã được xác nhận, và cần được làm rõ trước khi chuyển sang giai đoạn thiết kế use case và user flow chi tiết.
+- Các mục này được liệt kê như những câu hỏi còn bỏ ngỏ chứ không phải quyết định đã được xác nhận, và cần được làm rõ trước khi chuyển sang giai đoạn thiết kế use case và user flow chi tiết.
 
 ---
 
