@@ -169,3 +169,38 @@ Index các truy vấn chính: menu theo category/status; orders theo status/crea
 - [ ] Không tự động trừ kho theo đơn.
 - [ ] Một payment tối đa cho một order.
 - [ ] Migration có thể chạy trên PostgreSQL sạch và rollback/khôi phục theo quy trình backup.
+
+
+---
+
+## 11. Cập nhật quyết định dữ liệu theo nghiệp vụ ngày 29/10/2026
+
+Nguồn nghiệp vụ ưu tiên: [11-confirmed-business-rules.md](11-confirmed-business-rules.md). Các quy tắc cũ mâu thuẫn tại tài liệu này không còn là yêu cầu nghiệp vụ hiện hành.
+
+### 11.1 Điều chỉnh trạng thái order item
+Tập trạng thái nghiệp vụ cần phản ánh:
+- `PENDING_ACCEPTANCE` (Chờ tiếp nhận)
+- `ACCEPTED` (Đã tiếp nhận)
+- `PREPARING` (Đang chế biến)
+- `COMPLETED` (Đã hoàn thành)
+- `CANCELLED` (Đã hủy)
+
+Tên mã enum/string cuối cùng phải được thống nhất trong schema và migration; không sử dụng `REJECTED`. Bếp có thể chuyển `PREPARING` về `ACCEPTED`. Nhân viên Order chỉ được sửa ghi chú/hủy món ở hai trạng thái trước khi chế biến; gọi thêm tạo order item mới.
+
+### 11.2 Inventory
+- Bỏ quy tắc tự động chuyển menu item sang AUTO_OUT_OF_STOCK do tồn nguyên liệu thấp/đạt ngưỡng.
+- Ngưỡng thấp chỉ phát cảnh báo đến Nhân viên Kho.
+- Không tự động trừ kho theo đơn hàng; không dùng recipe/định mức.
+- Stock movement cần cho phép lưu thông tin đủ để truy vết nhập kho/điều chỉnh: loại giao dịch, lượng thay đổi, lý do/ghi chú, người thực hiện và thời điểm.
+- Kiểm kê được thực hiện linh hoạt; chưa chốt có tiếp tục dùng bản ghi opening/closing theo ngày hay không.
+
+### 11.3 Phiên bàn, thanh toán và tính bất biến
+- Một phiên bàn có một đơn; gọi thêm tạo item mới trong cùng đơn.
+- Một bàn chỉ có một phiên đang hoạt động.
+- Payment duy nhất cho một order; không hỗ trợ split payment.
+- Payment chỉ hợp lệ sau khi mọi item đã hoàn thành hoặc đã được giải quyết bằng trạng thái kết thúc phù hợp; CANCELLED không được tính tiền.
+- Sau payment, order không được chỉnh sửa; xác nhận payment đóng phiên.
+- Bảng/field cho yêu cầu thanh toán riêng chỉ bổ sung nếu phân tích tiếp theo xác định cần lưu trạng thái “đã yêu cầu thanh toán” tách biệt với “đã thanh toán”.
+
+### 11.4 Cần đồng bộ trước khi migration
+Schema hiện tại vẫn chứa các khái niệm cũ như `REJECTED`, `PENDING_CONFIRMATION`, `QUEUED`, `READY`, `SERVED`, quan hệ mapping nguyên liệu-món và daily opening/closing. Không được coi schema hiện tại là đã khớp nghiệp vụ mới. Cần thực hiện một lượt thiết kế lại có kiểm tra quan hệ và migration sau khi rà soát toàn bộ schema; không tự ý chạy migration production trong bước cập nhật tài liệu này.

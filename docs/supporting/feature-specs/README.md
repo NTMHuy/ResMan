@@ -171,3 +171,10 @@ Artifact này đang ở trạng thái:
 `Draft - Awaiting Review`
 
 Chỉ chuyển sang `Approved` sau khi có xác nhận của người quyết định dự án.
+
+
+---
+
+## Cập nhật nghiệp vụ mới nhất
+
+Các Feature Specs phải tuân theo [confirmed-rules-alignment.md](confirmed-rules-alignment.md) và [docs/11-confirmed-business-rules.md](../../11-confirmed-business-rules.md). Đây là nguồn cập nhật cho trạng thái món, quyền hủy/sửa/gọi thêm, thanh toán, tồn kho và các câu hỏi còn mở. Những Open Questions đã được quyết định trong tài liệu nghiệp vụ mới không còn là câu hỏi mở; những điểm chưa được quyết định vẫn phải giữ trạng thái Open.

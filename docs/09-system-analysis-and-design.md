@@ -812,3 +812,51 @@ ResMan sử dụng một backend API trung tâm để phục vụ các giao di�
 ### 16.6 Những nội dung ngoài MVP
 
 Không đưa recipe/consumption, supplier/purchase order, split payment, loyalty, multi-branch hoặc AI recommendation vào migration MVP. Các nội dung Future/Post-MVP vẫn cần được duyệt riêng trước khi mở rộng schema.
+
+
+---
+
+## 17. Cập nhật mô hình nghiệp vụ theo quyết định ngày 29/10/2026
+
+Nguồn nghiệp vụ ưu tiên: [docs/11-confirmed-business-rules.md](11-confirmed-business-rules.md). Phần này thay thế các mô tả cũ mâu thuẫn trong tài liệu.
+
+### 17.1 Phiên bàn và thiết bị
+- Quản lý hoặc Nhân viên Order mở phiên bàn.
+- Tablet gắn cố định với bàn; không có thao tác chuyển bàn trên phần mềm. Nếu cần đổi vị trí, nhân viên di chuyển tablet vật lý.
+- Server lưu phiên và đơn; tablet tải lại phiên đang hoạt động khi kết nối lại/khởi động lại.
+- Mỗi bàn tối đa một phiên hoạt động; một phiên có một đơn. Gọi thêm tạo order item mới trong cùng đơn.
+
+### 17.2 Đặt món và quyền order
+- Khách có thể gửi món từ tablet; xác nhận của Nhân viên Order là tùy chọn, không phải bước bắt buộc cho mọi lần gửi món.
+- Mỗi item hiển thị số thứ tự, tên món, trạng thái, giá, Tùy chọn và ghi chú.
+- Tùy chọn của khách: Hủy món (chỉ trước khi bếp tiếp nhận) và Gọi thêm (tạo item mới).
+- Tùy chọn của Nhân viên Order: Hủy món, Gọi thêm và Sửa. Sửa chỉ thay đổi ghi chú; không thay đổi tên món hoặc số lượng.
+- Nhân viên Order được hủy/sửa ghi chú ở Chờ tiếp nhận và Đã tiếp nhận. Từ Đang chế biến trở đi không được hủy/sửa; vẫn được Gọi thêm. Món đã hoàn thành/hủy không thể sửa hoặc hủy.
+
+### 17.3 State flow bếp
+- Trạng thái nghiệp vụ: Chờ tiếp nhận → Đã tiếp nhận → Đang chế biến → Đã hoàn thành; nhánh kết thúc Đã hủy.
+- Bếp xác nhận tiếp nhận, chuyển sang chế biến và xác nhận hoàn thành.
+- Bếp có thể chuyển Đang chế biến về Đã tiếp nhận.
+- Không có trạng thái Bị từ chối; bếp hủy món không cần nhập lý do.
+- Điều kiện trạng thái cụ thể để bếp hủy món và khả năng sửa trạng thái sau khi hoàn thành chưa được quyết định.
+- Tablet chỉ hiển thị trạng thái cập nhật; không yêu cầu push notification riêng.
+
+### 17.4 Thanh toán và kết thúc phiên
+- Khách yêu cầu thanh toán; nhân viên nhận đủ tiền và xác nhận.
+- Một đơn chỉ có một payment; không chia thanh toán.
+- Chỉ thanh toán khi mọi món đã hoàn thành hoặc đã được giải quyết bằng trạng thái kết thúc phù hợp; món Đã hủy bị loại khỏi tổng tiền.
+- Khi xác nhận payment, lưu người xác nhận/thời điểm, khóa chỉnh sửa đơn đã thanh toán và đóng phiên bàn.
+- Phương thức thanh toán và hình thức hóa đơn/output vẫn là nội dung chưa chốt.
+
+### 17.5 Inventory
+- Ngưỡng tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động chuyển món sang không khả dụng.
+- Không tự động trừ tồn theo đơn; không có recipe/định mức nguyên liệu.
+- Nhập kho lưu nguyên liệu, số lượng, đơn vị, ghi chú tùy chọn, người thực hiện và thời điểm.
+- Điều chỉnh tồn phải lưu lịch sử, không ghi đè lịch sử cũ.
+- Kiểm kê linh hoạt theo nhu cầu; mô hình đầu ngày/cuối ngày cần được xác nhận thêm.
+- Quản lý và Nhân viên Kho đều được cấu hình ngưỡng cảnh báo; chỉ Nhân viên Kho nhận cảnh báo theo quyết định hiện tại.
+
+### 17.6 Phân quyền và báo cáo
+- Nhân viên Order xem các bàn đang hoạt động, gọi món thay khách và xem lịch sử đơn đã thanh toán.
+- Chỉ Quản lý xem báo cáo: doanh thu ngày/tháng, số lượng món bán, món bán chạy, lịch sử đơn và tình trạng tồn kho.
+- Quản lý có toàn bộ quyền thao tác của Nhân viên Order, Bếp và Kho.
