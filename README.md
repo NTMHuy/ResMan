@@ -173,3 +173,16 @@ Những nội dung này được quản lý tập trung trong PRD và không đ�
 ResMan là dự án học tập / capstone được xây dựng theo hướng **AI-assisted software development**.
 
 **Tài liệu trung tâm của yêu cầu sản phẩm:** [`docs/08-prd.md`](docs/08-prd.md)
+
+## Quy tắc nghiệp vụ đã xác nhận
+
+Các quyết định nghiệp vụ mới nhất được tổng hợp tại [docs/11-confirmed-business-rules.md](docs/11-confirmed-business-rules.md). Tài liệu này là nguồn đối chiếu khi README hoặc tài liệu cũ còn mô tả khác.
+
+Tóm tắt:
+- Phiên bàn do Quản lý/Nhân viên Order mở; tablet gắn cố định với bàn.
+- Gọi thêm tạo món mới trong cùng đơn; không chỉnh số lượng item cũ.
+- Nhân viên Order sửa ghi chú và hủy món đến trước trạng thái Đang chế biến; sau đó chỉ được gọi thêm.
+- Bếp dùng trạng thái Chờ tiếp nhận, Đã tiếp nhận, Đang chế biến, Đã hoàn thành và Đã hủy; không có Bị từ chối.
+- Thanh toán một lần cho một đơn; món đã hủy không tính tiền; đơn đã thanh toán không chỉnh sửa.
+- Tồn thấp chỉ cảnh báo Nhân viên Kho; không tự động khóa món hoặc trừ kho.
+- Kiểm kê linh hoạt; chi tiết nhãn đầu/cuối ngày còn chờ xác nhận.
