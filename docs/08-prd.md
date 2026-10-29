@@ -549,19 +549,23 @@ AI được sử dụng xuyên suốt vòng đời phát triển dự án — ph
 | RC-004 | MVP không hoàn chỉnh nếu một Phase bị bỏ dở | High | M5 là mốc bắt buộc để coi MVP hoàn chỉnh; không công bố sản phẩm hoàn chỉnh trước M5 |
 | RC-005 | Sự không nhất quán do nhiều tài liệu được tạo qua AI ở nhiều giai đoạn | Medium | Đối chiếu chéo tại các Review Checkpoint; PRD này là điểm hợp nhất cuối cùng |
 
-## 20. Câu Hỏi Còn Bỏ Ngỏ
+## 20. Các Quyết Định Đã Xác Nhận và Chi Tiết Triển Khai
 
-| ID | Question | Related Area | Why It Matters | Status |
-|---|---|---|---|---|
-| OQ-01 | Có chỉ số đo lường thành công cụ thể nào (thời gian xử lý đơn, tỷ lệ lỗi...) không? | Product Goals | Ảnh hưởng đến việc đánh giá thành công định lượng của dự án | Open |
-| OQ-02 | Phương thức thanh toán cụ thể là gì (tiền mặt/thẻ/ví điện tử)? | F-012, Phase 4 | Ảnh hưởng đến phạm vi chi tiết của tính năng thanh toán | Needs Decision |
-| OQ-03 | Ngưỡng "tồn kho thấp" do ai/thế nào thiết lập? | F-010, Phase 4 | Ảnh hưởng đến cơ chế cảnh báo tồn kho | Needs Decision |
-| OQ-04 | Điều kiện chính xác để huỷ đơn hàng là gì? | F-007, Phase 2/3 | Ảnh hưởng đến business rule BR-003 | Needs Decision |
-| OQ-05 | Việc chuyển đơn từ "đã xác nhận" sang hàng đợi bếp là tự động hay thủ công? | F-006, Phase 3 | Ảnh hưởng đến thiết kế thao tác của Nhân viên Order | Needs Decision |
-| OQ-06 | Khách hàng có cần tài khoản để hỗ trợ theo dõi đơn và gợi ý AI hoạt động đầy đủ? | F-007, F-016 | F-016 phụ thuộc vào việc nhận diện khách hàng qua nhiều lần đặt món | Open |
-| OQ-07 | Khi Quản lý xoá món đang có trong đơn hàng chưa hoàn tất, hệ thống xử lý ra sao? | F-001, F-003 | Ảnh hưởng đến tính toàn vẹn dữ liệu đơn hàng đang xử lý | Open |
-| OQ-08 | Dự án có đủ nguồn lực để thực hiện Phase 6 và Phase 7, hay dừng lại ở MVP? | Phase 6, Phase 7 | Ảnh hưởng đến kế hoạch thời gian thực tế | Needs Decision |
-| OQ-09 | Có cần dịch vụ thông báo bên ngoài (SMS/Email) hay chỉ thông báo trong ứng dụng là đủ? | Toàn hệ thống | Ảnh hưởng đến việc có cần bổ sung actor/hệ thống bên ngoài | Open |
+Các câu hỏi OQ-01 đến OQ-09 trong bản PRD trước được rà soát lại theo các quyết định nghiệp vụ đã thống nhất. Không tiếp tục xem chúng là các quyết định MVP còn bỏ ngỏ.
+
+| ID | Nội dung đã được làm rõ | Quyết định/phạm vi hiện hành | Ghi chú triển khai |
+|---|---|---|---|
+| OQ-01 | Chỉ số đo lường thành công | MVP đánh giá theo mức độ hoàn thành các luồng nghiệp vụ cốt lõi và tiêu chí nghiệm thu của từng Feature | KPI định lượng chi tiết có thể bổ sung khi xây dựng kế hoạch kiểm thử/đánh giá |
+| OQ-02 | Phương thức thanh toán | Một đơn có tối đa một lần ghi nhận thanh toán; không hỗ trợ split payment hoặc tích hợp nhiều nhà cung cấp trong MVP | Loại phương thức thanh toán cụ thể cần được thể hiện trong thiết kế chi tiết, không mở rộng phạm vi thanh toán |
+| OQ-03 | Ngưỡng tồn kho thấp | Hệ thống hỗ trợ ngưỡng tồn kho tối thiểu để cảnh báo và làm căn cứ tự động khóa món theo mapping nguyên liệu-món đã cấu hình | Giá trị ngưỡng là dữ liệu cấu hình, không cố định trong PRD |
+| OQ-04 | Điều kiện hủy món/đơn | Khách và Nhân viên Order chỉ được hủy món khi món còn QUEUED và bếp chưa tiếp nhận; khi PREPARING thì không được tự hủy. Bếp có thể từ chối món kèm lý do | Trạng thái từng món là nguồn dữ liệu chuẩn; việc hủy/từ chối một món không tự động hủy các món còn lại |
+| OQ-05 | Điều phối món vào bếp | Nhân viên Order xác nhận và điều phối món vào hàng đợi của một trạm bếp duy nhất | Không tự động tách một đơn thành nhiều ticket; một đơn chỉ chứa món thuộc cùng trạm |
+| OQ-06 | Tài khoản khách hàng | Đăng nhập là tùy chọn; hỗ trợ đặt món guest. Khi đăng nhập, đơn được liên kết với tài khoản khách | Tablet dùng chung phải kết thúc/xóa phiên khách trước lượt sử dụng tiếp theo |
+| OQ-07 | Xóa món đã phát sinh trong đơn | Không xóa vật lý dữ liệu món/đơn đã được tham chiếu trong giao dịch; cần bảo toàn lịch sử đơn hàng | Khi thiết kế CRUD, ưu tiên ngừng kinh doanh/ẩn món thay vì xóa làm mất lịch sử |
+| OQ-08 | Phạm vi các phase sau MVP | Ưu tiên hoàn thành MVP trước; dashboard realtime thuộc Post-MVP và gợi ý món AI thuộc Future | Phase 6/7 chỉ triển khai khi được nhóm quyết định tiếp tục và có đủ nguồn lực |
+| OQ-09 | Kênh thông báo | MVP tập trung thông báo trong ứng dụng giữa các vai trò; không yêu cầu tích hợp SMS/Email bên ngoài | Tích hợp dịch vụ ngoài là khả năng mở rộng, không phải điều kiện hoàn thành MVP |
+
+Các chi tiết cấu hình và tiêu chí nghiệm thu có thể được cụ thể hóa trong thiết kế use case, user flow và kế hoạch kiểm thử mà không làm thay đổi các quyết định phạm vi MVP đã xác nhận.
 
 ## 21. Ma Trận Truy Vết
 
@@ -582,11 +586,11 @@ AI được sử dụng xuyên suốt vòng đời phát triển dự án — ph
 ## 22. Tóm Tắt Tính Nhất Quán Cuối Cùng
 
 - **Yêu cầu đã xác nhận (Confirmed):** 5 actor, 8 khu vực hệ thống, 24 Use Case, 16 Feature, 16 Functional Requirement — toàn bộ đều bắt nguồn trực tiếp và nhất quán từ `01-project-vision.md` qua các tài liệu trung gian đến tài liệu này.
-- **Yêu cầu suy luận (Derived):** 8/10 Business Rules (BR-001 đến BR-004, BR-006 đến BR-010), cùng một số điều kiện chi tiết (ví dụ điều kiện huỷ đơn, ngưỡng tồn kho) — được suy luận hợp lý nhưng chưa có xác nhận chi tiết từ dự án, đã được ghi nhận là Câu hỏi Mở.
+- **Yêu cầu suy luận (Derived):** Các business rule có nguồn gốc suy luận vẫn cần được đối chiếu với các quyết định nghiệp vụ đã xác nhận và không được xem là quyết định độc lập nếu mâu thuẫn với phụ lục xác nhận.
 - **Yêu cầu đề xuất (Suggested):** BR-005, F-015/FR-015 — không bị coi là bắt buộc.
 - **Yêu cầu tương lai (Future):** F-016/FR-016 (Gợi ý món ăn AI) — nhất quán được giữ nguyên trạng thái "sau khi hệ thống cốt lõi hoàn thiện" xuyên suốt cả 8 tài liệu, không có tài liệu nào âm thầm nâng cấp tính năng này lên phạm vi MVP.
 - **Tính đầy đủ của MVP:** 14/16 Feature (F-001 đến F-014) tạo thành một hành trình sản phẩm end-to-end đầy đủ, bao phủ toàn bộ 5 actor và 22/24 Use Case ở mức Complete; 2 Use Case còn lại (UC-022, UC-024) có độ bao phủ Partial do phụ thuộc Feature Post-MVP/Future — đây là kết quả có chủ đích, không phải thiếu sót.
-- **Câu hỏi chưa giải quyết:** 9 câu hỏi (OQ-01 đến OQ-09) được tổng hợp từ tất cả tài liệu trước, chưa có câu nào bị tự ý quyết định thay cho dự án.
+- **Quyết định nghiệp vụ:** Các nội dung OQ-01 đến OQ-09 đã được phân loại lại theo quyết định/phạm vi hiện hành tại Mục 20; các giá trị cấu hình và tiêu chí nghiệm thu chi tiết sẽ được cụ thể hóa trong thiết kế và kiểm thử.
 
 Tài liệu này là **tài liệu yêu cầu sản phẩm trung tâm** của Hệ thống Quản lý Nhà hàng, sẵn sàng làm nền tảng cho các hoạt động phát triển có hỗ trợ AI tiếp theo.
 
@@ -636,42 +640,3 @@ Phụ lục này cập nhật và thay thế mọi mô tả trước đây có n
 | DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
 | DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
 
----
-
-## 21. Quyết định nghiệp vụ bổ sung đã được xác nhận (28/10/2026)
-
-Phần này làm rõ các yêu cầu đã được chủ dự án xác nhận và được ưu tiên khi nội dung cũ ở các mục trước chưa mô tả đủ chi tiết.
-
-### 21.1 Thiết bị và tài khoản khách hàng
-
-- Mỗi tablet đặt món tại nhà hàng được gán cố định với một bàn.
-- Khách có thể đặt món không cần đăng nhập (guest checkout).
-- Khách có thể đăng ký/đăng nhập tùy chọn để lưu lịch sử đặt món và hỗ trợ cá nhân hóa trong tương lai.
-- Đơn hàng lưu customer_id khi khách đã đăng nhập; đơn guest không có customer_id.
-- Khi khách kết thúc lượt sử dụng hoặc đăng xuất, thiết bị phải xóa liên kết khách hiện tại trước khi phục vụ lượt khách tiếp theo. Không được mặc định khách đăng nhập trước vẫn là người đặt đơn sau.
-- Chương trình thành viên/khuyến mãi và AI recommendation vẫn ngoài MVP trừ khi được duyệt riêng.
-
-### 21.2 Quy tắc đơn hàng và bếp
-
-- Một đơn chỉ chứa các món thuộc cùng một trạm bếp. Nếu giỏ hàng có món thuộc nhiều trạm, hệ thống yêu cầu tách thành các đơn riêng; không tự động chia một đơn thành nhiều vé bếp.
-- Khách có thể ghi yêu cầu riêng bằng văn bản trong ghi chú của từng món; MVP không có modifier/options cấu hình sẵn.
-- Sau khi Order Staff xác nhận và điều phối, món vào hàng đợi bếp (QUEUED). Bếp nhận món và bắt đầu chế biến; sau khi hoàn tất, bếp chuyển món sang READY để Order Staff giao đúng bàn.
-- Khách và Order Staff chỉ được hủy món khi món còn QUEUED và bếp chưa nhận/bắt đầu chế biến.
-- Bếp có thể từ chối món không thể chế biến và phải cung cấp lý do. Việc từ chối một món không tự động hủy các món còn lại trong cùng đơn.
-- Trạng thái từng món là nguồn chuẩn cho tiến độ bếp; mọi thay đổi phải có lịch sử trạng thái, tác nhân, thời gian và lý do nếu có.
-- Món có thể bị khóa bán tự động nếu nguyên liệu bắt buộc được cấu hình cho món có tồn bằng 0 hoặc dưới ngưỡng tồn đã thiết lập. Hệ thống phải hiển thị nguyên liệu/lý do và chặn tạo đơn mới cho món đó.
-- Vì MVP không có định mức nguyên liệu theo khẩu phần, hệ thống không thể tính chính xác lượng nguyên liệu đủ cho một số phần món bất kỳ và không tự động trừ kho theo đơn.
-
-### 21.3 Quy trình kiểm kê kho
-
-- Nhân viên Kho ghi nhận số lượng thực tế đầu ngày và cuối ngày.
-- Mọi lần nhập thêm trong ngày được ghi riêng trong sổ biến động kho.
-- Tổng nhập trong ngày được tổng hợp từ các bản ghi nhập kho, không lưu lặp thành một trường tổng nhập trong bản ghi kiểm kê.
-- Khi chốt số lượng cuối ngày, hệ thống đối chiếu số đếm thực tế với số dư hiện tại; chênh lệch được ghi thành biến động điều chỉnh để số dư và sổ lịch sử nhất quán.
-- Nếu số lượng kiểm kê cuối ngày thấp hơn ngưỡng, hệ thống tạo cảnh báo để nhân viên Kho chuẩn bị bổ sung cho ngày tiếp theo.
-- Không suy diễn lượng tiêu thụ chính xác từ chênh lệch đầu ngày + nhập - cuối ngày vì chênh lệch có thể gồm tiêu thụ, hao hụt và sai số kiểm đếm.
-
-### 21.4 Thanh toán và phạm vi dữ liệu
-
-- MVP hỗ trợ tối đa một lần ghi nhận thanh toán cho mỗi đơn; không chia hóa đơn hoặc split payment.
-- Không đưa bảng công thức/định mức nguyên liệu, nhà cung cấp, đơn mua hàng, loyalty hoặc AI recommendation vào schema MVP.
