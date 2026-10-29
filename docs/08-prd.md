@@ -640,3 +640,24 @@ Phụ lục này cập nhật và thay thế mọi mô tả trước đây có n
 | DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
 | DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
 
+
+
+---
+
+## 22. Bổ sung nghiệp vụ đã xác nhận ngày 29/10/2026
+
+Các quy tắc tại [11-confirmed-business-rules.md](11-confirmed-business-rules.md) là phần bổ sung có hiệu lực cho PRD này. Khi nội dung cũ trong PRD mâu thuẫn với quyết định mới, áp dụng quy tắc mới tại tài liệu bổ sung.
+
+Các điểm thay đổi quan trọng:
+- Phiên bàn do Quản lý hoặc Nhân viên Order mở; tablet gắn cố định với bàn; mỗi phiên có một đơn, gọi thêm tạo order item mới.
+- Nhân viên Order xác nhận đơn là tùy chọn, không bắt buộc cho mọi lần khách gửi món.
+- Không có chức năng chuyển bàn trên phần mềm; tablet được di chuyển vật lý nếu cần.
+- Trạng thái món dùng Chờ tiếp nhận → Đã tiếp nhận → Đang chế biến → Đã hoàn thành; có thể Đã hủy. Không dùng trạng thái Bị từ chối.
+- Khách chỉ hủy món trước khi bếp tiếp nhận. Nhân viên Order có thể hủy và sửa ghi chú khi món ở Chờ tiếp nhận hoặc Đã tiếp nhận; từ Đang chế biến trở đi không thể sửa/hủy. Gọi thêm luôn tạo món mới.
+- Bếp có thể chuyển Đang chế biến về Đã tiếp nhận; thao tác hủy của bếp không yêu cầu lý do. Điều kiện trạng thái cụ thể cho thao tác hủy của bếp vẫn cần làm rõ.
+- Thanh toán được xác nhận bởi nhân viên sau khi nhận đủ tiền; một đơn chỉ có một payment; món đã hủy không tính tiền; đơn đã thanh toán không chỉnh sửa; thanh toán xong đóng phiên.
+- Tồn kho thấp chỉ cảnh báo Nhân viên Kho, không tự động khóa món; không tự động trừ kho theo doanh số.
+- Kiểm kê được thực hiện linh hoạt khi cần; việc giữ hay bỏ nhãn kiểm kê đầu ngày/cuối ngày còn cần xác nhận.
+- Nhân viên Order được xem lịch sử đơn đã thanh toán; chỉ Quản lý được xem báo cáo.
+
+Xem tài liệu bổ sung để biết đầy đủ các luồng, quyền thao tác và điểm còn mở.
