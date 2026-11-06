@@ -1,6 +1,6 @@
 # Thiết kế cơ sở dữ liệu ResMan
 
-> **Phiên bản:** 3.0  
+> **Phiên bản:** 3.1  
 > **Ngày cập nhật:** 06/11/2026  
 > **Nhánh:** `member/minhhuy`  
 > **Nguồn chuẩn nghiệp vụ:** `backend/README.md`, `docs/11-confirmed-business-rules.md`, PRD và các quyết định đã xác nhận.
@@ -61,6 +61,7 @@ Thiết kế PostgreSQL cho MVP một nhà hàng, backend NestJS và Prisma. Cli
 | | `stock_movements` | Sổ giao dịch kho |
 | | `inventory_count_records` | Các lần kiểm kê độc lập |
 | Payment | `payments` | Một payment cho một order |
+| Audit | `audit_logs` | Nhật ký thao tác quan trọng, actor, đối tượng và thời điểm |
 
 Không tạo các bảng `customers`, `kitchen_stations`, `kitchen_tickets`, `shortage_reports`, `menu_item_ingredients` hoặc `daily_inventory_records` trong MVP hiện tại.
 
@@ -118,8 +119,8 @@ Không cần `orders.status` hoặc `order_status_history` trong MVP; trạng th
 - `payment_method` nullable để không khóa cứng phương thức khi nhóm chưa quyết định; chỉ ghi khi phương thức đã được thống nhất.
 - Không lưu payment request như payment đã hoàn tất.
 - Amount do backend tính từ order item snapshot. Tính tiền theo trạng thái: ACCEPTED, IN_PREPARATION, COMPLETED được tính; AWAITING_ACCEPTANCE, CANCELLED không tính.
-- Điều kiện cho phép xác nhận payment/đóng session khi còn món chưa hoàn thành là điểm nghiệp vụ chưa chốt riêng; không thêm cột trạng thái để tự giải quyết.
-- Xác nhận payment, đóng session và cập nhật bàn phải nằm trong cùng transaction.
+- **Payment gate đã chốt (phương án B):** chỉ cho phép xác nhận payment/đóng session khi không còn order item ở `AWAITING_ACCEPTANCE`. Các item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED` đều không chặn đóng phiên. Amount vẫn chỉ cộng `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED`.
+- Xác nhận payment, đóng session và cập nhật bàn phải nằm trong cùng transaction. Trong transaction phải khóa/kiểm tra order items và từ chối nếu còn item `AWAITING_ACCEPTANCE`; item `IN_PREPARATION` không chặn đóng phiên.
 
 ### 4.6 Inventory và kiểm kê
 
@@ -174,7 +175,7 @@ Các request có thể gửi lặp (đặc biệt payment confirmation) cần id
 
 1. Cơ chế xác thực tablet và credential lifecycle; do đó schema thiết bị hiện không chứa token.
 2. Trạng thái cụ thể mà Bếp được phép hủy và có bắt buộc lý do hay không.
-3. Payment gate/điều kiện đóng phiên khi còn món đang chế biến hoặc chờ tiếp nhận.
+3. Quy tắc hủy món của Bếp: các trạng thái được phép hủy và việc có bắt buộc lý do hay không.
 4. Phương thức thanh toán và định dạng hóa đơn.
 5. Đơn vị kho có cần quy đổi hay không.
 6. Quy tắc lưu trữ/xóa mềm menu và dữ liệu nhân viên.
@@ -183,7 +184,13 @@ Các request có thể gửi lặp (đặc biệt payment confirmation) cần id
 
 Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc quan hệ nghiệp vụ.
 
-## 9. Prisma và migration
+## 9. Audit log và migration
+
+### 9.1 Audit log
+
+`audit_logs` là nhật ký kỹ thuật/nghiệp vụ dùng để truy vết các thao tác nhạy cảm, độc lập với lịch sử trạng thái món (`order_item_status_history`) và sổ giao dịch kho (`stock_movements`). Tối thiểu lưu actor (có thể null với thao tác hệ thống), action, entity type, entity ID, metadata JSON tùy chọn và timestamp. Không dùng audit log thay thế các bảng lịch sử chuyên biệt.
+
+### 9.2 Prisma và migration
 
 - Prisma schema: `prisma/schema.prisma`.
 - Migration: `prisma/migrations/<timestamp>_<name>/migration.sql`.
@@ -191,7 +198,7 @@ Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc 
 - Không dùng `prisma db push` cho database dùng chung/production.
 - Mọi thay đổi schema phải có migration được review.
 - Seed role/permission tách riêng; không seed mật khẩu production mặc định.
-- Bản schema đồng bộ này là thiết kế đích, chưa tạo migration và chưa được áp dụng lên database.
+- Schema Prisma phải được validate trước khi tạo migration. Migration khởi tạo cần được sinh từ chính schema bằng Prisma CLI, sau đó bổ sung SQL cho partial unique index và CHECK constraints mà Prisma schema không biểu diễn. Chưa chạy migration và chưa áp dụng lên database.
 
 ## 10. Checklist
 
@@ -205,6 +212,7 @@ Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc 
 - [ ] Giá món được snapshot ở thời điểm gọi.
 - [ ] Một order tối đa một payment.
 - [ ] Payment amount tính theo trạng thái item đã xác nhận.
+- [ ] Payment gate: chỉ chặn xác nhận/đóng phiên nếu còn item AWAITING_ACCEPTANCE; cho phép IN_PREPARATION.
 - [ ] Không có recipe/menu_item_ingredients/shortage report tự động.
 - [ ] Không có daily opening/closing inventory record.
 - [ ] Mỗi lần kiểm kê có actual quantity, timestamp và actor.
