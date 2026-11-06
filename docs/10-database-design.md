@@ -43,7 +43,7 @@ Thiết kế PostgreSQL cho MVP một nhà hàng, backend NestJS và Prisma. Cli
 
 | Nhóm | Bảng | Mục đích |
 |---|---|---|
-| Identity/Staff | `roles` | Năm vai trò nghiệp vụ |
+| Identity/Staff | `roles` | Bốn vai trò tài khoản nhân viên: Order Staff, Kitchen Staff, Inventory Staff, Manager |
 | | `permissions` | Danh mục quyền |
 | | `role_permissions` | Gán quyền cho vai trò |
 | | `users` | Tài khoản nhân viên |
