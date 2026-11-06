@@ -472,4 +472,4 @@ Không được tự giải quyết các mục trên bằng cách thêm trạng 
 
 ---
 
-**Lưu ý đồng bộ:** `docs/10-database-design.md` và `prisma/schema.prisma` từng chứa mô hình cũ về kitchen station, customer ownership, daily opening/closing inventory và các trạng thái legacy. Chúng cần được rà soát/thiết kế lại riêng để khớp đặc tả này trước khi tạo migration triển khai. Tài liệu này không tuyên bố schema hoặc migration đã được cập nhật.
+**Lưu ý đồng bộ:** `docs/10-database-design.md` v3.1 và `prisma/schema.prisma` đã được đồng bộ theo các quyết định MVP hiện tại, bao gồm payment gate phương án B và `AuditLog`. Migration runbook nằm tại `prisma/migrations/README.md`. Schema và migration vẫn cần được validate/sinh bằng Prisma CLI trong workspace backend trước khi áp dụng; không có migration nào đã chạy lên database.
