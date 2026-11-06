@@ -182,7 +182,7 @@ Món phải được tính vào tổng tiền khi Bếp đã tiếp nhận món 
 
 Backend tự tính tổng từ snapshot giá và quantity lưu trên server. Không tin tổng tiền do client gửi lên. Món `CANCELLED` luôn bị loại khỏi tổng tiền.
 
-**Phân biệt quan trọng:** quy tắc trên xác định món nào được đưa vào số tiền phải trả. Nó không tự động xác nhận rằng phiên được phép đóng trong khi còn món đang chế biến hoặc còn món chờ tiếp nhận. Điều kiện cuối cùng để nhân viên được xác nhận payment/đóng phiên phải tiếp tục tuân theo cổng hoàn tất order đã chốt; nếu muốn cho phép đóng phiên khi món còn đang chế biến, cần có quyết định nghiệp vụ riêng.
+**Điều kiện xác nhận payment và đóng phiên (đã xác nhận — phương án B):** nhân viên được xác nhận thanh toán và đóng phiên khi tất cả order item đều ở một trong các trạng thái `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` hoặc `CANCELLED`. Không được xác nhận/đóng phiên nếu còn bất kỳ item nào ở `AWAITING_ACCEPTANCE`. Item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` được tính tiền; item `CANCELLED` và `AWAITING_ACCEPTANCE` không được tính. Vì vậy phiên có thể đóng khi món còn đang chế biến; hệ thống không bắt buộc chờ tất cả món `COMPLETED`.
 
 ### 6.3 Dữ liệu payment
 
@@ -438,7 +438,7 @@ Ràng buộc quan trọng:
 Các nội dung sau chưa được coi là quyết định đã chốt:
 1. Cơ chế xác thực, cấp phát, thu hồi và xoay vòng credential cho tablet.
 2. Điều kiện trạng thái chính xác để Kitchen Staff được hủy món và việc có bắt buộc lý do hủy hay không.
-3. Cổng cuối cùng cho phép xác nhận payment/đóng phiên khi order còn món chưa hoàn thành; quy tắc tính tiền theo trạng thái ở §6.2 đã được xác định, nhưng không đồng nghĩa tự động cho phép đóng phiên.
+3. Quy tắc hủy món của Bếp: các trạng thái được phép hủy và việc có bắt buộc lý do hủy hay không.
 4. Danh sách phương thức thanh toán.
 5. Hình thức hóa đơn: hiển thị, in, tải hoặc xuất.
 6. Đơn vị kho và quy tắc chuyển đổi nếu có nhiều đơn vị.
@@ -463,7 +463,7 @@ Không được tự giải quyết các mục trên bằng cách thêm trạng 
 - [ ] Tính tiền: ACCEPTED, IN_PREPARATION, COMPLETED được tính; AWAITING_ACCEPTANCE và CANCELLED không tính.
 - [ ] Một order tối đa một payment; nhân viên nhận tiền rồi mới xác nhận.
 - [ ] Bàn chỉ có AVAILABLE/OCCUPIED; “đang thanh toán” không phải trạng thái bàn.
-- [ ] Xác nhận payment đóng phiên và đưa bàn về AVAILABLE.
+- [ ] Xác nhận payment chỉ được thực hiện khi không còn item `AWAITING_ACCEPTANCE`; cho phép item `ACCEPTED`/`IN_PREPARATION`/`COMPLETED`/`CANCELLED`; sau xác nhận đóng phiên và đưa bàn về AVAILABLE.
 - [ ] Kiểm kê lưu thời điểm và số lượng thực tế; không bắt buộc đầu ngày/cuối ngày.
 - [ ] Không tự động trừ kho; không recipe/định mức.
 - [ ] Cảnh báo tồn thấp chỉ hiển thị cho Inventory Staff.
