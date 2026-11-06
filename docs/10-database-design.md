@@ -1,171 +1,214 @@
 # Thiết kế cơ sở dữ liệu ResMan
 
-> Phiên bản: 2.0  
-> Ngày cập nhật: 28/10/2026  
-> Nhánh: `member/minhhuy`  
-> Nguồn yêu cầu: [PRD](08-prd.md), [System Analysis & Design](09-system-analysis-and-design.md)
+> **Phiên bản:** 3.0  
+> **Ngày cập nhật:** 06/11/2026  
+> **Nhánh:** `member/minhhuy`  
+> **Nguồn chuẩn nghiệp vụ:** `backend/README.md`, `docs/11-confirmed-business-rules.md`, PRD và các quyết định đã xác nhận.
 
 ## 1. Phạm vi và nguyên tắc
 
-Thiết kế PostgreSQL cho MVP của một nhà hàng, phục vụ nhiều giao diện (web quản lý, tablet tại bàn, giao diện nhân viên/KDS và ứng dụng mobile trong tương lai) qua một backend NestJS. Các client chỉ gọi API; không kết nối trực tiếp PostgreSQL.
+Thiết kế PostgreSQL cho MVP một nhà hàng, backend NestJS và Prisma. Client (tablet, màn hình bếp, giao diện nhân viên/quản lý) chỉ gọi API, không kết nối trực tiếp database.
 
-- Prisma ORM quản lý schema và versioned migrations.
-- PK dùng BIGINT identity; thời gian dùng TIMESTAMPTZ; tiền dùng NUMERIC(14,2); số lượng kho dùng NUMERIC(14,3).
-- Tên bảng/cột snake_case. Trạng thái dùng VARCHAR + CHECK để dễ mở rộng.
+- Prisma quản lý schema và migration có version.
+- Primary key dùng BIGINT identity; timestamp dùng TIMESTAMPTZ; tiền dùng NUMERIC(14,2); số lượng kho dùng NUMERIC(14,3).
+- Tên bảng/cột snake_case; Prisma model/field dùng PascalCase/camelCase và `@map`.
 - Không cascade-delete dữ liệu giao dịch/lịch sử.
-- Không lưu mật khẩu dạng rõ.
-- Một nhà hàng trong MVP; chưa có chi nhánh, nhà cung cấp, đơn mua hàng hoặc ca làm việc.
-- AI Recommendation là tương lai, không thuộc migration MVP.
+- Không lưu mật khẩu dạng rõ hoặc secrets trong repository.
+- Một nhà hàng; chưa có chi nhánh, nhà cung cấp, đơn mua hàng, ca làm.
+- AI Recommendation là phạm vi tương lai.
+- Không tạo migration triển khai trong bước đồng bộ thiết kế này.
 
-## 2. Quyết định nghiệp vụ đã chốt
+## 2. Quyết định nghiệp vụ chi phối dữ liệu
 
-| ID | Quyết định |
+| Chủ đề | Quyết định |
 |---|---|
-| DD-01 / DD-07 | Một đơn chỉ chứa món thuộc một kitchen station; một đơn có tối đa một kitchen ticket. |
-| DD-02 | Không có modifier; yêu cầu riêng của khách lưu ở order_items.note. |
-| DD-03 | Một đơn có tối đa một payment; không chia hóa đơn/thanh toán nhiều lần. |
-| DD-04 | Không quản lý công thức/định mức số lượng nguyên liệu cho món. |
-| DD-05 | Không tự động trừ kho theo đơn; nhân viên Kho ghi nhận nhập/xuất/điều chỉnh/hao hụt. |
-| DD-06 / DD-10 | Khách có thể đặt với tư cách guest; đăng ký/đăng nhập là tùy chọn. |
-| DD-08 | Khi nguyên liệu bắt buộc được ánh xạ cho món có tồn bằng 0 hoặc dưới ngưỡng, backend tự chuyển món sang trạng thái hết hàng do thiếu nguyên liệu và chặn đơn mới; phải hiển thị nguyên liệu/lý do. |
-| DD-09 | Khách và Order Staff chỉ được hủy món khi món còn QUEUED, tức bếp chưa nhận/bắt đầu chế biến. |
-| INV-01 | Kho kiểm kê đầu ngày và cuối ngày. Nhập thêm trong ngày ghi bằng stock_movements; không lưu lặp tổng nhập ở bản ghi kiểm kê. |
+| Bàn và tablet | Tablet gắn vật lý với một bàn; không có chức năng chuyển bàn bằng phần mềm |
+| Khách hàng | Không tạo tài khoản/định danh khách trong MVP; không gắn người gọi vào order item |
+| Phiên bàn | Một bàn tối đa một phiên OPEN; một phiên có một order |
+| Gọi thêm | Mỗi lần gọi thêm tạo order item mới trong cùng order; chỉ cần phiên còn OPEN |
+| Ghi chú | Không có modifier; yêu cầu riêng lưu trong `order_items.note` |
+| Bếp | Một hàng đợi bếp chung; không có Kitchen Station, station routing hoặc kitchen ticket riêng |
+| Trạng thái món | `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED` |
+| Hủy của khách | Chỉ được hủy khi món còn `AWAITING_ACCEPTANCE` |
+| Order Staff | Sửa note/hủy theo ma trận trạng thái; gọi thêm tạo item mới |
+| Thanh toán | Một payment tối đa cho một order; nhân viên nhận tiền rồi mới xác nhận |
+| Tính tiền | ACCEPTED, IN_PREPARATION, COMPLETED được tính; AWAITING_ACCEPTANCE và CANCELLED không tính |
+| Bàn | Chỉ `AVAILABLE` và `OCCUPIED`; “đang thanh toán” là bước quy trình, không phải trạng thái |
+| Kho | Cập nhật thủ công; không recipe, không tự trừ kho theo món bán |
+| Kiểm kê | Mỗi lần kiểm kê lưu thời điểm và số lượng thực tế; không có mô hình bắt buộc đầu ngày/cuối ngày |
+| Cảnh báo tồn thấp | Chỉ Inventory Staff xem; Manager quản lý nguyên liệu/ngưỡng |
+| Báo cáo | Chỉ Manager xem |
 
-## 3. Mô hình trạng thái
-
-### 3.1 Trạng thái món (order_items.status)
-
-- PENDING_CONFIRMATION: khách vừa gửi đơn, chờ Order Staff xác nhận.
-- QUEUED: đã được chuyển đến bếp, đang chờ bếp nhận.
-- PREPARING: bếp đã nhận và bắt đầu chế biến.
-- READY: món hoàn tất, chờ nhân viên giao.
-- SERVED: món đã giao đến bàn.
-- REJECTED: bếp từ chối chế biến, bắt buộc có lý do.
-- CANCELLED: món bị hủy, lưu lý do khi có.
-
-Luồng bình thường: PENDING_CONFIRMATION → QUEUED → PREPARING → READY → SERVED.  
-Nhánh kết thúc: PENDING_CONFIRMATION/QUEUED → CANCELLED; QUEUED/PREPARING → REJECTED theo quyền và quy trình. Khách/Order Staff không được hủy sau khi món đã chuyển PREPARING. Bếp có thể từ chối món với lý do; các món khác trong cùng đơn tiếp tục xử lý.
-
-Mỗi lần đổi trạng thái phải append order_item_status_history trong cùng transaction. Backend chịu trách nhiệm kiểm tra transition và quyền actor.
-
-### 3.2 Trạng thái đơn
-
-orders.status là trạng thái tổng hợp phục vụ danh sách đơn, không thay thế trạng thái từng món. Đơn có thể chứa món ở nhiều trạng thái; backend tính trạng thái tổng hợp theo quy tắc nghiệp vụ. Không đánh dấu đơn hoàn tất chỉ vì một món READY. Payment chỉ được ghi nhận một lần; đơn chỉ COMPLETED sau khi payment hợp lệ và các điều kiện giao món được đáp ứng.
-
-### 3.3 Trạng thái khả dụng món
-
-menu_items.availability_status gồm AVAILABLE, MANUAL_UNAVAILABLE, AUTO_OUT_OF_STOCK. Cột is_active quản lý việc món còn được sử dụng trong hệ thống; không dùng thêm trạng thái INACTIVE để tránh lưu trùng ý nghĩa. Trạng thái tự động do backend tính lại khi số dư/ngưỡng/mapping nguyên liệu thay đổi. Trạng thái thủ công của Quản lý không được tự động ghi đè. Nếu có nhiều nguyên liệu thiếu, API trả danh sách nguyên liệu và lý do.
-
-Giới hạn quan trọng: mapping menu_item_ingredients chỉ xác định nguyên liệu bắt buộc, không có định mức. Hệ thống không thể tính đủ nguyên liệu cho số phần bất kỳ; không tự động trừ tồn.
-
-## 4. Danh sách 24 bảng
+## 3. Mô hình dữ liệu và danh sách bảng
 
 | Nhóm | Bảng | Mục đích |
 |---|---|---|
-| Identity/Staff | roles | Vai trò nhân viên |
-| | permissions | Danh mục quyền |
-| | role_permissions | Vai trò - quyền |
-| | users | Tài khoản nhân viên |
-| | employees | Hồ sơ nhân viên |
-| Menu/Kitchen setup | menu_categories | Danh mục món |
-| | kitchen_stations | Trạm chế biến |
-| | menu_items | Món ăn, giá, trạng thái bán, trạm |
-| Dining/Customer | dining_tables | Bàn ăn |
-| | dining_sessions | Phiên phục vụ của bàn, token lưu dạng hash |
-| | table_devices | Tablet/thiết bị được gán bàn |
-| | customers | Tài khoản khách tùy chọn |
-| Order | orders | Đơn hàng, bàn/phiên/khách/trạm |
-| | order_items | Snapshot món, số lượng, ghi chú, trạng thái món |
-| | order_status_history | Lịch sử trạng thái tổng đơn |
-| | order_item_status_history | Lịch sử trạng thái từng món |
-| Kitchen | kitchen_tickets | Một vé bếp cho một đơn |
-| Inventory | ingredients | Danh mục nguyên liệu và ngưỡng thấp |
-| | inventory_balances | Số lượng tồn hiện tại |
-| | stock_movements | Sổ cái nhập/xuất/điều chỉnh/hao hụt |
-| | shortage_reports | Bếp báo thiếu nguyên liệu |
-| | menu_item_ingredients | Mapping nguyên liệu bắt buộc, không có định mức |
-| | daily_inventory_records | Số đếm đầu/cuối ngày theo nguyên liệu |
-| Payment | payments | Một khoản thanh toán cho một đơn |
+| Identity/Staff | `roles` | Năm vai trò nghiệp vụ |
+| | `permissions` | Danh mục quyền |
+| | `role_permissions` | Gán quyền cho vai trò |
+| | `users` | Tài khoản nhân viên |
+| | `employees` | Hồ sơ nhân viên |
+| Menu | `menu_categories` | Danh mục món |
+| | `menu_items` | Món, giá, trạng thái hiển thị/khả dụng |
+| Dining | `dining_tables` | Bàn và trạng thái bàn |
+| | `dining_sessions` | Phiên đang hoạt động/đã đóng |
+| | `table_devices` | Định danh tablet gắn vật lý với bàn; không quyết định cơ chế auth |
+| Order | `orders` | Một order cho mỗi phiên bàn |
+| | `order_items` | Các lần gọi món, snapshot giá và trạng thái |
+| | `order_item_status_history` | Lịch sử trạng thái món |
+| Inventory | `ingredients` | Nguyên liệu và ngưỡng cảnh báo |
+| | `inventory_balances` | Số dư hiện tại |
+| | `stock_movements` | Sổ giao dịch kho |
+| | `inventory_count_records` | Các lần kiểm kê độc lập |
+| Payment | `payments` | Một payment cho một order |
 
-Không tạo kitchen_ticket_items: KDS truy vấn order_items theo order/kitchen_ticket; trạng thái món chỉ nằm ở order_items.
+Không tạo các bảng `customers`, `kitchen_stations`, `kitchen_tickets`, `shortage_reports`, `menu_item_ingredients` hoặc `daily_inventory_records` trong MVP hiện tại.
 
-## 5. Quy tắc dữ liệu chi tiết
+## 4. Các thực thể chính
 
-### 5.1 Customer, tablet và dining session
+### 4.1 Staff và role
 
-- customers tách khỏi users: users dành cho nhân viên, customers dành cho khách.
-- Đăng nhập khách tùy chọn; đơn guest có orders.customer_id NULL.
-- table_devices.device_code duy nhất và gắn một dining_table. Việc đổi bàn/thu hồi thiết bị do backend quản lý.
-- dining_sessions đại diện phiên phục vụ của bàn; mỗi bàn tối đa một phiên OPEN tại một thời điểm.
-- orders.customer_id lưu khách thực sự đặt từng đơn. Không đặt customer_id ở dining_sessions vì nhiều khách có thể dùng chung bàn/phiên.
-- Khi khách đăng xuất hoặc kết thúc lượt sử dụng tablet, ứng dụng phải xóa liên kết tài khoản khỏi thiết bị/session hiện tại để tránh gắn nhầm lịch sử cho khách tiếp theo.
+- `users` lưu tài khoản nhân viên; `employees` lưu hồ sơ nhân sự.
+- Role code dự kiến: `ORDER_STAFF`, `KITCHEN_STAFF`, `INVENTORY_STAFF`, `MANAGER`. Customer không phải tài khoản nhân viên và không có role đăng nhập trong MVP.
+- Có thể dùng bảng permissions/role_permissions để phân quyền chi tiết.
+- Quản lý được quyền quản trị; quyền xem inventory alert vẫn chỉ cấp cho Inventory Staff.
 
-### 5.2 Order và kitchen station
+### 4.2 Menu
 
-- Mỗi menu_item có một kitchen_station_id.
-- Khi tạo đơn, backend xác thực tất cả món cùng station; orders lưu kitchen_station_id để ràng buộc nhất quán.
-- order_items lưu menu_item_id, kitchen_station_id, item_name_snapshot, unit_price, quantity, line_total và note.
-- Ràng buộc composite FK bảo đảm món trong order_items cùng station với đơn và station của menu_item.
-- kitchen_tickets.order_id unique; ticket station phải trùng station trên order.
-- Ticket được tạo khi Order Staff điều phối đơn đã xác nhận vào bếp.
+`menu_items` lưu giá hiện tại và trạng thái:
+- `is_active`: món còn được quản lý/sử dụng trong menu.
+- `availability_status`: `AVAILABLE` hoặc `MANUAL_UNAVAILABLE`.
+- `availability_reason`: lý do quản lý đánh dấu không khả dụng (nếu có).
 
-### 5.3 Inventory và kiểm kê
+Không còn `AUTO_OUT_OF_STOCK`, nguyên liệu bắt buộc hoặc mapping món-nguyên liệu. Tồn thấp không tự động thay đổi khả dụng của món.
 
-- inventory_balances là số dư hiện tại; stock_movements là sổ lịch sử bất biến.
-- Mọi cập nhật số dư phải ghi movement trong cùng transaction và khóa dòng balance để tránh cập nhật đồng thời gây sai lệch.
-- IN có quantity_delta dương; OUT/WASTE âm; ADJUSTMENT có thể dương hoặc âm.
-- daily_inventory_records có unique (ingredient_id, inventory_date), lưu opening_quantity và closing_quantity là số đếm thực tế; closing có thể NULL cho đến khi chốt cuối ngày.
-- Không lưu received_quantity trong daily_inventory_records: tổng nhập trong ngày được truy vấn từ stock_movements loại IN.
-- Khi chốt closing count, backend so sánh số đếm thực tế với balance hiện tại, ghi ADJUSTMENT cho chênh lệch rồi cập nhật balance.
-- Cảnh báo đặt hàng cho ngày sau khi closing_quantity dưới low_stock_threshold. MVP không có supplier/purchase order.
+### 4.3 Bàn, tablet và phiên
 
-### 5.4 Payment
+- `dining_tables.status` chỉ nhận `AVAILABLE` hoặc `OCCUPIED`.
+- Phiên có `OPEN` hoặc `CLOSED`; bàn OCCUPIED khi có phiên OPEN và AVAILABLE khi không có phiên OPEN.
+- Database phải bảo đảm tối đa một phiên OPEN trên mỗi bàn bằng partial unique index trong migration SQL.
+- `table_devices` chỉ mô tả tablet/thiết bị được gán vật lý với bàn (mã thiết bị, tên hiển thị, trạng thái gán). Không lưu token/hash/credential cho tới khi cơ chế xác thực tablet được quyết định.
+- Mỗi phiên có một order. Dùng unique constraint trên `orders.dining_session_id`.
+- Không lưu trạng thái `WAITING_PAYMENT` cho bàn.
 
-payments.order_id unique. payment_method lưu mã dạng chuỗi để không khóa cứng phương thức trước khi nhóm chốt. Không hỗ trợ split payment. Chỉ backend mới được tạo payment; amount phải được tính từ dữ liệu server.
+### 4.4 Order và order item
 
-## 6. Ràng buộc và transaction bắt buộc
+- MVP chỉ phục vụ tại bàn: bỏ `order_type`, `guest_count`, `customer_id`, `kitchen_station_id`, `rejection_reason`, `dispatched_at` và trạng thái tổng order cũ.
+- `orders` tham chiếu `dining_session_id`; bàn được xác định qua session, tránh lưu lặp `dining_table_id`.
+- Mỗi order item lưu menu item, tên món snapshot, đơn giá snapshot, quantity, line total, note và trạng thái.
+- Giá snapshot không đổi khi Manager cập nhật giá menu về sau.
+- Mỗi lần gọi thêm là row mới; không tăng quantity row cũ.
+- Không có customer ownership ở order item.
+- Không có stationId ở menu item/order/order item.
 
-- CHECK: quantity > 0; price/unit_price/line_total/amount >= 0; inventory quantity >= 0; capacity/guest_count > 0 nếu có; status nằm trong tập hợp hợp lệ.
-- UNIQUE: username, email (khi có), employee_code, menu code, table code, device_code, order_code, kitchen_ticket.order_id, payments.order_id, (ingredient_id, inventory_date), (menu_item_id, ingredient_id).
-- Một dining_table tối đa một dining_session OPEN (partial unique index).
-- DINE_IN yêu cầu table_id + dining_session_id; TAKEAWAY không có bàn/session.
-- Ghi trạng thái và lịch sử trong cùng transaction.
-- Tạo order + order_items + history là một transaction.
-- Dispatch tạo kitchen_ticket và chuyển món sang QUEUED cùng transaction.
-- Cập nhật inventory balance + stock movement là một transaction.
-- Chốt kiểm kê tạo adjustment + cập nhật balance + đóng bản ghi kiểm kê cùng transaction.
-- Tạo payment + chuyển order sang COMPLETED + history là một transaction.
+Trạng thái hợp lệ của `order_items.status`:
+`AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`.
+
+Luồng thông thường:
+`AWAITING_ACCEPTANCE → ACCEPTED → IN_PREPARATION → COMPLETED`
+
+Bếp có thể đưa `IN_PREPARATION → ACCEPTED`. Hủy là trạng thái kết thúc riêng. Mọi thay đổi trạng thái phải append `order_item_status_history` trong cùng transaction. Ma trận hủy của Bếp còn cần chốt chi tiết; không mã hóa giả định thành CHECK constraint.
+
+Không cần `orders.status` hoặc `order_status_history` trong MVP; trạng thái vận hành được quản lý theo từng item. Nếu sau này cần trạng thái tổng hợp, nên tính từ item/payment thay vì tạo nguồn dữ liệu thứ hai.
+
+### 4.5 Thanh toán
+
+- `payments.order_id` unique: một order tối đa một payment.
+- Lưu amount, actor xác nhận và timestamp.
+- `payment_method` nullable để không khóa cứng phương thức khi nhóm chưa quyết định; chỉ ghi khi phương thức đã được thống nhất.
+- Không lưu payment request như payment đã hoàn tất.
+- Amount do backend tính từ order item snapshot. Tính tiền theo trạng thái: ACCEPTED, IN_PREPARATION, COMPLETED được tính; AWAITING_ACCEPTANCE, CANCELLED không tính.
+- Điều kiện cho phép xác nhận payment/đóng session khi còn món chưa hoàn thành là điểm nghiệp vụ chưa chốt riêng; không thêm cột trạng thái để tự giải quyết.
+- Xác nhận payment, đóng session và cập nhật bàn phải nằm trong cùng transaction.
+
+### 4.6 Inventory và kiểm kê
+
+- `ingredients`: tên, nhóm, đơn vị, ngưỡng cảnh báo, ghi chú, trạng thái.
+- `inventory_balances`: số lượng tồn hiện tại, một row cho mỗi ingredient.
+- `stock_movements`: IN/OUT/ADJUSTMENT/WASTE, quantity delta, lý do, actor, timestamp.
+- Nhập/xuất/điều chỉnh/hao hụt cập nhật balance và append movement trong cùng transaction.
+- Không tự động trừ kho khi order được tạo/hoàn thành.
+- `inventory_count_records` lưu mỗi lần kiểm kê độc lập: ingredient, actual quantity, counted_at, người kiểm kê, note; không gộp theo ngày và không phân loại opening/closing.
+- Khi lưu số đếm thực tế, backend đối chiếu với balance; nếu áp dụng chênh lệch phải ghi stock movement loại ADJUSTMENT, không âm thầm ghi đè.
+- Cảnh báo tồn thấp được tính từ balance và threshold; quyền đọc feed chỉ cấp Inventory Staff.
+
+## 5. Ràng buộc và tính toàn vẹn
+
+Các ràng buộc cần có trong Prisma và/hoặc migration SQL:
+- Quantity order item > 0; giá/line total/payment amount >= 0.
+- Số dư kho không âm; quy tắc delta phù hợp movement type.
+- Trạng thái bàn, phiên, món và menu nằm trong tập giá trị được định nghĩa.
+- Username, email (nếu có), employee_code, menu code, table code, device_code là unique theo quy tắc nullability.
+- Một bàn tối đa một session OPEN (partial unique index).
+- Một session tối đa một order (unique dining_session_id).
+- Một order tối đa một payment (unique order_id).
+- Không xóa cứng order item/history/payment/stock movement/count record đã phát sinh.
+- Không dùng cascade delete cho dữ liệu lịch sử.
+
+Một số constraint PostgreSQL (partial unique index, CHECK phức tạp) có thể cần viết trong migration SQL vì Prisma schema không biểu diễn đầy đủ.
+
+## 6. Transaction bắt buộc
+
+1. Mở phiên: tạo session OPEN, tạo order và cập nhật bàn OCCUPIED nguyên tử.
+2. Gọi món: tạo order item cùng snapshot giá và history trạng thái đầu tiên nguyên tử.
+3. Chuyển trạng thái món: kiểm tra trạng thái hiện tại, cập nhật item và append history nguyên tử.
+4. Hủy món: kiểm tra role + state + payment/session, cập nhật item và history nguyên tử.
+5. Giao dịch kho: khóa balance, cập nhật số dư và tạo stock movement nguyên tử.
+6. Kiểm kê: lưu actual count/time/actor; nếu điều chỉnh balance thì tạo ADJUSTMENT trong cùng transaction.
+7. Thanh toán: khóa order/session phù hợp, tính amount từ server, tạo payment, đóng session và đặt bàn AVAILABLE trong cùng transaction sau khi qua payment gate đã được xác nhận.
+
+Các request có thể gửi lặp (đặc biệt payment confirmation) cần idempotency hoặc optimistic concurrency; chi tiết key/retention sẽ chốt khi thiết kế API.
 
 ## 7. Index đề xuất
 
-Index các truy vấn chính: menu theo category/status; orders theo status/created_at, table_id/created_at và customer_id/created_at; order_items theo order_id/status; lịch sử trạng thái theo item/order và changed_at; kitchen ticket theo station/status/dispatched_at; stock movements theo ingredient_id/created_at; daily inventory theo inventory_date; shortage_reports theo status/created_at.
+- Menu: `(category_id, is_active, availability_status)`.
+- Sessions: `(table_id, status)`; partial unique index trên table_id khi status = OPEN.
+- Orders: unique `dining_session_id`.
+- Order items: `(order_id, status)`, `(status, created_at)`.
+- Item history: `(order_item_id, changed_at DESC)`.
+- Inventory movements: `(ingredient_id, created_at DESC)`.
+- Inventory counts: `(ingredient_id, counted_at DESC)`.
+- Payments: unique `order_id`, `paid_at DESC`.
 
-## 8. Quyết định còn mở (không chặn migration nền tảng)
+## 8. Các điểm còn mở
 
-- OQ-02: danh sách phương thức thanh toán cuối cùng; hiện dùng VARCHAR.
-- OQ-03: vai trò cụ thể được phép cấu hình low_stock_threshold; hiện bảo vệ bằng authorization ở backend.
-- OQ-05: thao tác dispatch tự động hay thủ công; hiện tạo ticket khi Order Staff dispatch.
-- OQ-07: chính sách xóa/ẩn món; mặc định không xóa cứng món có lịch sử.
-- OQ-09: kênh thông báo; hiện lưu shortage_reports, notification transport để tầng ứng dụng quyết định.
+1. Cơ chế xác thực tablet và credential lifecycle; do đó schema thiết bị hiện không chứa token.
+2. Trạng thái cụ thể mà Bếp được phép hủy và có bắt buộc lý do hay không.
+3. Payment gate/điều kiện đóng phiên khi còn món đang chế biến hoặc chờ tiếp nhận.
+4. Phương thức thanh toán và định dạng hóa đơn.
+5. Đơn vị kho có cần quy đổi hay không.
+6. Quy tắc lưu trữ/xóa mềm menu và dữ liệu nhân viên.
+7. Cơ chế realtime/polling.
+8. Chính sách pagination, idempotency và retention audit.
+
+Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc quan hệ nghiệp vụ.
 
 ## 9. Prisma và migration
 
-- Prisma schema đặt tại prisma/schema.prisma.
-- Migration đặt tại prisma/migrations/<timestamp>_initial_schema/migration.sql.
-- Dùng PostgreSQL provider và DATABASE_URL qua environment variable; không commit secret.
-- Không dùng prisma db push cho database dùng chung/production. Thay đổi schema phải có migration được review.
-- Migration đầu tiên tạo schema nền tảng; seed role/permission/demo data tách riêng và không chứa tài khoản/mật khẩu mặc định production.
+- Prisma schema: `prisma/schema.prisma`.
+- Migration: `prisma/migrations/<timestamp>_<name>/migration.sql`.
+- PostgreSQL provider; `DATABASE_URL` lấy từ environment, không commit secrets.
+- Không dùng `prisma db push` cho database dùng chung/production.
+- Mọi thay đổi schema phải có migration được review.
+- Seed role/permission tách riêng; không seed mật khẩu production mặc định.
+- Bản schema đồng bộ này là thiết kế đích, chưa tạo migration và chưa được áp dụng lên database.
 
-## 10. Tiêu chí nghiệm thu
+## 10. Checklist
 
-- [ ] 24 bảng và quan hệ khớp mô hình.
-- [ ] Không tồn tại kitchen_ticket_items hoặc modifier/recipe tables.
-- [ ] Một đơn chỉ có một station và một kitchen ticket.
-- [ ] Trạng thái món chỉ có một nguồn chuẩn và có history.
-- [ ] Guest order và customer-linked order đều hợp lệ.
-- [ ] Tablet gắn bàn; session token chỉ lưu hash.
-- [ ] Auto-unavailable không ghi đè manual unavailable.
-- [ ] Inventory opening/closing là số đếm thực; received total lấy từ stock_movements.
-- [ ] Không tự động trừ kho theo đơn.
-- [ ] Một payment tối đa cho một order.
-- [ ] Migration có thể chạy trên PostgreSQL sạch và rollback/khôi phục theo quy trình backup.
+- [ ] Không có Customer model/tài khoản khách hoặc customer_id trong order.
+- [ ] Không có KitchenStation, stationId, KitchenTicket hoặc station routing.
+- [ ] Không có order_type takeaway, guest_count hoặc table_id lặp trong Order.
+- [ ] Một bàn tối đa một phiên OPEN; một phiên một order.
+- [ ] Bàn chỉ AVAILABLE/OCCUPIED.
+- [ ] Gọi thêm tạo order item mới.
+- [ ] Order item chỉ có năm trạng thái chuẩn và có history.
+- [ ] Giá món được snapshot ở thời điểm gọi.
+- [ ] Một order tối đa một payment.
+- [ ] Payment amount tính theo trạng thái item đã xác nhận.
+- [ ] Không có recipe/menu_item_ingredients/shortage report tự động.
+- [ ] Không có daily opening/closing inventory record.
+- [ ] Mỗi lần kiểm kê có actual quantity, timestamp và actor.
+- [ ] Không tự động trừ kho theo món bán.
+- [ ] Cảnh báo tồn thấp chỉ Inventory Staff được đọc.
+- [ ] Chỉ Manager được đọc báo cáo.
+- [ ] Migration SQL bổ sung partial unique index và CHECK cần thiết.
