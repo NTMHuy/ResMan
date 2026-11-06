@@ -58,6 +58,7 @@ model User {
   stockMovements     StockMovement[]
   inventoryCounts    InventoryCountRecord[]
   payments           Payment[]
+  auditLogs          AuditLog[]
 
   @@map("users")
 }
@@ -279,4 +280,20 @@ model Payment {
 
   @@index([paidAt(sort: Desc)])
   @@map("payments")
+}
+
+
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  actorId    BigInt?  @map("actor_id")
+  action     String   @db.VarChar(100)
+  entityType String   @map("entity_type") @db.VarChar(80)
+  entityId   String   @map("entity_id") @db.VarChar(100)
+  metadata   Json?
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, occurredAt(sort: Desc)])
+  @@index([actorId, occurredAt(sort: Desc)])
+  @@map("audit_logs")
 }
