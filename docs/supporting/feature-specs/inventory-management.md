@@ -1,134 +1,86 @@
 # Inventory Management Feature Specification
 
-> **Provenance**
->
-> - **Source prompt:** 3.5 Feature Specification từ User Stories & Acceptance Criteria
-> - **Artifact status:** `Draft - Awaiting Review`
+> **Trạng thái:** Draft — đã đối chiếu Confirmed Business Rules  
+> **Nguồn nghiệp vụ chuẩn:** `docs/11-confirmed-business-rules.md`
 
-## F-INV-01 — Theo dõi tồn kho
+## F-INV-01 — Theo dõi nguyên liệu và tồn kho
 
 ### Goal
-
-Cho phép Nhân viên Kho theo dõi số lượng nguyên liệu hiện có.
-
-### Main Flow
-
-1. Nhân viên Kho mở danh sách tồn kho.
-2. Hệ thống hiển thị nguyên liệu.
-3. Nhân viên xem số lượng hiện tại.
-4. Nhân viên xác định nguyên liệu đang ở mức thấp.
+Cho phép Nhân viên Kho theo dõi thông tin nguyên liệu và số dư tồn hiện tại.
 
 ### Information
-
-- Tên nguyên liệu
-- Số lượng tồn
-- Đơn vị
-- Mức tồn tối thiểu
+- Tên nguyên liệu.
+- Nhóm/danh mục.
+- Đơn vị.
+- Số lượng tồn hiện tại.
+- Ngưỡng cảnh báo tồn thấp.
+- Ghi chú.
 
 ### Acceptance Criteria
+- [ ] Xem được danh sách nguyên liệu và số dư hiện tại.
+- [ ] Xem được đơn vị và ngưỡng cảnh báo.
+- [ ] Xem được lịch sử nhập, điều chỉnh và kiểm kê.
 
-- [ ] Xem được danh sách nguyên liệu.
-- [ ] Xem được số lượng tồn.
-- [ ] Xem được mức tồn tối thiểu.
-- [ ] Có thể xác định nguyên liệu tồn thấp.
-
-### Traceability
-
-- User Story: US-INV-01
-- Requirement: PR-05
-
----
-
-## F-INV-02 — Cập nhật tồn kho
-
-### Goal
-
-Cho phép Nhân viên Kho cập nhật thông tin tồn kho.
+## F-INV-02 — Nhập kho và điều chỉnh tồn
 
 ### Main Flow
-
-1. Nhân viên chọn nguyên liệu.
-2. Nhập thông tin tồn kho mới.
-3. Xác nhận cập nhật.
-4. Hệ thống ghi nhận thông tin mới.
+1. Chọn nguyên liệu.
+2. Nhập số lượng và đơn vị.
+3. Thêm ghi chú nếu cần.
+4. Xác nhận thao tác.
+5. Hệ thống cập nhật số dư và tạo stock movement.
 
 ### Business Rules
-
-- Số lượng tồn phải được cập nhật chính xác.
-- Dữ liệu sau cập nhật phải phản ánh trạng thái hiện tại.
+- Mỗi stock movement lưu loại giao dịch, lượng thay đổi, người thực hiện, thời điểm và ghi chú/lý do.
+- Điều chỉnh tồn không được ghi đè hoặc xóa lịch sử cũ.
+- Cập nhật số dư và tạo movement phải nằm trong cùng transaction.
 
 ### Acceptance Criteria
+- [ ] Nhập kho làm tăng số dư nguyên liệu.
+- [ ] Điều chỉnh tồn tạo lịch sử riêng.
+- [ ] Có thể xác định actor, timestamp và lượng chênh lệch.
 
-- [ ] Có thể cập nhật số lượng tồn.
-- [ ] Hệ thống lưu giá trị mới.
-- [ ] Giá trị tồn kho hiển thị được cập nhật.
-
-### Traceability
-
-- User Story: US-INV-02
-- Requirement: PR-05
-
-### Dependency
-
-- F-INV-01
-
----
-
-## F-INV-03 — Cảnh báo tồn kho thấp
-
-### Goal
-
-Giúp Nhân viên Kho nhận biết nguyên liệu dưới mức tồn tối thiểu.
+## F-INV-03 — Kiểm kê linh hoạt
 
 ### Main Flow
-
-1. Hệ thống kiểm tra số lượng tồn.
-2. So sánh với mức tồn tối thiểu.
-3. Nếu thấp hơn mức cho phép, hiển thị cảnh báo.
+1. Nhân viên Kho chọn nguyên liệu.
+2. Ghi số lượng thực tế tại thời điểm kiểm kê.
+3. Xác nhận và lưu bản ghi.
+4. Hệ thống đối chiếu số thực tế với số dư đang ghi nhận.
+5. Nếu cần điều chỉnh số dư, tạo movement điều chỉnh có lịch sử.
 
 ### Business Rules
-
-- Cảnh báo khi tồn kho dưới mức tối thiểu.
-- Mức tối thiểu phải được xác định cho nguyên liệu.
+- Kiểm kê có thể thực hiện bất cứ khi nào cần.
+- Mỗi lần kiểm kê là một bản ghi độc lập, lưu actual quantity, counted_at, actor và note.
+- Không bắt buộc phân loại đầu ngày/cuối ngày.
+- Stock-in/adjustment được lưu trong stock movements riêng.
+- Không suy diễn lượng tiêu thụ chính xác từ chênh lệch kiểm kê.
 
 ### Acceptance Criteria
+- [ ] Có thể tạo kiểm kê khi cần.
+- [ ] Lưu số lượng thực tế, người kiểm kê và thời điểm.
+- [ ] Có thể so sánh số thực tế với số dư hệ thống.
+- [ ] Điều chỉnh số dư (nếu có) tạo movement riêng.
 
-- [ ] Hệ thống xác định được nguyên liệu tồn thấp.
-- [ ] Hiển thị cảnh báo.
-- [ ] Thông tin cảnh báo gắn với đúng nguyên liệu.
+## F-INV-04 — Cảnh báo tồn thấp
 
-### Traceability
+### Business Rules
+- Quản lý hoặc Nhân viên Kho có thể thiết lập ngưỡng tồn thấp.
+- Khi số dư thấp hơn ngưỡng, hệ thống tạo/hiển thị cảnh báo cho Nhân viên Kho.
+- Tồn thấp không tự động khóa món hoặc thay đổi menu availability.
+- Không tự động trừ kho khi bán món.
+- Không có recipe/ingredient mapping, nhà cung cấp hoặc đơn mua hàng trong MVP.
 
-- User Story: US-INV-03
-- Requirement: PR-05
+### Acceptance Criteria
+- [ ] Hệ thống xác định được nguyên liệu dưới ngưỡng.
+- [ ] Cảnh báo gắn với đúng nguyên liệu.
+- [ ] Cảnh báo tồn thấp chỉ hiển thị cho Nhân viên Kho.
+- [ ] Không tự động thay đổi trạng thái menu.
 
-### Dependencies
-
-- F-INV-01
-
----
-
-## ❓ Open Questions
-
-- Menu có liên kết trực tiếp với nguyên liệu hay Recipe không?
-- Có tự động trừ tồn kho khi Order hoàn thành không?
-- Ai xác định mức tồn tối thiểu?
-
-## 📋 Review Checklist
-
-- [ ] Quy tắc tồn kho thấp được xác nhận.
-- [ ] Mức tồn tối thiểu được xác nhận.
-- [ ] Quan hệ Menu/Ingredient cần được làm rõ.
+## Open Decisions
+- Quy tắc quy đổi khi đơn vị nhập khác đơn vị chuẩn.
+- Có cho phép số dư tồn âm hay không.
+- Cách phân loại/lý do khi kiểm kê có chênh lệch.
 
 ## Review Gate
-
-`Draft - Awaiting Review`
-
-
-## Quyết định tồn kho đã xác nhận (07/11/2026)
-
-- Kiểm kê linh hoạt; mỗi lần kiểm kê là bản ghi độc lập gồm số lượng thực tế, thời điểm, người thực hiện và ghi chú. Không bắt buộc đầu ngày/cuối ngày.
-- Stock-in/adjustment có lịch sử stock movement riêng.
-- Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món hoặc thay đổi menu availability.
-- Không tự động trừ kho khi bán món; không có recipe/ingredient mapping trong MVP.
-- Các câu hỏi cũ về tự động trừ kho, liên kết Menu/Ingredient hoặc quy trình kiểm kê đầu/cuối ngày không còn là giả định được phép triển khai.
+`Draft — Awaiting Review`
