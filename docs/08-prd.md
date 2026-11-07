@@ -633,8 +633,8 @@ Phụ lục này cập nhật và thay thế mọi mô tả trước đây có n
 |---|---|---|
 | DD-07 | Một hàng đợi bếp chung; không có Kitchen Station hoặc station routing | Đã xác nhận — SHARED QUEUE (07/11/2026) |
 | DD-08 | Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món | Đã xác nhận — ALERT ONLY |
-| DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
-| DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
+| DD-09 | Khách hủy khi `AWAITING_ACCEPTANCE`; Order Staff hủy/sửa theo ma trận quyền đã xác nhận | Đã xác nhận — ITEM STATE MATRIX |
+| DD-10 | Guest-only trong MVP; không có tài khoản khách hàng | Đã xác nhận — GUEST ONLY |
 
 ---
 
@@ -646,8 +646,8 @@ Phần này làm rõ các yêu cầu đã được chủ dự án xác nhận v�
 
 - Mỗi tablet đặt món tại nhà hàng được gán cố định với một bàn.
 - Khách có thể đặt món không cần đăng nhập (guest checkout).
-- Khách có thể đăng ký/đăng nhập tùy chọn để lưu lịch sử đặt món và hỗ trợ cá nhân hóa trong tương lai.
-- Đơn hàng lưu customer_id khi khách đã đăng nhập; đơn guest không có customer_id.
+- MVP không xây dựng tài khoản khách hàng, đăng nhập hoặc lịch sử đặt món theo danh tính cá nhân.
+- Order chỉ liên kết với phiên bàn; không có `customer_id`.
 - Khi khách kết thúc lượt sử dụng hoặc đăng xuất, thiết bị phải xóa liên kết khách hiện tại trước khi phục vụ lượt khách tiếp theo. Không được mặc định khách đăng nhập trước vẫn là người đặt đơn sau.
 - Chương trình thành viên/khuyến mãi và AI recommendation vẫn ngoài MVP trừ khi được duyệt riêng.
 
