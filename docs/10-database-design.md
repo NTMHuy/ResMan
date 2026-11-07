@@ -1,9 +1,9 @@
 # Thiết kế cơ sở dữ liệu ResMan
 
-> **Phiên bản:** 3.1  
-> **Ngày cập nhật:** 06/11/2026  
+> **Phiên bản:** 3.2  
+> **Ngày cập nhật:** 07/11/2026  
 > **Nhánh:** `member/minhhuy`  
-> **Nguồn chuẩn nghiệp vụ:** `backend/README.md`, `docs/11-confirmed-business-rules.md`, PRD và các quyết định đã xác nhận.
+> **Nguồn chuẩn nghiệp vụ:** `docs/11-confirmed-business-rules.md`, `docs/08-prd.md`, `docs/09-system-analysis-and-design.md`, `backend/README.md` và quyết định người dùng xác nhận ngày 07/11/2026.
 
 ## 1. Phạm vi và nguyên tắc
 
@@ -27,7 +27,7 @@ Thiết kế PostgreSQL cho MVP một nhà hàng, backend NestJS và Prisma. Cli
 | Phiên bàn | Một bàn tối đa một phiên OPEN; một phiên có một order |
 | Gọi thêm | Mỗi lần gọi thêm tạo order item mới trong cùng order; chỉ cần phiên còn OPEN |
 | Ghi chú | Không có modifier; yêu cầu riêng lưu trong `order_items.note` |
-| Bếp | Một hàng đợi bếp chung; không có Kitchen Station, station routing hoặc kitchen ticket riêng |
+| Bếp | Phương án 2 đã xác nhận ngày 07/11/2026: một hàng đợi bếp chung; không có Kitchen Station, station routing hoặc kitchen ticket riêng |
 | Trạng thái món | `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED` |
 | Hủy của khách | Chỉ được hủy khi món còn `AWAITING_ACCEPTANCE` |
 | Order Staff | Sửa note/hủy theo ma trận trạng thái; gọi thêm tạo item mới |
@@ -220,3 +220,14 @@ Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc 
 - [ ] Cảnh báo tồn thấp chỉ Inventory Staff được đọc.
 - [ ] Chỉ Manager được đọc báo cáo.
 - [ ] Migration SQL bổ sung partial unique index và CHECK cần thiết.
+
+
+## 11. Cập nhật phiên bản 3.2 — 07/11/2026
+
+- Người dùng đã xác nhận **phương án 2**: loại bỏ Kitchen Station và dùng một hàng đợi bếp chung. Thiết kế không tạo `kitchen_stations`, `kitchen_tickets`, `station_id` hoặc ràng buộc order theo station.
+- Xác nhận guest-only cho MVP; không có Customer model/account/customer_id.
+- Xác nhận payment gate phương án B; item `IN_PREPARATION` được phép khi xác nhận payment/đóng phiên, miễn không còn item `AWAITING_ACCEPTANCE`.
+- Xác nhận kiểm kê độc lập, linh hoạt; không bắt buộc đầu ngày/cuối ngày.
+- Xác nhận low-stock chỉ cảnh báo Inventory Staff; không tự động khóa món, không tự trừ kho và không có recipe mapping.
+
+Phiên bản này là baseline thiết kế để kiểm tra Prisma schema. Chưa được xem là migration đã sinh hoặc đã validate bằng Prisma CLI.
