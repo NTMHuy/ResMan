@@ -41,39 +41,39 @@ model RolePermission {
 }
 
 model User {
-  id                 BigInt                  @id @default(autoincrement())
-  roleId             BigInt                  @map("role_id")
-  username           String                  @unique @db.VarChar(80)
-  email              String?                 @unique @db.VarChar(255)
-  passwordHash       String                  @map("password_hash") @db.VarChar(255)
-  isActive           Boolean                 @default(true) @map("is_active")
-  lastLoginAt        DateTime?               @map("last_login_at") @db.Timestamptz(6)
-  createdAt          DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
-  role               Role                    @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  employee           Employee?
-  openedSessions     DiningSession[]         @relation("SessionOpener")
-  closedSessions     DiningSession[]         @relation("SessionCloser")
-  itemHistory        OrderItemStatusHistory[]
-  stockMovements     StockMovement[]
-  inventoryCounts    InventoryCountRecord[]
-  payments           Payment[]
-  auditLogs          AuditLog[]
+  id              BigInt                   @id @default(autoincrement())
+  roleId          BigInt                   @map("role_id")
+  username        String                   @unique @db.VarChar(80)
+  email           String?                  @unique @db.VarChar(255)
+  passwordHash    String                   @map("password_hash") @db.VarChar(255)
+  isActive        Boolean                  @default(true) @map("is_active")
+  lastLoginAt     DateTime?                @map("last_login_at") @db.Timestamptz(6)
+  createdAt       DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  role            Role                     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  employee        Employee?
+  openedSessions  DiningSession[]          @relation("SessionOpener")
+  closedSessions  DiningSession[]          @relation("SessionCloser")
+  itemHistory     OrderItemStatusHistory[]
+  stockMovements  StockMovement[]
+  inventoryCounts InventoryCountRecord[]
+  payments        Payment[]
+  auditLogs       AuditLog[]
 
   @@map("users")
 }
 
 model Employee {
-  id               BigInt   @id @default(autoincrement())
-  userId           BigInt   @unique @map("user_id")
-  employeeCode     String   @unique @map("employee_code") @db.VarChar(30)
-  fullName         String   @map("full_name") @db.VarChar(150)
-  phone            String?  @db.VarChar(20)
-  employmentStatus String   @default("ACTIVE") @map("employment_status") @db.VarChar(20)
+  id               BigInt    @id @default(autoincrement())
+  userId           BigInt    @unique @map("user_id")
+  employeeCode     String    @unique @map("employee_code") @db.VarChar(30)
+  fullName         String    @map("full_name") @db.VarChar(150)
+  phone            String?   @db.VarChar(20)
+  employmentStatus String    @default("ACTIVE") @map("employment_status") @db.VarChar(20)
   hiredAt          DateTime? @map("hired_at") @db.Date
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  user             User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@map("employees")
 }
@@ -127,18 +127,18 @@ model DiningTable {
 }
 
 model DiningSession {
-  id         BigInt      @id @default(autoincrement())
-  tableId    BigInt      @map("table_id")
-  sessionCode String     @unique @map("session_code") @db.VarChar(80)
-  status     String      @default("OPEN") @db.VarChar(20)
-  openedBy   BigInt?     @map("opened_by")
-  closedBy   BigInt?     @map("closed_by")
-  openedAt   DateTime    @default(now()) @map("opened_at") @db.Timestamptz(6)
-  closedAt   DateTime?   @map("closed_at") @db.Timestamptz(6)
-  table      DiningTable @relation(fields: [tableId], references: [id], onDelete: Restrict)
-  opener     User?       @relation("SessionOpener", fields: [openedBy], references: [id], onDelete: Restrict)
-  closer     User?       @relation("SessionCloser", fields: [closedBy], references: [id], onDelete: Restrict)
-  order      Order?
+  id          BigInt      @id @default(autoincrement())
+  tableId     BigInt      @map("table_id")
+  sessionCode String      @unique @map("session_code") @db.VarChar(80)
+  status      String      @default("OPEN") @db.VarChar(20)
+  openedBy    BigInt?     @map("opened_by")
+  closedBy    BigInt?     @map("closed_by")
+  openedAt    DateTime    @default(now()) @map("opened_at") @db.Timestamptz(6)
+  closedAt    DateTime?   @map("closed_at") @db.Timestamptz(6)
+  table       DiningTable @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  opener      User?       @relation("SessionOpener", fields: [openedBy], references: [id], onDelete: Restrict)
+  closer      User?       @relation("SessionCloser", fields: [closedBy], references: [id], onDelete: Restrict)
+  order       Order?
 
   @@index([tableId, status])
   @@map("dining_sessions")
@@ -173,19 +173,19 @@ model Order {
 }
 
 model OrderItem {
-  id               BigInt                    @id @default(autoincrement())
-  orderId          BigInt                    @map("order_id")
-  menuItemId       BigInt                    @map("menu_item_id")
-  itemNameSnapshot String                    @map("item_name_snapshot") @db.VarChar(150)
+  id               BigInt                   @id @default(autoincrement())
+  orderId          BigInt                   @map("order_id")
+  menuItemId       BigInt                   @map("menu_item_id")
+  itemNameSnapshot String                   @map("item_name_snapshot") @db.VarChar(150)
   quantity         Int
-  unitPrice        Decimal                   @map("unit_price") @db.Decimal(14, 2)
-  lineTotal        Decimal                   @map("line_total") @db.Decimal(14, 2)
+  unitPrice        Decimal                  @map("unit_price") @db.Decimal(14, 2)
+  lineTotal        Decimal                  @map("line_total") @db.Decimal(14, 2)
   note             String?
-  status           String                    @default("AWAITING_ACCEPTANCE") @db.VarChar(30)
-  createdAt        DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  order            Order                     @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  menuItem         MenuItem                  @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  status           String                   @default("AWAITING_ACCEPTANCE") @db.VarChar(30)
+  createdAt        DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  order            Order                    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  menuItem         MenuItem                 @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
   history          OrderItemStatusHistory[]
 
   @@index([orderId, status])
@@ -252,14 +252,14 @@ model StockMovement {
 }
 
 model InventoryCountRecord {
-  id              BigInt     @id @default(autoincrement())
-  ingredientId    BigInt     @map("ingredient_id")
-  actualQuantity  Decimal    @map("actual_quantity") @db.Decimal(14, 3)
-  countedAt       DateTime   @default(now()) @map("counted_at") @db.Timestamptz(6)
-  countedBy       BigInt     @map("counted_by")
-  note            String?
-  ingredient      Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
-  actor           User       @relation(fields: [countedBy], references: [id], onDelete: Restrict)
+  id             BigInt     @id @default(autoincrement())
+  ingredientId   BigInt     @map("ingredient_id")
+  actualQuantity Decimal    @map("actual_quantity") @db.Decimal(14, 3)
+  countedAt      DateTime   @default(now()) @map("counted_at") @db.Timestamptz(6)
+  countedBy      BigInt     @map("counted_by")
+  note           String?
+  ingredient     Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  actor          User       @relation(fields: [countedBy], references: [id], onDelete: Restrict)
 
   @@index([ingredientId, countedAt(sort: Desc)])
   @@index([countedAt(sort: Desc)])
@@ -267,21 +267,20 @@ model InventoryCountRecord {
 }
 
 model Payment {
-  id            BigInt   @id @default(autoincrement())
-  orderId       BigInt   @unique @map("order_id")
-  amount        Decimal  @db.Decimal(14, 2)
-  paymentMethod String?  @map("payment_method") @db.VarChar(40)
-  status        String   @default("PAID") @db.VarChar(20)
-  transactionRef String? @map("transaction_ref") @db.VarChar(120)
-  paidAt        DateTime @default(now()) @map("paid_at") @db.Timestamptz(6)
-  recordedBy    BigInt   @map("recorded_by")
-  order         Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  actor         User     @relation(fields: [recordedBy], references: [id], onDelete: Restrict)
+  id             BigInt   @id @default(autoincrement())
+  orderId        BigInt   @unique @map("order_id")
+  amount         Decimal  @db.Decimal(14, 2)
+  paymentMethod  String?  @map("payment_method") @db.VarChar(40)
+  status         String   @default("PAID") @db.VarChar(20)
+  transactionRef String?  @map("transaction_ref") @db.VarChar(120)
+  paidAt         DateTime @default(now()) @map("paid_at") @db.Timestamptz(6)
+  recordedBy     BigInt   @map("recorded_by")
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actor          User     @relation(fields: [recordedBy], references: [id], onDelete: Restrict)
 
   @@index([paidAt(sort: Desc)])
   @@map("payments")
 }
-
 
 model AuditLog {
   id         BigInt   @id @default(autoincrement())
