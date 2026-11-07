@@ -138,3 +138,12 @@ Cho phép Nhân viên Bếp tiếp nhận chính xác các món từ đơn hàng
 ## Review Gate
 
 `Draft - Awaiting Review`
+
+
+## Đồng bộ quyết định đã xác nhận (07/11/2026)
+
+- MVP sử dụng một hàng đợi bếp chung; không có Kitchen Station, station routing, stationId hoặc kitchen ticket riêng.
+- Không giới hạn một order vào một station; không tách order theo khu vực bếp.
+- Trạng thái item chuẩn: `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`. Không dùng `REJECTED`.
+- Bếp có thể chuyển `IN_PREPARATION` về `ACCEPTED`. Ma trận trạng thái được phép hủy bởi Bếp vẫn cần được xác nhận chi tiết.
+- Phần nội dung cũ trong tài liệu này mô tả Pending/Cooking/Rejected hoặc phân biệt đơn theo station đã bị thay thế bởi các quy tắc trên.
