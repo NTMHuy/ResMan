@@ -123,3 +123,12 @@ Giúp Nhân viên Kho nhận biết nguyên liệu dưới mức tồn tối thi
 ## Review Gate
 
 `Draft - Awaiting Review`
+
+
+## Quyết định tồn kho đã xác nhận (07/11/2026)
+
+- Kiểm kê linh hoạt; mỗi lần kiểm kê là bản ghi độc lập gồm số lượng thực tế, thời điểm, người thực hiện và ghi chú. Không bắt buộc đầu ngày/cuối ngày.
+- Stock-in/adjustment có lịch sử stock movement riêng.
+- Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món hoặc thay đổi menu availability.
+- Không tự động trừ kho khi bán món; không có recipe/ingredient mapping trong MVP.
+- Các câu hỏi cũ về tự động trừ kho, liên kết Menu/Ingredient hoặc quy trình kiểm kê đầu/cuối ngày không còn là giả định được phép triển khai.
