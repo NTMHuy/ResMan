@@ -133,21 +133,20 @@ Từ góc nhìn người dùng, phiên bản hoàn chỉnh đầu tiên của d�
 
 Trọng tâm là một hệ thống cốt lõi hoạt động tốt, có sự phối hợp — không phải công nghệ cao cấp hay tập hợp tính năng lớn.
 
-## 10. Giả Định và Câu Hỏi Còn Bỏ Ngỏ
+## 10. Các Quyết Định và Giả Định Phạm Vi Đã Thống Nhất
 
-Các điểm sau đây chưa được quyết định và cần được làm rõ ở các giai đoạn phân tích sau:
+Các nội dung dưới đây là cơ sở nghiệp vụ đã được nhóm thống nhất cho phiên bản MVP, thay thế danh sách câu hỏi còn bỏ ngỏ ở các phiên bản trước:
 
-- Quy mô giả định của nhà hàng là gì (nhà hàng độc lập nhỏ hay cơ sở lớn hơn)?
-- Hệ thống chỉ hỗ trợ một nhà hàng duy nhất, hay có dự kiến hỗ trợ đa chi nhánh/đa nhà hàng sau này?
-- Những phương thức thanh toán nào cần được hỗ trợ (chỉ tiền mặt, thẻ, ví điện tử, v.v.)?
-- Quản lý bàn (ví dụ: gán bàn, đặt bàn trước) có cần thiết cho phiên bản đầu tiên không?
-- Chức năng giao hàng/mang đi có được bao gồm không, hay hệ thống chỉ giới hạn ở việc đặt món tại chỗ?
-- Khách hàng có cần tạo tài khoản không, hay có thể đặt món mà không cần đăng ký?
-- Mức độ chi tiết mong đợi cho quản lý nhân sự là gì (ví dụ: xếp lịch ca làm, tính lương) so với chỉ kiểm soát truy cập theo vai trò cơ bản?
-- Những chỉ số báo cáo nào được xem là thiết yếu cho Quản lý trong phiên bản đầu tiên?
-- Tính năng đánh giá/phản hồi của khách hàng có được mong đợi trong phiên bản đầu tiên không, hay sẽ được hoãn lại cùng với tính năng gợi ý?
+- **Quy mô và phạm vi triển khai:** MVP hướng đến mô hình vận hành một nhà hàng; không triển khai đa nhà hàng/đa chi nhánh trong phạm vi hiện tại.
+- **Thanh toán:** Mỗi đơn có tối đa một lần ghi nhận thanh toán. Tích hợp nhiều nhà cung cấp thanh toán và split payment không thuộc MVP. Phương thức thanh toán cụ thể sẽ được xác định trong thiết kế chi tiết nếu cần.
+- **Bàn và thiết bị:** Tablet đặt món được cấu hình cố định với một bàn; đơn tạo từ tablet tự động gắn với bàn đó. Đặt bàn trước không thuộc luồng cốt lõi MVP.
+- **Hình thức phục vụ:** MVP tập trung vào đặt món tại chỗ; giao hàng và tích hợp đơn vị giao hàng bên thứ ba nằm ngoài phạm vi.
+- **Tài khoản khách hàng:** Khách có thể đặt món không cần tài khoản; đăng ký/đăng nhập là tùy chọn để lưu lịch sử đặt món.
+- **Quản lý nhân sự:** MVP tập trung vào hồ sơ nhân viên cơ bản, vai trò và quyền truy cập; xếp lịch ca và tính lương không thuộc phạm vi hiện tại.
+- **Báo cáo:** MVP cung cấp báo cáo vận hành cơ bản, trọng tâm là doanh thu và số lượng đơn hàng; các chỉ số nâng cao được xem xét sau.
+- **Đánh giá và phản hồi:** Không thuộc phạm vi MVP; có thể xem xét ở giai đoạn mở rộng sau khi hệ thống cốt lõi ổn định.
 
-Các nội dung trên đã được nhóm thảo luận, thống nhất và xác nhận là các quyết định nghiệp vụ chính thức của phiên bản MVP. Đây sẽ là cơ sở để triển khai các giai đoạn tiếp theo, bao gồm thiết kế use case, user flow, kiến trúc hệ thống và thiết kế cơ sở dữ liệu. Mọi thay đổi sau này cần được cập nhật và thống nhất lại trong tài liệu dự án.
+Các ngưỡng cấu hình, tiêu chí đo lường định lượng và chi tiết thao tác chưa được mô tả ở mức này sẽ được cụ thể hóa trong PRD và thiết kế use case/user flow; chúng không làm thay đổi các quyết định phạm vi nêu trên. Đây là cơ sở thống nhất cho các giai đoạn phân tích, thiết kế kiến trúc và thiết kế cơ sở dữ liệu. Mọi thay đổi phạm vi phải được nhóm xem xét, thống nhất và cập nhật trong tài liệu dự án.
 
 ---
 
