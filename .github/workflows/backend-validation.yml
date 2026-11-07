@@ -1,0 +1,46 @@
+name: Backend validation
+
+on:
+  push:
+    branches:
+      - member/minhhuy
+    paths:
+      - "backend/**"
+      - "prisma/**"
+      - ".github/workflows/backend-validation.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "prisma/**"
+      - ".github/workflows/backend-validation.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resman_ci?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Build NestJS
+        run: npm run build
