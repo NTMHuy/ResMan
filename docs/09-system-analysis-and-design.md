@@ -697,9 +697,9 @@ Mô hình mục tiêu được đề xuất là một hệ thống quản lý nh
 
 ---
 
-## 18. Phụ lục quyết định nghiệp vụ đã xác nhận — 28/10/2026
+## 18. [LEGACY — ĐÃ ĐƯỢC THAY THẾ] Phụ lục quyết định nghiệp vụ — 28/10/2026
 
-Phụ lục này là phần cập nhật có hiệu lực và **ưu tiên hơn các mô tả mâu thuẫn ở những mục trước**.
+Phụ lục này chỉ phản ánh quyết định tại thời điểm 28/10/2026. Các nội dung liên quan tài khoản khách, Kitchen Station, trạng thái món, kiểm kê và payment đã được cập nhật lại; **Mục 19 mới nhất và `docs/11-confirmed-business-rules.md` có hiệu lực ưu tiên**.
 
 ### 18.1 Đặt món, tài khoản khách và thiết bị tại bàn
 
