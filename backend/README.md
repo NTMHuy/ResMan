@@ -484,3 +484,8 @@ Không được tự giải quyết các mục trên bằng cách thêm trạng 
 - Customer access trong MVP là guest-only; không có customer account/login/customer_id.
 
 Các điểm trên ưu tiên hơn mọi mô tả cũ còn sót trong tài liệu supporting hoặc schema legacy. Đặc tả này vẫn là Draft; chưa phải backend implementation.
+
+
+## 17. Hướng dẫn chạy backend
+
+Workspace NestJS, cấu hình Prisma ORM 7, các lệnh cài đặt/chạy local và kiểm tra schema được mô tả tại [`backend/DEVELOPMENT.md`](DEVELOPMENT.md). Tài liệu này là hướng dẫn môi trường; backend hiện mới có bootstrap và health endpoint, chưa có module nghiệp vụ.
