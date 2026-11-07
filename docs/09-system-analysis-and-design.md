@@ -812,3 +812,38 @@ ResMan sử dụng một backend API trung tâm để phục vụ các giao di�
 ### 16.6 Những nội dung ngoài MVP
 
 Không đưa recipe/consumption, supplier/purchase order, split payment, loyalty, multi-branch hoặc AI recommendation vào migration MVP. Các nội dung Future/Post-MVP vẫn cần được duyệt riêng trước khi mở rộng schema.
+
+
+## 19. Đồng bộ theo quyết định nghiệp vụ mới nhất (07/11/2026)
+
+Phần này có hiệu lực ưu tiên khi các mục cũ trong tài liệu mâu thuẫn; nguồn nghiệp vụ chuẩn là `docs/11-confirmed-business-rules.md`.
+
+### 19.1 Kitchen — một hàng đợi chung
+
+- MVP chỉ có một hàng đợi bếp chung cho toàn bộ order item.
+- Không có Kitchen Station, kitchen ticket theo station, station routing, `stationId` hoặc `kitchen_station_id`.
+- Một order không bị giới hạn vào một station; không tách order theo khu vực bếp.
+- Trạng thái chuẩn ở cấp order item: `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`.
+- Không sử dụng `QUEUED`, `PREPARING`, `READY`, `SERVED`, `REJECTED` như trạng thái nghiệp vụ hiện hành.
+
+### 19.2 Payment — phương án B
+
+- Mỗi order tối đa một payment; nhân viên nhận đủ tiền rồi mới xác nhận trên hệ thống.
+- Không được xác nhận payment/đóng phiên nếu còn bất kỳ item `AWAITING_ACCEPTANCE`.
+- Có thể xác nhận payment/đóng phiên khi các item còn lại ở `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` hoặc `CANCELLED`; `IN_PREPARATION` không chặn thanh toán.
+- Tính tiền các item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED` khỏi tổng.
+- Tạo payment, lưu actor/time, đóng session và cập nhật bàn phải nằm trong cùng transaction.
+
+### 19.3 Inventory — kiểm kê linh hoạt, cảnh báo בלבד
+
+- Kiểm kê là các bản ghi độc lập; mỗi lần lưu actual quantity, counted_at, actor và note. Không bắt buộc đầu ngày/cuối ngày.
+- Stock-in/adjustment được lưu trong stock movement riêng; không gộp tổng nhập trong bản ghi kiểm kê.
+- Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món hoặc đổi menu availability.
+- Không tự động trừ kho theo đơn và không có recipe/ingredient mapping trong MVP.
+
+### 19.4 Customer — guest only
+
+- MVP không xây dựng tài khoản khách hàng, đăng nhập khách hàng hoặc lịch sử đặt món theo danh tính cá nhân.
+- Tablet được gắn với bàn; khách sử dụng phiên bàn hiện tại dưới chế độ guest.
+
+Các mô hình cũ như một order/one station, daily opening/closing inventory, automatic menu lock, customer account/customer_id và payment chỉ sau khi hoàn tất món đã bị thay thế bởi các quy tắc trên.
