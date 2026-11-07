@@ -11,7 +11,7 @@ Là khách hàng, tôi muốn xem món, giá và trạng thái để lựa chọ
 **Acceptance Criteria**
 - [ ] Xem được tên, giá, mô tả, danh mục và trạng thái món.
 - [ ] Có thể lọc danh mục/tìm kiếm nếu chức năng này được giữ trong UI hiện tại.
-- [ ] Khách không bắt buộc đăng nhập.
+- [ ] Khách sử dụng guest mode; MVP không có tài khoản hoặc đăng nhập khách hàng.
 - [ ] Món bị Quản lý tắt không thể đặt.
 - [ ] Tồn nguyên liệu thấp không tự động làm món chuyển sang không khả dụng.
 
@@ -65,6 +65,8 @@ Là Nhân viên Order, tôi muốn xem lịch sử đơn đã thanh toán để 
 - [ ] Quyền này không cấp quyền xem báo cáo quản lý.
 
 ## 3. Kitchen Staff
+
+- Toàn bộ món được hiển thị trong một hàng đợi bếp chung; không có Kitchen Station hoặc station routing.
 
 ### US-KIT-01 — Xem danh sách món cần xử lý
 **Acceptance Criteria**
@@ -130,8 +132,8 @@ Là Nhân viên Order, tôi muốn xác nhận thanh toán sau khi nhận đủ 
 - [ ] Khách yêu cầu thanh toán sau khi dùng bữa.
 - [ ] Nhân viên nhận đủ tiền rồi xác nhận trên hệ thống.
 - [ ] Một đơn chỉ có một payment; không hỗ trợ thanh toán một phần.
-- [ ] Chỉ item hoàn thành được tính tiền; item Đã hủy bị loại trừ.
-- [ ] Mọi item phải ở trạng thái đã hoàn thành hoặc trạng thái kết thúc phù hợp trước khi thanh toán.
+- [ ] Item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` được tính tiền; `AWAITING_ACCEPTANCE` và `CANCELLED` không tính.
+- [ ] Payment gate phương án B: chỉ bị chặn nếu còn item `AWAITING_ACCEPTANCE`; cho phép xác nhận khi item ở `IN_PREPARATION`.
 - [ ] Lưu người xác nhận và thời điểm.
 - [ ] Xác nhận payment làm đơn bất biến và đóng phiên.
 - [ ] Phương thức và định dạng hóa đơn vẫn là quyết định mở.
@@ -141,10 +143,18 @@ Là Nhân viên Order, tôi muốn xác nhận thanh toán sau khi nhận đủ 
 - Một phiên bàn có một đơn; mỗi bàn tối đa một phiên đang hoạt động.
 - Tablet gắn cố định với bàn; không có chuyển bàn trên phần mềm.
 - Server lưu trạng thái phiên và đơn; tablet tải lại dữ liệu khi kết nối lại.
-- Một đơn chỉ thuộc một kitchen station và có tối đa một kitchen ticket.
+- Một hàng đợi bếp chung; không có kitchen station, stationId hoặc kitchen ticket theo station.
 - Không có modifier, recipe/định mức, tự động trừ kho, nhà cung cấp/đơn mua hàng hoặc AI recommendation trong MVP.
 - Quản lý có toàn quyền nghiệp vụ của ba nhóm nhân viên; báo cáo chỉ dành cho Quản lý.
 
 ## 8. Các quyết định còn mở
 
 Xem Mục 10 trong [confirmed business rules](../../11-confirmed-business-rules.md). Không chuyển các câu hỏi này thành Acceptance Criteria bắt buộc trước khi có xác nhận.
+
+
+## 9. Quyết định bổ sung ngày 07/11/2026
+
+- Kitchen: phương án 2 — một hàng đợi bếp chung, không có station.
+- Payment: phương án B; `IN_PREPARATION` không chặn thanh toán, chỉ `AWAITING_ACCEPTANCE` chặn.
+- Customer: guest-only trong MVP; không tài khoản khách hàng.
+- Inventory: kiểm kê linh hoạt theo từng bản ghi độc lập; cảnh báo tồn thấp chỉ dành cho Nhân viên Kho; không tự động khóa món.

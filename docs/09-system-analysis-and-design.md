@@ -697,9 +697,9 @@ Mô hình mục tiêu được đề xuất là một hệ thống quản lý nh
 
 ---
 
-## 18. Phụ lục quyết định nghiệp vụ đã xác nhận — 28/10/2026
+## 18. [LEGACY — ĐÃ ĐƯỢC THAY THẾ] Phụ lục quyết định nghiệp vụ — 28/10/2026
 
-Phụ lục này là phần cập nhật có hiệu lực và **ưu tiên hơn các mô tả mâu thuẫn ở những mục trước**.
+Phụ lục này chỉ phản ánh quyết định tại thời điểm 28/10/2026. Các nội dung liên quan tài khoản khách, Kitchen Station, trạng thái món, kiểm kê và payment đã được cập nhật lại; **Mục 19 mới nhất và `docs/11-confirmed-business-rules.md` có hiệu lực ưu tiên**.
 
 ### 18.1 Đặt món, tài khoản khách và thiết bị tại bàn
 
@@ -860,3 +860,46 @@ Nguồn nghiệp vụ ưu tiên: [docs/11-confirmed-business-rules.md](11-confir
 - Nhân viên Order xem các bàn đang hoạt động, gọi món thay khách và xem lịch sử đơn đã thanh toán.
 - Chỉ Quản lý xem báo cáo: doanh thu ngày/tháng, số lượng món bán, món bán chạy, lịch sử đơn và tình trạng tồn kho.
 - Quản lý có toàn bộ quyền thao tác của Nhân viên Order, Bếp và Kho.
+
+
+## 19. Đồng bộ theo quyết định nghiệp vụ mới nhất (07/11/2026)
+
+Phần này có hiệu lực ưu tiên khi các mục cũ trong tài liệu mâu thuẫn; nguồn nghiệp vụ chuẩn là `docs/11-confirmed-business-rules.md`.
+
+### 19.1 Kitchen — một hàng đợi chung
+
+- MVP chỉ có một hàng đợi bếp chung cho toàn bộ order item.
+- Không có Kitchen Station, kitchen ticket theo station, station routing, `stationId` hoặc `kitchen_station_id`.
+- Một order không bị giới hạn vào một station; không tách order theo khu vực bếp.
+- Trạng thái chuẩn ở cấp order item: `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`.
+- Không sử dụng `QUEUED`, `PREPARING`, `READY`, `SERVED`, `REJECTED` như trạng thái nghiệp vụ hiện hành.
+
+### 19.2 Payment — phương án B
+
+- Mỗi order tối đa một payment; nhân viên nhận đủ tiền rồi mới xác nhận trên hệ thống.
+- Không được xác nhận payment/đóng phiên nếu còn bất kỳ item `AWAITING_ACCEPTANCE`.
+- Có thể xác nhận payment/đóng phiên khi các item còn lại ở `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` hoặc `CANCELLED`; `IN_PREPARATION` không chặn thanh toán.
+- Tính tiền các item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED` khỏi tổng.
+- Tạo payment, lưu actor/time, đóng session và cập nhật bàn phải nằm trong cùng transaction.
+
+### 19.3 Inventory — kiểm kê linh hoạt, cảnh báo tồn thấp
+
+- Kiểm kê là các bản ghi độc lập; mỗi lần lưu actual quantity, counted_at, actor và note. Không bắt buộc đầu ngày/cuối ngày.
+- Stock-in/adjustment được lưu trong stock movement riêng; không gộp tổng nhập trong bản ghi kiểm kê.
+- Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món hoặc đổi menu availability.
+- Không tự động trừ kho theo đơn và không có recipe/ingredient mapping trong MVP.
+
+### 19.4 Customer — guest only
+
+- MVP không xây dựng tài khoản khách hàng, đăng nhập khách hàng hoặc lịch sử đặt món theo danh tính cá nhân.
+- Tablet được gắn với bàn; khách sử dụng phiên bàn hiện tại dưới chế độ guest.
+
+Các mô hình cũ như một order/one station, daily opening/closing inventory, automatic menu lock, customer account/customer_id và payment chỉ sau khi hoàn tất món đã bị thay thế bởi các quy tắc trên.
+
+### 19.5 Các câu hỏi mở cũ đã được giải quyết
+
+- OQ về việc một order có thể thuộc nhiều kitchen station hay không: **đã giải quyết — không có station; dùng một hàng đợi chung**.
+- OQ về thanh toán nhiều lần/split payment: **đã giải quyết — một payment/order**.
+- OQ về payment chỉ sau khi hoàn tất món: **đã giải quyết — phương án B; `IN_PREPARATION` được phép**.
+- OQ về kiểm kê đầu ngày/cuối ngày: **đã giải quyết — kiểm kê độc lập, linh hoạt theo nhu cầu**.
+- OQ về tài khoản khách: **đã giải quyết — guest-only trong MVP**.

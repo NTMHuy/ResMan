@@ -85,3 +85,6 @@ ENV/
 *.apk
 *.aab
 *.ipa
+
+# Prisma Client generated source
+/backend/src/generated/prisma/

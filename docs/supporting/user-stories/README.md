@@ -200,3 +200,8 @@ Nếu các Open Questions làm thay đổi requirement hoặc business rule, c�
 Đối chiếu các User Stories hiện có với [confirmed-rules-alignment.md](confirmed-rules-alignment.md) và [docs/11-confirmed-business-rules.md](../../11-confirmed-business-rules.md). Các bảng quyền, Acceptance Criteria và quyết định mới trong hai tài liệu này được ưu tiên khi có nội dung cũ mâu thuẫn.
 
 Đặc biệt: không bắt buộc Order Staff xác nhận mọi lần gửi món; không dùng trạng thái Bị từ chối; không tự động khóa món do tồn thấp; gọi thêm tạo item mới; Nhân viên Order chỉ sửa ghi chú; đơn đã thanh toán bất biến.
+
+
+## Nguồn nghiệp vụ ưu tiên
+
+Đối chiếu [confirmed-rules-alignment.md](confirmed-rules-alignment.md). MVP sử dụng một hàng đợi bếp chung; payment gate phương án B; kiểm kê linh hoạt; tồn thấp chỉ cảnh báo Inventory Staff; guest-only, không tài khoản khách hàng. Các Open Questions cũ mâu thuẫn với các quyết định này đã được giải quyết và không còn là câu hỏi mở.

@@ -9,7 +9,7 @@
 ### F-CUS-01 — Xem menu
 - Khách xem danh sách món, giá, mô tả, danh mục và trạng thái khả dụng.
 - Trạng thái món không khả dụng do Quản lý thiết lập; không tự động đổi chỉ vì nguyên liệu dưới ngưỡng tồn.
-- Khách có thể đặt món với tư cách guest; không bắt buộc đăng nhập.
+- MVP chỉ hỗ trợ guest ordering trên tablet gắn với bàn; không có tài khoản hoặc đăng nhập khách hàng.
 
 ### F-CUS-02 — Gửi món và gọi thêm
 **Preconditions:** Nhân viên đã mở phiên cho bàn; phiên đang hoạt động; menu có món khả dụng.
@@ -68,6 +68,8 @@ Không cho phép thay đổi đơn sau khi payment đã được xác nhận và
 
 ## 3. F-KIT — Kitchen
 
+MVP sử dụng một hàng đợi bếp chung. Không có Kitchen Station, stationId, kitchen ticket riêng hoặc station routing; một order không bị giới hạn vào một station.
+
 ### F-KIT-01 — Danh sách món
 Hiển thị số thứ tự, tên món, trạng thái, giá và ghi chú. Bếp nhìn thấy giá món.
 
@@ -103,14 +105,15 @@ Nhập kho gồm chọn nguyên liệu, số lượng, đơn vị, ghi chú tùy
 - Tồn thấp không tự động khóa món.
 - Không tự động trừ kho theo đơn hàng.
 - Không quản lý recipe/định mức nguyên liệu, nhà cung cấp hoặc đơn mua hàng trong MVP.
-- Cách biểu diễn bản ghi kiểm kê đầu ngày/cuối ngày còn chờ xác nhận.
+- Kiểm kê là các bản ghi độc lập, linh hoạt; không bắt buộc đầu ngày/cuối ngày.
 
 ## 5. F-PAY — Payment
 
 - Khách yêu cầu thanh toán sau khi dùng bữa.
 - Nhân viên nhận đủ tiền và xác nhận payment.
 - Một order có tối đa một payment; không chia nhỏ hoặc thanh toán nhiều lần.
-- Chỉ thanh toán khi mọi item đã hoàn thành hoặc được giải quyết bằng trạng thái kết thúc phù hợp.
+- Áp dụng payment gate phương án B: chỉ chặn xác nhận/đóng phiên nếu còn item `AWAITING_ACCEPTANCE`; cho phép `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`.
+- Tính tiền item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED`.
 - Item Đã hủy không tính vào tổng tiền.
 - Lưu người xác nhận và thời điểm.
 - Sau payment, đơn bất biến và phiên bàn đóng.
@@ -132,7 +135,7 @@ Chỉ Quản lý được xem báo cáo. Nhân viên Order chỉ có quyền xem
 - Điều kiện trạng thái cụ thể để Bếp hủy món.
 - Có cho phép chuyển Đã hoàn thành về trạng thái trước đó không.
 - Hình thức xuất/in/tải hóa đơn.
-- Giữ nhãn kiểm kê đầu ngày/cuối ngày hay dùng các lần kiểm kê độc lập.
+- Kiểm kê đầu ngày/cuối ngày hay độc lập: đã giải quyết — dùng các lần kiểm kê độc lập.
 - Quy tắc quy đổi đơn vị.
 - Danh sách phương thức thanh toán.
 - Quy trình điều chỉnh sau khi payment đã xác nhận.
@@ -145,5 +148,15 @@ Chỉ Quản lý được xem báo cáo. Nhân viên Order chỉ có quyền xem
 - [ ] Không còn tự động khóa món do tồn kho thấp.
 - [ ] Không còn tự động trừ kho hoặc recipe/định mức trong MVP.
 - [ ] Quyền sửa/hủy/gọi thêm đúng ma trận.
-- [ ] Payment loại trừ item Đã hủy và khóa đơn sau xác nhận.
+- [ ] Payment gate phương án B cho phép item IN_PREPARATION và chặn khi còn AWAITING_ACCEPTANCE.
+- [ ] Không có Kitchen Station/station routing.
+- [ ] Kiểm kê linh hoạt; cảnh báo tồn thấp chỉ dành cho Nhân viên Kho.
 - [ ] Các điểm chưa quyết định được giữ ở trạng thái Open.
+
+
+## 9. Quyết định bổ sung ngày 07/11/2026
+
+- Kitchen: một hàng đợi chung, không có station.
+- Payment: phương án B; không cần chờ `COMPLETED` nếu mọi item đã được Bếp tiếp nhận trở lên hoặc đã `CANCELLED`.
+- Inventory: kiểm kê độc lập; cảnh báo thấp chỉ gửi Inventory Staff; không tự động khóa món.
+- Customer: guest-only trong MVP, không customer account.

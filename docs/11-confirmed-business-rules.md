@@ -22,7 +22,7 @@ Hệ thống có năm vai trò chính: Khách hàng, Nhân viên Order, Nhân vi
 - Dữ liệu phiên bàn và đơn hàng được lưu ở server. Tablet chỉ kết nối để hiển thị và gửi thao tác; khi khởi động lại hoặc kết nối lại, tablet tải dữ liệu phiên đang hoạt động từ server.
 - Không có chức năng chuyển bàn/đổi bàn trên phần mềm trong MVP; nếu cần đổi vị trí tablet thì nhân viên di chuyển thiết bị vật lý.
 - Mỗi bàn chỉ có tối đa một phiên đang hoạt động.
-- Khách có thể đặt món với tư cách guest; đăng nhập khách hàng không bắt buộc.
+- MVP chỉ hỗ trợ khách đặt món theo chế độ guest trên tablet gắn với bàn; không xây dựng tài khoản khách hàng hoặc lưu lịch sử đặt món theo danh tính cá nhân.
 - AI gợi ý món ăn là định hướng tương lai, không thuộc MVP.
 
 ## 3. Phiên bàn và đặt món
@@ -36,6 +36,7 @@ Hệ thống có năm vai trò chính: Khách hàng, Nhân viên Order, Nhân vi
 - Yêu cầu thanh toán và xác nhận thanh toán là hai hành động khác nhau.
 - Khách liên hệ nhân viên để yêu cầu thanh toán; không có thao tác tự thanh toán độc lập trên tablet trong quy trình MVP.
 - Mỗi phiên bàn có một đơn hàng; các lần gọi món tiếp theo được thêm vào cùng đơn đó.
+- **Quyết định bếp đã xác nhận (07/11/2026):** MVP sử dụng một hàng đợi bếp chung. Không phân chia Kitchen Station, không định tuyến món theo station và không ràng buộc một order thuộc một station. Quyết định này thay thế giả định station trong tài liệu cũ.
 
 ### 3.2 Đặt món và gọi thêm
 
@@ -116,7 +117,9 @@ Khi bếp đã chuyển món sang “Đang chế biến”, Nhân viên Order kh
 - Nhân viên nhận đủ tiền và xác nhận thanh toán trên hệ thống.
 - Một đơn chỉ có một lần thanh toán; không hỗ trợ tách hóa đơn hoặc thanh toán nhiều lần.
 - Phương thức thanh toán cụ thể được để lại cho giai đoạn sau.
-- Chỉ được thanh toán khi mọi món trong đơn đã hoàn thành hoặc đã được giải quyết bằng trạng thái kết thúc phù hợp. Món đã hủy không được tính vào số tiền phải thanh toán.
+- **Điều kiện xác nhận thanh toán đã chốt (phương án B):** được xác nhận payment và đóng phiên khi mọi order item đều ở `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` hoặc `CANCELLED`; chỉ cần còn một item `AWAITING_ACCEPTANCE` thì chưa được xác nhận/đóng phiên.
+- Tính tiền các item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED` khỏi tổng tiền. Vì vậy không bắt buộc chờ món `IN_PREPARATION` hoàn thành mới được xác nhận thanh toán.
+- Món đã hủy không được tính vào số tiền phải thanh toán.
 - Khi xác nhận thanh toán, hệ thống lưu lịch sử thanh toán, người xác nhận và thời điểm; sau đó đóng phiên bàn.
 - Đơn đã thanh toán không được chỉnh sửa.
 - Phần tổng kết thanh toán phải liệt kê các món được tính tiền và loại trừ món đã hủy.
@@ -159,8 +162,6 @@ Khi điều chỉnh tồn, hệ thống lưu lịch sử tương tự; không gh
 - Ngưỡng thấp chỉ tạo cảnh báo kho; không tự động làm món ăn chuyển sang hết hàng/không khả dụng.
 - Không tự động trừ kho khi bán món.
 - MVP không quản lý công thức/định mức nguyên liệu cho món và không có quy trình nhà cung cấp/đơn mua hàng.
-
-**Cần làm rõ:** Có giữ khái niệm bản ghi kiểm kê “đầu ngày/cuối ngày” nhưng cho phép thực hiện linh hoạt, hay chuyển hoàn toàn sang các lần kiểm kê độc lập. Chưa được tự chọn một phương án.
 
 ## 7. Nhân viên Order
 
@@ -208,7 +209,15 @@ Các nội dung đã xác định không thuộc MVP:
 1. Bếp được phép hủy món ở những trạng thái cụ thể nào, nhất là sau khi đã bắt đầu chế biến.
 2. Có cho phép chuyển món từ “Đã hoàn thành” về trạng thái trước đó hay không.
 3. Hình thức xuất/in/tải hóa đơn hoặc kết quả thanh toán.
-4. Kiểm kê có tiếp tục dùng nhãn đầu ngày/cuối ngày hay chỉ là các lần kiểm kê linh hoạt.
 5. Quy tắc chuyển đổi đơn vị khi nhập kho khác đơn vị chuẩn của nguyên liệu (nếu phát sinh).
 6. Danh sách phương thức thanh toán.
 7. Có cần quy trình điều chỉnh riêng sau khi đơn đã thanh toán hay không.
+
+
+## 11. Quyết định bổ sung đã xác nhận ngày 07/11/2026
+
+- **Kitchen Station:** chọn phương án 2 — một hàng đợi bếp chung cho toàn bộ món. Không có Kitchen Station, station routing, stationId hoặc ràng buộc một order thuộc một station. Quyết định này thay thế mọi nội dung cũ trái ngược trong PRD, tài liệu supporting, schema và đặc tả backend.
+- **Payment gate:** áp dụng phương án B như Mục 5: chỉ chặn thanh toán/đóng phiên khi còn item `AWAITING_ACCEPTANCE`; cho phép item `IN_PREPARATION`.
+
+
+Các điểm OQ cũ liên quan đến Kitchen Station (nếu xuất hiện trong PRD/System Analysis) và mô hình kiểm kê đầu ngày/cuối ngày đã được giải quyết theo các quyết định trên. Không tiếp tục giữ chúng dưới dạng câu hỏi mở.
