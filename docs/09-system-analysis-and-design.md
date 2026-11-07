@@ -834,7 +834,7 @@ Phần này có hiệu lực ưu tiên khi các mục cũ trong tài liệu mâu
 - Tính tiền các item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED` khỏi tổng.
 - Tạo payment, lưu actor/time, đóng session và cập nhật bàn phải nằm trong cùng transaction.
 
-### 19.3 Inventory — kiểm kê linh hoạt, cảnh báo בלבד
+### 19.3 Inventory — kiểm kê linh hoạt, cảnh báo tồn thấp
 
 - Kiểm kê là các bản ghi độc lập; mỗi lần lưu actual quantity, counted_at, actor và note. Không bắt buộc đầu ngày/cuối ngày.
 - Stock-in/adjustment được lưu trong stock movement riêng; không gộp tổng nhập trong bản ghi kiểm kê.
