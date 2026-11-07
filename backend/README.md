@@ -473,3 +473,13 @@ Không được tự giải quyết các mục trên bằng cách thêm trạng 
 ---
 
 **Lưu ý đồng bộ:** `docs/10-database-design.md` v3.1 và `prisma/schema.prisma` đã được đồng bộ theo các quyết định MVP hiện tại, bao gồm payment gate phương án B và `AuditLog`. Migration runbook nằm tại `prisma/migrations/README.md`. Schema và migration vẫn cần được validate/sinh bằng Prisma CLI trong workspace backend trước khi áp dụng; không có migration nào đã chạy lên database.
+
+
+## 16. Đồng bộ quyết định ngày 07/11/2026
+
+- Kitchen đã được người dùng chốt **phương án 2**: một hàng đợi bếp chung, không có Kitchen Station/stationId/station routing. Không tạo KitchenStation/KitchenTicket và không giới hạn order theo station.
+- Payment áp dụng phương án B tại §6.2: không xác nhận/đóng phiên nếu còn `AWAITING_ACCEPTANCE`; cho phép `IN_PREPARATION`; tính tiền `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE`, `CANCELLED`.
+- Inventory dùng stocktake độc lập, linh hoạt; không bắt buộc đầu ngày/cuối ngày. Low-stock chỉ cảnh báo Inventory Staff; không tự động khóa menu, không tự trừ kho và không có recipe mapping.
+- Customer access trong MVP là guest-only; không có customer account/login/customer_id.
+
+Các điểm trên ưu tiên hơn mọi mô tả cũ còn sót trong tài liệu supporting hoặc schema legacy. Đặc tả này vẫn là Draft; chưa phải backend implementation.
