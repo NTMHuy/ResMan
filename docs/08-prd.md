@@ -555,10 +555,10 @@ AI được sử dụng xuyên suốt vòng đời phát triển dự án — ph
 |---|---|---|---|---|
 | OQ-01 | Có chỉ số đo lường thành công cụ thể nào (thời gian xử lý đơn, tỷ lệ lỗi...) không? | Product Goals | Ảnh hưởng đến việc đánh giá thành công định lượng của dự án | Open |
 | OQ-02 | Phương thức thanh toán cụ thể là gì (tiền mặt/thẻ/ví điện tử)? | F-012, Phase 4 | Ảnh hưởng đến phạm vi chi tiết của tính năng thanh toán | Needs Decision |
-| OQ-03 | Ngưỡng "tồn kho thấp" do ai/thế nào thiết lập? | F-010, Phase 4 | Ảnh hưởng đến cơ chế cảnh báo tồn kho | Needs Decision |
-| OQ-04 | Điều kiện chính xác để huỷ đơn hàng là gì? | F-007, Phase 2/3 | Ảnh hưởng đến business rule BR-003 | Needs Decision |
+| OQ-03 | Ngưỡng tồn kho thấp do ai thiết lập? | F-010, Phase 4 | Quản lý hoặc Nhân viên Kho được thiết lập ngưỡng; cảnh báo chỉ gửi Nhân viên Kho | Resolved — Confirmed Business Rules |
+| OQ-04 | Điều kiện hủy item theo từng vai trò là gì? | F-007, Phase 2/3 | Khách chỉ hủy trước khi Bếp tiếp nhận; Order Staff theo ma trận trạng thái; điều kiện hủy của Bếp vẫn cần làm rõ | Partially Resolved |
 | OQ-05 | Việc chuyển đơn từ "đã xác nhận" sang hàng đợi bếp là tự động hay thủ công? | F-006, Phase 3 | Ảnh hưởng đến thiết kế thao tác của Nhân viên Order | Needs Decision |
-| OQ-06 | Khách hàng có cần tài khoản để hỗ trợ theo dõi đơn và gợi ý AI hoạt động đầy đủ? | F-007, F-016 | F-016 phụ thuộc vào việc nhận diện khách hàng qua nhiều lần đặt món | Open |
+| OQ-06 | Khách hàng có cần tài khoản trong MVP? | F-007, F-016 | MVP guest-only; tài khoản khách và nhận diện cá nhân thuộc phạm vi ngoài MVP/tương lai nếu được duyệt | Resolved — Guest Only |
 | OQ-07 | Khi Quản lý xoá món đang có trong đơn hàng chưa hoàn tất, hệ thống xử lý ra sao? | F-001, F-003 | Ảnh hưởng đến tính toàn vẹn dữ liệu đơn hàng đang xử lý | Open |
 | OQ-08 | Dự án có đủ nguồn lực để thực hiện Phase 6 và Phase 7, hay dừng lại ở MVP? | Phase 6, Phase 7 | Ảnh hưởng đến kế hoạch thời gian thực tế | Needs Decision |
 | OQ-09 | Có cần dịch vụ thông báo bên ngoài (SMS/Email) hay chỉ thông báo trong ứng dụng là đủ? | Toàn hệ thống | Ảnh hưởng đến việc có cần bổ sung actor/hệ thống bên ngoài | Open |
@@ -688,3 +688,15 @@ Phần này cập nhật và thay thế mọi nội dung trái ngược ở các
 - **Item status:** dùng `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`; không dùng `QUEUED`, `PREPARING`, `READY`, `SERVED`, `REJECTED` như trạng thái nghiệp vụ hiện hành.
 
 Các quyết định trên là nguồn chuẩn khi đọc PRD; những đoạn legacy chưa được xóa hết phải được hiểu là đã bị thay thế bởi mục 22 và `docs/11-confirmed-business-rules.md`.
+
+
+## 23. Trạng thái cập nhật các Open Questions (07/11/2026)
+
+- OQ-02: phương thức thanh toán vẫn mở; không ảnh hưởng đến payment gate phương án B đã chốt.
+- OQ-03: đã giải quyết — Quản lý hoặc Nhân viên Kho thiết lập ngưỡng; cảnh báo tồn thấp chỉ dành cho Nhân viên Kho.
+- OQ-04: đã giải quyết một phần — quyền hủy của Khách và Order Staff đã có ma trận; điều kiện hủy cụ thể của Bếp vẫn mở.
+- OQ-05: Order Staff không bắt buộc xác nhận mọi lần gửi món; chi tiết thao tác dispatch nếu có không được tự suy diễn thành một bước bắt buộc.
+- OQ-06: đã giải quyết — guest-only trong MVP, không có customer account.
+- Kitchen Station / một hàng đợi chung: đã giải quyết — chọn phương án 2, không có station.
+- Payment gate: đã giải quyết — phương án B, cho phép thanh toán khi item đang `IN_PREPARATION` nếu không còn item `AWAITING_ACCEPTANCE`.
+- Kiểm kê: đã giải quyết — bản ghi độc lập, linh hoạt; không bắt buộc đầu ngày/cuối ngày.
