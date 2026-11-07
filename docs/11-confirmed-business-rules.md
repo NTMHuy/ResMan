@@ -163,8 +163,6 @@ Khi điều chỉnh tồn, hệ thống lưu lịch sử tương tự; không gh
 - Không tự động trừ kho khi bán món.
 - MVP không quản lý công thức/định mức nguyên liệu cho món và không có quy trình nhà cung cấp/đơn mua hàng.
 
-**Cần làm rõ:** Có giữ khái niệm bản ghi kiểm kê “đầu ngày/cuối ngày” nhưng cho phép thực hiện linh hoạt, hay chuyển hoàn toàn sang các lần kiểm kê độc lập. Chưa được tự chọn một phương án.
-
 ## 7. Nhân viên Order
 
 Nhân viên Order được:
@@ -211,7 +209,6 @@ Các nội dung đã xác định không thuộc MVP:
 1. Bếp được phép hủy món ở những trạng thái cụ thể nào, nhất là sau khi đã bắt đầu chế biến.
 2. Có cho phép chuyển món từ “Đã hoàn thành” về trạng thái trước đó hay không.
 3. Hình thức xuất/in/tải hóa đơn hoặc kết quả thanh toán.
-4. Kiểm kê có tiếp tục dùng nhãn đầu ngày/cuối ngày hay chỉ là các lần kiểm kê linh hoạt.
 5. Quy tắc chuyển đổi đơn vị khi nhập kho khác đơn vị chuẩn của nguyên liệu (nếu phát sinh).
 6. Danh sách phương thức thanh toán.
 7. Có cần quy trình điều chỉnh riêng sau khi đơn đã thanh toán hay không.
@@ -221,3 +218,6 @@ Các nội dung đã xác định không thuộc MVP:
 
 - **Kitchen Station:** chọn phương án 2 — một hàng đợi bếp chung cho toàn bộ món. Không có Kitchen Station, station routing, stationId hoặc ràng buộc một order thuộc một station. Quyết định này thay thế mọi nội dung cũ trái ngược trong PRD, tài liệu supporting, schema và đặc tả backend.
 - **Payment gate:** áp dụng phương án B như Mục 5: chỉ chặn thanh toán/đóng phiên khi còn item `AWAITING_ACCEPTANCE`; cho phép item `IN_PREPARATION`.
+
+
+Các điểm OQ cũ liên quan đến Kitchen Station (nếu xuất hiện trong PRD/System Analysis) và mô hình kiểm kê đầu ngày/cuối ngày đã được giải quyết theo các quyết định trên. Không tiếp tục giữ chúng dưới dạng câu hỏi mở.
