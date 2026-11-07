@@ -895,3 +895,11 @@ Phần này có hiệu lực ưu tiên khi các mục cũ trong tài liệu mâu
 - Tablet được gắn với bàn; khách sử dụng phiên bàn hiện tại dưới chế độ guest.
 
 Các mô hình cũ như một order/one station, daily opening/closing inventory, automatic menu lock, customer account/customer_id và payment chỉ sau khi hoàn tất món đã bị thay thế bởi các quy tắc trên.
+
+### 19.5 Các câu hỏi mở cũ đã được giải quyết
+
+- OQ về việc một order có thể thuộc nhiều kitchen station hay không: **đã giải quyết — không có station; dùng một hàng đợi chung**.
+- OQ về thanh toán nhiều lần/split payment: **đã giải quyết — một payment/order**.
+- OQ về payment chỉ sau khi hoàn tất món: **đã giải quyết — phương án B; `IN_PREPARATION` được phép**.
+- OQ về kiểm kê đầu ngày/cuối ngày: **đã giải quyết — kiểm kê độc lập, linh hoạt theo nhu cầu**.
+- OQ về tài khoản khách: **đã giải quyết — guest-only trong MVP**.
