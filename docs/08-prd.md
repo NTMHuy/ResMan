@@ -602,37 +602,37 @@ Phụ lục này cập nhật và thay thế mọi mô tả trước đây có n
 
 - **FR-CUS-01:** Mỗi tablet tại nhà hàng phải được cấu hình gắn với một bàn cụ thể. Đơn tạo từ tablet phải tự động gắn với bàn đã cấu hình.
 - **FR-CUS-02:** Khách có thể đặt món không cần tài khoản.
-- **FR-CUS-03:** Khách có thể đăng ký/đăng nhập tùy chọn. Khi đăng nhập, đơn phát sinh phải liên kết với tài khoản khách để lưu lịch sử đặt món.
-- **FR-CUS-04:** Tablet dùng chung phải hỗ trợ đăng xuất/kết thúc phiên khách trước khi người tiếp theo sử dụng.
+- **FR-CUS-03:** Không xây dựng tài khoản khách hàng trong MVP; khách sử dụng chế độ guest.
+- **FR-CUS-04:** Tablet được gắn vật lý với bàn; dữ liệu phiên bàn và đơn hàng được tải từ server khi kết nối lại. Không quản lý danh tính cá nhân của khách trên tablet.
 - **FR-CUS-05:** Mỗi món trong đơn có trường ghi chú tự do để khách ghi yêu cầu đặc biệt; không có danh sách modifier/options cấu hình sẵn trong MVP.
 
 ### 21.2 Xử lý món và phối hợp bếp
 
-- **FR-KIT-01:** Sau khi Nhân viên Order xác nhận và điều phối, các món trong đơn được đưa vào hàng đợi của một trạm bếp duy nhất.
-- **FR-KIT-02:** Bếp có thể tiếp nhận món, bắt đầu chế biến và đánh dấu món hoàn thành. Nhân viên Order nhìn thấy món READY để giao đúng bàn.
-- **FR-KIT-03:** Trạng thái được quản lý ở cấp món: QUEUED, PREPARING, READY, SERVED, REJECTED, CANCELLED.
-- **FR-KIT-04:** Bếp có thể từ chối một món không thể chế biến; bắt buộc ghi lý do. Hệ thống phải thông báo lý do cho Nhân viên Order và hiển thị kết quả phù hợp cho khách.
-- **FR-KIT-05:** Khách hoặc Nhân viên Order có thể hủy món khi món đang QUEUED và bếp chưa tiếp nhận. Khi món đã PREPARING, khách không thể tự hủy.
+- **FR-KIT-01:** Mọi món được gửi vào một hàng đợi bếp chung; MVP không phân chia Kitchen Station hoặc định tuyến món theo station.
+- **FR-KIT-02:** Bếp tiếp nhận, bắt đầu chế biến và đánh dấu hoàn thành từng món; trạng thái được hiển thị trên tablet và giao diện nhân viên.
+- **FR-KIT-03:** Trạng thái chuẩn cấp món: `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`.
+- **FR-KIT-04:** Không có trạng thái hoặc thao tác “Từ chối món”. Bếp có thao tác hủy món; ma trận trạng thái được phép hủy và yêu cầu ghi lý do vẫn là nội dung cần làm rõ.
+- **FR-KIT-05:** Khách chỉ được hủy khi món còn `AWAITING_ACCEPTANCE`. Nhân viên Order hủy/sửa ghi chú theo ma trận quyền tại tài liệu Confirmed Business Rules.
 - **FR-KIT-06:** Từ chối/hủy một món không tự động hủy các món còn lại trong đơn. Đơn phải thể hiện kết quả từng món và trạng thái tổng hợp phù hợp.
-- **FR-KIT-07:** Một đơn chỉ được chứa các món thuộc cùng một trạm bếp. Nếu khách chọn món từ nhiều trạm, hệ thống yêu cầu tách thành các đơn riêng; không tự chia ticket.
+- **FR-KIT-07:** Không có station, station routing hoặc giới hạn món theo trạm. Tất cả order item được hiển thị trong một hàng đợi bếp chung.
 
 ### 21.3 Kiểm kê và nhập hàng
 
-- **FR-INV-01:** Nhân viên kho ghi nhận số lượng thực tế đầu ngày cho từng nguyên liệu.
+- **FR-INV-01:** Nhân viên Kho có thể ghi nhận kiểm kê linh hoạt khi cần; mỗi lần kiểm kê lưu số lượng thực tế, thời điểm và người thực hiện.
 - **FR-INV-02:** Nhân viên kho ghi nhận lượng hàng nhập thêm trong ngày. Mỗi lần nhập phải lưu thời điểm, số lượng, người ghi nhận và ghi chú nếu có.
-- **FR-INV-03:** Nhân viên kho ghi nhận số lượng thực tế cuối ngày cho từng nguyên liệu.
-- **FR-INV-04:** Hệ thống lưu lịch sử kiểm kê theo ngày và nguyên liệu, gồm số lượng đầu ngày, tổng lượng nhập trong ngày, số lượng cuối ngày, ghi chú và người xác nhận.
-- **FR-INV-05:** Hệ thống cảnh báo khi số lượng cuối ngày thấp hơn ngưỡng tối thiểu để nhân viên kho/quản lý lên kế hoạch nhập hàng vào ngày tiếp theo.
+- **FR-INV-03:** Không bắt buộc phân loại kiểm kê đầu ngày/cuối ngày.
+- **FR-INV-04:** Mỗi lần kiểm kê độc lập lưu nguyên liệu, số lượng thực tế, thời điểm, người kiểm kê và ghi chú; lịch sử nhập/điều chỉnh tồn được lưu riêng trong stock movements.
+- **FR-INV-05:** Khi tồn thấp hơn ngưỡng, hệ thống tạo cảnh báo dành cho Nhân viên Kho.
 - **FR-INV-06:** Không tự động trừ tồn kho theo đơn hàng hoặc số món chế biến. Không tính lượng tiêu thụ chính xác nếu không có định mức nguyên liệu.
-- **FR-INV-07:** Hệ thống tự động chuyển món sang không khả dụng và chặn đơn mới nếu nguyên liệu bắt buộc được khai báo cho món có tồn kho bằng 0 hoặc dưới ngưỡng tối thiểu. Lý do và nguyên liệu gây thiếu phải được hiển thị. Khi tồn được cập nhật đủ, món có thể được mở bán lại theo quy tắc hệ thống/quản lý.
-- **FR-INV-08:** Việc tự động khóa món dựa trên mapping món-nguyên liệu và số liệu kiểm kê hiện có; hệ thống không cam kết dự đoán đủ nguyên liệu cho một số lượng phần đặt cụ thể vì MVP không có recipe/định lượng.
+- **FR-INV-07:** Cảnh báo tồn thấp không tự động thay đổi trạng thái khả dụng/bán của món. Quản lý chủ động bật/tắt hoặc cập nhật trạng thái món.
+- **FR-INV-08:** MVP không có mapping công thức/định mức nguyên liệu theo món; không tính nhu cầu nguyên liệu tự động.
 
 ### 21.4 Quy tắc và quyết định nghiệp vụ
 
 | ID | Quyết định | Trạng thái |
 |---|---|---|
-| DD-07 | Một đơn chỉ thuộc một trạm bếp | Đã xác nhận — ONE |
-| DD-08 | Tự động khóa món khi nguyên liệu thiếu theo ngưỡng tồn đã ghi nhận | Đã xác nhận — AUTO |
+| DD-07 | Một hàng đợi bếp chung; không có Kitchen Station hoặc station routing | Đã xác nhận — SHARED QUEUE (07/11/2026) |
+| DD-08 | Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món | Đã xác nhận — ALERT ONLY |
 | DD-09 | Khách và Order Staff được hủy món khi QUEUED, trước khi bếp tiếp nhận | Đã xác nhận — QUEUED |
 | DD-10 | Đăng nhập khách hàng là tùy chọn; hỗ trợ guest | Đã xác nhận — OPTIONAL |
 
@@ -653,25 +653,38 @@ Phần này làm rõ các yêu cầu đã được chủ dự án xác nhận v�
 
 ### 21.2 Quy tắc đơn hàng và bếp
 
-- Một đơn chỉ chứa các món thuộc cùng một trạm bếp. Nếu giỏ hàng có món thuộc nhiều trạm, hệ thống yêu cầu tách thành các đơn riêng; không tự động chia một đơn thành nhiều vé bếp.
+- Một đơn có thể chứa các món khác nhau; toàn bộ order item đi vào một hàng đợi bếp chung, không phân station.
 - Khách có thể ghi yêu cầu riêng bằng văn bản trong ghi chú của từng món; MVP không có modifier/options cấu hình sẵn.
-- Sau khi Order Staff xác nhận và điều phối, món vào hàng đợi bếp (QUEUED). Bếp nhận món và bắt đầu chế biến; sau khi hoàn tất, bếp chuyển món sang READY để Order Staff giao đúng bàn.
-- Khách và Order Staff chỉ được hủy món khi món còn QUEUED và bếp chưa nhận/bắt đầu chế biến.
-- Bếp có thể từ chối món không thể chế biến và phải cung cấp lý do. Việc từ chối một món không tự động hủy các món còn lại trong cùng đơn.
+- Khi khách/Order Staff gửi món thành công, món ở trạng thái `AWAITING_ACCEPTANCE` và xuất hiện trong hàng đợi bếp chung. Bếp tiếp nhận, chuyển sang `IN_PREPARATION`, rồi `COMPLETED`; có thể chuyển `IN_PREPARATION` về `ACCEPTED`.
+- Khách chỉ được hủy món khi còn `AWAITING_ACCEPTANCE`; quyền hủy/sửa ghi chú của Order Staff theo ma trận trạng thái đã xác nhận.
+- Không có trạng thái từ chối. Bếp có thao tác hủy món; điều kiện trạng thái cụ thể và yêu cầu lý do vẫn cần làm rõ.
 - Trạng thái từng món là nguồn chuẩn cho tiến độ bếp; mọi thay đổi phải có lịch sử trạng thái, tác nhân, thời gian và lý do nếu có.
-- Món có thể bị khóa bán tự động nếu nguyên liệu bắt buộc được cấu hình cho món có tồn bằng 0 hoặc dưới ngưỡng tồn đã thiết lập. Hệ thống phải hiển thị nguyên liệu/lý do và chặn tạo đơn mới cho món đó.
+- Tồn kho thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món hoặc thay đổi trạng thái menu.
 - Vì MVP không có định mức nguyên liệu theo khẩu phần, hệ thống không thể tính chính xác lượng nguyên liệu đủ cho một số phần món bất kỳ và không tự động trừ kho theo đơn.
 
 ### 21.3 Quy trình kiểm kê kho
 
-- Nhân viên Kho ghi nhận số lượng thực tế đầu ngày và cuối ngày.
+- Nhân viên Kho có thể kiểm kê linh hoạt khi cần; không bắt buộc bản ghi đầu ngày/cuối ngày.
 - Mọi lần nhập thêm trong ngày được ghi riêng trong sổ biến động kho.
 - Tổng nhập trong ngày được tổng hợp từ các bản ghi nhập kho, không lưu lặp thành một trường tổng nhập trong bản ghi kiểm kê.
 - Khi chốt số lượng cuối ngày, hệ thống đối chiếu số đếm thực tế với số dư hiện tại; chênh lệch được ghi thành biến động điều chỉnh để số dư và sổ lịch sử nhất quán.
-- Nếu số lượng kiểm kê cuối ngày thấp hơn ngưỡng, hệ thống tạo cảnh báo để nhân viên Kho chuẩn bị bổ sung cho ngày tiếp theo.
+- Nếu số lượng tồn thấp hơn ngưỡng cảnh báo, hệ thống tạo cảnh báo cho Nhân viên Kho, không tự động thay đổi menu availability.
 - Không suy diễn lượng tiêu thụ chính xác từ chênh lệch đầu ngày + nhập - cuối ngày vì chênh lệch có thể gồm tiêu thụ, hao hụt và sai số kiểm đếm.
 
 ### 21.4 Thanh toán và phạm vi dữ liệu
 
-- MVP hỗ trợ tối đa một lần ghi nhận thanh toán cho mỗi đơn; không chia hóa đơn hoặc split payment.
+- MVP hỗ trợ tối đa một payment cho mỗi order; nhân viên nhận đủ tiền rồi mới xác nhận. Payment gate phương án B: chỉ chặn xác nhận/đóng phiên khi còn item `AWAITING_ACCEPTANCE`; cho phép item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`. Tính tiền `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED` khỏi tổng.
 - Không đưa bảng công thức/định mức nguyên liệu, nhà cung cấp, đơn mua hàng, loyalty hoặc AI recommendation vào schema MVP.
+
+
+## 22. Đồng bộ quyết định nghiệp vụ mới nhất (07/11/2026)
+
+Phần này cập nhật và thay thế mọi nội dung trái ngược ở các mục trước của PRD. Nguồn quyết định: `docs/11-confirmed-business-rules.md`.
+
+- **Kitchen:** chọn phương án 2 — một hàng đợi bếp chung; không có Kitchen Station, stationId, kitchen ticket riêng hoặc station routing. Một order không bị giới hạn vào một station.
+- **Payment gate:** áp dụng phương án B. Chỉ chặn xác nhận thanh toán/đóng phiên nếu còn item `AWAITING_ACCEPTANCE`; `IN_PREPARATION` không chặn. Item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` được tính tiền; `CANCELLED` và `AWAITING_ACCEPTANCE` không tính.
+- **Inventory:** kiểm kê linh hoạt theo từng lần độc lập; lưu actual quantity, counted_at, actor và note. Không bắt buộc đầu ngày/cuối ngày. Tồn thấp chỉ tạo cảnh báo cho Nhân viên Kho; không tự động khóa món, không tự động trừ kho, không recipe/ingredient mapping.
+- **Customer:** MVP chỉ hỗ trợ guest/tablet theo bàn; không xây dựng tài khoản khách hàng hoặc lịch sử cá nhân của khách.
+- **Item status:** dùng `AWAITING_ACCEPTANCE`, `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`, `CANCELLED`; không dùng `QUEUED`, `PREPARING`, `READY`, `SERVED`, `REJECTED` như trạng thái nghiệp vụ hiện hành.
+
+Các quyết định trên là nguồn chuẩn khi đọc PRD; những đoạn legacy chưa được xóa hết phải được hiểu là đã bị thay thế bởi mục 22 và `docs/11-confirmed-business-rules.md`.
