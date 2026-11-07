@@ -5,16 +5,30 @@ Schema source: `prisma/schema.prisma`
 
 ## Current status
 
-The Prisma data model is prepared, including the confirmed payment gate (option B) and `AuditLog`. No migration has been generated or applied yet. The repository currently has no backend package manifest/Prisma CLI dependency, so do not run migration commands until the backend workspace has Prisma installed and a PostgreSQL `DATABASE_URL` configured.
+The Prisma data model is prepared, including the confirmed payment gate (option B) and `AuditLog`. No migration has been generated or applied yet. The backend workspace uses Prisma ORM 7. The datasource URL is configured in `backend/prisma.config.ts`; create `backend/.env` from `.env.example` before running validation or migration commands.
+
+## Prisma ORM 7 setup
+
+Run commands from `backend/`. Prisma 7 keeps the datasource provider in `schema.prisma` and reads the connection URL from `backend/prisma.config.ts`. The generated client is written to `backend/src/generated/prisma/` and is ignored by Git.
+
+```powershell
+Copy-Item .env.example .env
+npm install
+npm run prisma:format
+npm run prisma:validate
+npm run prisma:generate
+```
+
+Do not create a migration until `prisma validate` succeeds and a disposable PostgreSQL database is available.
 
 ## Generate the initial migration
 
 Run from the repository root after the backend workspace and Prisma CLI are initialized:
 
 ```powershell
-npx prisma format --schema prisma/schema.prisma
-npx prisma validate --schema prisma/schema.prisma
-npx prisma migrate dev --create-only --name init_resman --schema prisma/schema.prisma
+npm run prisma:format
+npm run prisma:validate
+npm run prisma:migrate:create
 ```
 
 Review the generated file under `prisma/migrations/<timestamp>_init_resman/migration.sql`. Append the PostgreSQL constraints below to that generated initial migration before applying it. Do not create a second migration containing the same constraints.
@@ -120,11 +134,11 @@ The gate is cross-table business logic and must be enforced in the payment-confi
 After reviewing the generated SQL:
 
 ```powershell
-npx prisma migrate dev --schema prisma/schema.prisma
-npx prisma generate --schema prisma/schema.prisma
+npm run prisma:migrate
+npm run prisma:generate
 ```
 
-For a shared/production database, deploy reviewed migrations with `npx prisma migrate deploy`; never use `prisma db push` as a substitute for versioned migrations.
+For a shared/production database, deploy reviewed migrations with `npm run prisma:migrate:deploy`; never use `prisma db push` as a substitute for versioned migrations.
 
 ## Important implementation notes
 
