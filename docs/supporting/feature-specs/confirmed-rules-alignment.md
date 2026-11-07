@@ -135,7 +135,7 @@ Chỉ Quản lý được xem báo cáo. Nhân viên Order chỉ có quyền xem
 - Điều kiện trạng thái cụ thể để Bếp hủy món.
 - Có cho phép chuyển Đã hoàn thành về trạng thái trước đó không.
 - Hình thức xuất/in/tải hóa đơn.
-- Giữ nhãn kiểm kê đầu ngày/cuối ngày hay dùng các lần kiểm kê độc lập.
+- Kiểm kê đầu ngày/cuối ngày hay độc lập: đã giải quyết — dùng các lần kiểm kê độc lập.
 - Quy tắc quy đổi đơn vị.
 - Danh sách phương thức thanh toán.
 - Quy trình điều chỉnh sau khi payment đã xác nhận.
