@@ -1,7 +1,7 @@
 # ResMan — Backend Specification
 
 > **Trạng thái:** Draft — đặc tả backend, chưa phải mã nguồn triển khai  
-> **Ngày cập nhật:** 06/11/2026  
+> **Ngày cập nhật:** 07/11/2026  
 > **Nhánh:** `member/minhhuy`  
 > **Công nghệ mục tiêu:** NestJS, PostgreSQL, Prisma  
 > **Phạm vi:** MVP quản lý nhà hàng, một nhà hàng
@@ -53,6 +53,7 @@ Quản lý kế thừa quyền thao tác nghiệp vụ của các vai trò nhân
 - Mỗi tablet được gán vật lý cho một bàn.
 - Việc đổi tablet giữa các bàn là thao tác vật lý; MVP không cần chức năng chuyển bàn trên phần mềm.
 - Một tablet chỉ phục vụ bàn được gán cho nó.
+- MVP guest-only: không xây dựng tài khoản/đăng nhập khách hàng, không lưu customer_id hoặc lịch sử đặt món theo danh tính cá nhân.
 - Không cần xác định khách cụ thể nào đã gọi từng món. Không cần lưu chủ sở hữu cá nhân cho từng order item.
 - Mọi món được gọi trên tablet thuộc phiên đang hoạt động của bàn đó.
 
