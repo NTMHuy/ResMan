@@ -22,7 +22,7 @@ Hệ thống có năm vai trò chính: Khách hàng, Nhân viên Order, Nhân vi
 - Dữ liệu phiên bàn và đơn hàng được lưu ở server. Tablet chỉ kết nối để hiển thị và gửi thao tác; khi khởi động lại hoặc kết nối lại, tablet tải dữ liệu phiên đang hoạt động từ server.
 - Không có chức năng chuyển bàn/đổi bàn trên phần mềm trong MVP; nếu cần đổi vị trí tablet thì nhân viên di chuyển thiết bị vật lý.
 - Mỗi bàn chỉ có tối đa một phiên đang hoạt động.
-- Khách có thể đặt món với tư cách guest; đăng nhập khách hàng không bắt buộc.
+- MVP chỉ hỗ trợ khách đặt món theo chế độ guest trên tablet gắn với bàn; không xây dựng tài khoản khách hàng hoặc lưu lịch sử đặt món theo danh tính cá nhân.
 - AI gợi ý món ăn là định hướng tương lai, không thuộc MVP.
 
 ## 3. Phiên bàn và đặt món
