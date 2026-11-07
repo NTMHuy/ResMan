@@ -79,3 +79,12 @@ Cho phép Nhân viên Order ghi nhận thanh toán cho đơn hàng.
 ## Review Gate
 
 `Draft - Awaiting Review`
+
+
+## Quyết định thanh toán đã xác nhận (07/11/2026)
+
+- Một order tối đa một payment; không split payment và không thanh toán nhiều lần.
+- Nhân viên nhận đủ tiền trước, sau đó mới xác nhận payment trên hệ thống.
+- Áp dụng phương án B: không được xác nhận payment/đóng phiên khi còn item `AWAITING_ACCEPTANCE`; được phép khi các item còn lại ở `ACCEPTED`, `IN_PREPARATION`, `COMPLETED` hoặc `CANCELLED`.
+- Tính tiền item `ACCEPTED`, `IN_PREPARATION`, `COMPLETED`; loại `AWAITING_ACCEPTANCE` và `CANCELLED`.
+- Phương thức thanh toán và hình thức xuất/in/tải hóa đơn vẫn chưa được quyết định. Các mục cũ hỏi có hỗ trợ thanh toán một phần hay chờ hoàn thành món đã bị thay thế.
