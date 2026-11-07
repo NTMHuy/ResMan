@@ -552,3 +552,22 @@ Artifact **3.3 Requirement Analysis** chỉ được chuyển sang **Approved** 
 - [ ] Open Questions.
 - [ ] Human Decision Required.
 - [ ] Glossary Update.
+
+
+---
+
+## 18. Cập nhật sau khi Product Owner xác nhận nghiệp vụ
+
+Các phần Open Questions, Gap Analysis, Assumptions và Dependency Notes ở trên được lập trước khi hoàn tất xác nhận nghiệp vụ. Vì vậy, không được tiếp tục coi các câu hỏi sau là chưa có quyết định:
+- Khách có cần đăng nhập: không bắt buộc, hỗ trợ guest.
+- Quản lý bàn: nằm trong MVP; Quản lý và Nhân viên Order mở phiên.
+- Takeaway/đặt bàn trước: không đưa vào MVP theo phạm vi hiện tại; không có đặt bàn trước.
+- Luồng món bếp: Chờ tiếp nhận → Đã tiếp nhận → Đang chế biến → Đã hoàn thành; có nhánh Đã hủy; không có Bị từ chối.
+- Hủy/sửa của khách và Order Staff: áp dụng ma trận quyền trong tài liệu nghiệp vụ chuẩn.
+- Inventory: cảnh báo tồn thấp, không tự động khóa món và không tự động trừ kho; không có recipe/định mức.
+- Thanh toán: một payment cho một order, không chia nhỏ; nhân viên xác nhận sau khi nhận đủ tiền; item đã hủy không tính tiền.
+- Nhân viên Order xem lịch sử đơn đã thanh toán; chỉ Quản lý xem báo cáo.
+
+Các câu hỏi còn mở phải được lấy từ [docs/11-confirmed-business-rules.md](../11-confirmed-business-rules.md), không giữ các câu hỏi cũ đã được giải quyết như yêu cầu chờ người dùng xác nhận lần nữa.
+
+Phần phân tích này cần được hiệu chỉnh lại dependency: Inventory là module quản lý tồn độc lập trong MVP, không phải luồng tự động trừ nguyên liệu hoặc điều kiện khóa menu. Không mô tả luồng Customer ↔ Order ↔ Kitchen ↔ Inventory như một chuỗi phụ thuộc dữ liệu bắt buộc.
