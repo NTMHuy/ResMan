@@ -348,3 +348,25 @@ Không lấy giá menu hiện tại để tính lại item cũ. Không chỉnh s
 - [ ] Mọi transition có history.
 - [ ] Mọi thay đổi balance có stock movement.
 - [ ] Không có station, recipe, customer account hoặc split payment trong MVP.
+
+
+## 8.1. Bổ sung đề xuất: IdempotencyRecord
+
+API contract dùng idempotency key cho thao tác tạo order items và xác nhận payment. Schema hiện tại chưa có nơi lưu key bền vững. Để bảo đảm retry không tạo dữ liệu trùng sau timeout/restart, đề xuất thêm model/bảng riêng sau khi duyệt:
+
+| Field | Type | Constraint |
+|---|---|---|
+| id | BIGINT | PK |
+| scope | VARCHAR(40) | NOT NULL; ví dụ ORDER_ITEMS, PAYMENT_CONFIRM |
+| idempotency_key | VARCHAR(120) | NOT NULL |
+| request_hash | VARCHAR(64) | NOT NULL; hash canonical request |
+| response_body | JSONB | NULL; response đã hoàn tất |
+| resource_type | VARCHAR(40) | NULL |
+| resource_id | VARCHAR(100) | NULL |
+| created_at | TIMESTAMPTZ | NOT NULL |
+| expires_at | TIMESTAMPTZ | NULL |
+
+Constraint đề xuất: UNIQUE(scope, idempotency_key). Cùng key + cùng request hash trả lại kết quả đã lưu; cùng key + request hash khác trả IDEMPOTENCY_KEY_REUSED. Việc ghi idempotency record và nghiệp vụ phải được phối hợp transaction. Retention/cleanup policy cần xác định trước khi triển khai.
+
+Đây là **model bổ sung**, không nằm trong 19 model hiện tại; không tự thêm vào Prisma schema trước khi được duyệt.
+
