@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
 import { CreateGuestOrderItemsDto } from "./dto/create-guest-order-items.dto.js";
 import { OrdersService } from "./orders.service.js";
 
@@ -9,6 +9,14 @@ export class OrdersController {
   @Get()
   getGuestSession(@Param("sessionCode") sessionCode: string) {
     return this.orders.getGuestSession(sessionCode);
+  }
+
+  @Delete("items/:itemId")
+  cancelItem(
+    @Param("sessionCode") sessionCode: string,
+    @Param("itemId", ParseIntPipe) itemId: number,
+  ) {
+    return this.orders.cancelGuestItem(sessionCode, BigInt(itemId));
   }
 
   @Post("items")
