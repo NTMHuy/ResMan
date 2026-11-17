@@ -6,6 +6,7 @@ import { DatabaseModule } from "./database/database.module.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { TablesModule } from "./tables/tables.module.js";
 import { UsersModule } from "./users/users.module.js";
+import { SessionsModule } from "./sessions/sessions.module.js";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from "./users/users.module.js";
     AuthModule,
     TablesModule,
     UsersModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
