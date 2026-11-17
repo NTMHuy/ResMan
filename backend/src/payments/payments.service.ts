@@ -77,9 +77,10 @@ export class PaymentsService {
           },
         });
 
+        const closedAt = new Date();
         const closed = await tx.diningSession.updateMany({
           where: { id: session.id, status: "OPEN" },
-          data: { status: "CLOSED", closedAt: new Date(), closedBy: actorId },
+          data: { status: "CLOSED", closedAt, closedBy: actorId },
         });
         if (closed.count !== 1) {
           throw new ConflictException("Phiên vừa được đóng bởi một thao tác khác");
@@ -113,7 +114,7 @@ export class PaymentsService {
           session: {
             id: session.id.toString(),
             status: "CLOSED",
-            closedAt: new Date().toISOString(),
+            closedAt: closedAt.toISOString(),
             table: {
               id: session.table.id.toString(),
               code: session.table.code,
@@ -214,5 +215,4 @@ export class PaymentsService {
       } : null,
     };
   }
-
 }
