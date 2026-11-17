@@ -14,8 +14,9 @@ export class ReportsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) {
         throw new BadRequestException("from phải có định dạng YYYY-MM-DD");
       }
+      const calendarDate = new Date(`${from}T00:00:00.000Z`);
       const start = new Date(`${from}T00:00:00+07:00`);
-      if (Number.isNaN(start.getTime()) || start.toISOString().slice(0, 10) !== from) {
+      if (Number.isNaN(start.getTime()) || calendarDate.toISOString().slice(0, 10) !== from) {
         throw new BadRequestException("from không phải ngày hợp lệ");
       }
       range.gte = start;
@@ -24,11 +25,12 @@ export class ReportsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) {
         throw new BadRequestException("to phải có định dạng YYYY-MM-DD");
       }
+      const calendarDate = new Date(`${to}T00:00:00.000Z`);
       const end = new Date(`${to}T00:00:00+07:00`);
-      if (Number.isNaN(end.getTime()) || end.toISOString().slice(0, 10) !== to) {
+      if (Number.isNaN(end.getTime()) || calendarDate.toISOString().slice(0, 10) !== to) {
         throw new BadRequestException("to không phải ngày hợp lệ");
       }
-      end.setUTCDate(end.getUTCDate() + 1);
+      end.setTime(end.getTime() + 24 * 60 * 60 * 1000);
       range.lt = end;
     }
     if (range.gte && range.lt && range.gte >= range.lt) {
