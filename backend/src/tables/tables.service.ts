@@ -22,7 +22,7 @@ export class TablesService {
   async findById(id: bigint) {
     const table = await this.prisma.diningTable.findUnique({
       where: { id },
-      include: { sessions: { where: { status: "OPEN" }, select: { id: true, sessionCode: true, status: true, openedAt: true } } },
+      include: { sessions: { where: { status: "OPEN" }, select: { id: true, status: true, openedAt: true } } },
     });
     if (!table) throw new NotFoundException("Không tìm thấy bàn");
     return {
