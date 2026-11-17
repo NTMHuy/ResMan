@@ -18,7 +18,7 @@ export class InventoryService {
 
   private parsePositiveId(value: string, field: string): bigint {
     if (!/^[0-9]+$/.test(value) || BigInt(value) < 1n) {
-      throw new BadRequestException(\`\${field} phải là số nguyên dương\`);
+      throw new BadRequestException(`${field} phải là số nguyên dương`);
     }
     return BigInt(value);
   }
@@ -35,10 +35,10 @@ export class InventoryService {
 
   private decimal(value: string, field: string, allowZero = true): Prisma.Decimal {
     if (!/^[0-9]+(\.[0-9]{1,3})?$/.test(value)) {
-      throw new BadRequestException(\`\${field} phải là số không âm, tối đa 3 chữ số thập phân\`);
+      throw new BadRequestException(`${field} phải là số không âm, tối đa 3 chữ số thập phân`);
     }
     const parsed = new Prisma.Decimal(value);
-    if (!allowZero && parsed.lte(0)) throw new BadRequestException(\`\${field} phải lớn hơn 0\`);
+    if (!allowZero && parsed.lte(0)) throw new BadRequestException(`${field} phải lớn hơn 0`);
     return parsed;
   }
 
@@ -236,7 +236,7 @@ export class InventoryService {
               movementType: "COUNT_ADJUSTMENT",
               quantityDelta: delta,
               reason: "Điều chỉnh theo kết quả kiểm kê",
-              referenceCode: \`COUNT-\${record.id}\`,
+              referenceCode: `COUNT-${record.id}`,
               createdBy: actorId,
             },
           });
