@@ -81,6 +81,8 @@ For local development migration authoring, follow `../prisma/migrations/README.m
 
 ## Current implementation boundary
 
-Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, guest order-item creation/cancellation, Order Staff item operations, kitchen queue/status workflow, payment confirmation with atomic session closure, manual inventory management with stock-in and physical counts, and management reports for revenue, sales, orders, and inventory.\n\nInventory balances are changed only by explicit stock-in and physical-count operations. Order creation does not deduct ingredients automatically. Count adjustments are recorded as stock movements; all stock changes retain the acting employee and timestamp.
+Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, guest order-item creation/cancellation, Order Staff item operations, kitchen queue/status workflow, payment confirmation with atomic session closure, manual inventory management with stock-in and physical counts, and management reports for revenue, sales, orders, and inventory.
+
+Inventory balances are changed only by explicit stock-in and physical-count operations. Order creation does not deduct ingredients automatically. Count adjustments are recorded as stock movements; all stock changes retain the acting employee and timestamp.
 
 Still to implement: manager menu CRUD and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
