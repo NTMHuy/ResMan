@@ -12,6 +12,7 @@ import { MenuModule } from "./menu/menu.module.js";
 import { KitchenModule } from "./kitchen/kitchen.module.js";
 import { PaymentsModule } from "./payments/payments.module.js";
 import { InventoryModule } from "./inventory/inventory.module.js";
+import { ReportsModule } from "./reports/reports.module.js";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { InventoryModule } from "./inventory/inventory.module.js";
     KitchenModule,
     PaymentsModule,
     InventoryModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
