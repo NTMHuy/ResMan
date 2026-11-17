@@ -75,7 +75,7 @@ export class InventoryService {
     });
   }
 
-  async createIngredient(input: IngredientInput) {
+  async createIngredient(input: IngredientInput, actorId: bigint) {
     try {
       const threshold = input.lowStockThreshold == null
         ? null
@@ -95,7 +95,7 @@ export class InventoryService {
         });
         await tx.auditLog.create({
           data: {
-            action: "INGREDIENT_CREATED",
+            actorId,\n            action: "INGREDIENT_CREATED",
             entityType: "INGREDIENT",
             entityId: created.id.toString(),
             metadata: { code: created.code, name: created.name },
@@ -118,7 +118,7 @@ export class InventoryService {
     }
   }
 
-  async updateIngredient(ingredientId: bigint, input: IngredientInput) {
+  async updateIngredient(ingredientId: bigint, input: IngredientInput, actorId: bigint) {
     try {
       const data: Prisma.IngredientUpdateInput = {};
       if (input.name !== undefined) data.name = input.name.trim();
