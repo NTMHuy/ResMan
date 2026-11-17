@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { Permissions } from "../auth/decorators/permissions.decorator.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
@@ -10,6 +10,12 @@ import { PaymentsService } from "./payments.service.js";
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PaymentsController {
   constructor(private readonly payments: PaymentsService) {}
+
+  @Get("sessions/:sessionId/summary")
+  @Permissions("payments:read")
+  getSummary(@Param("sessionId", ParseIntPipe) sessionId: number) {
+    return this.payments.getSessionSummary(BigInt(sessionId));
+  }
 
   @Post("sessions/:sessionId/confirm")
   @Permissions("payments:confirm")
