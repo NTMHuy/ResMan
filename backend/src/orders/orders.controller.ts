@@ -1,29 +1,36 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, Param, ParseIntPipe, Post, UnauthorizedException } from "@nestjs/common";
 import { CreateGuestOrderItemsDto } from "./dto/create-guest-order-items.dto.js";
 import { OrdersService } from "./orders.service.js";
 
-@Controller("guest/sessions/:sessionCode")
+@Controller("guest/session")
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 
+  private requireSessionCode(sessionCode?: string): string {
+    if (!sessionCode || !/^[a-f0-9]{64}$/.test(sessionCode)) {
+      throw new UnauthorizedException("Thiếu hoặc sai mã truy cập phiên bàn");
+    }
+    return sessionCode;
+  }
+
   @Get()
-  getGuestSession(@Param("sessionCode") sessionCode: string) {
-    return this.orders.getGuestSession(sessionCode);
+  getGuestSession(@Headers("x-session-code") sessionCode?: string) {
+    return this.orders.getGuestSession(this.requireSessionCode(sessionCode));
   }
 
   @Delete("items/:itemId")
   cancelItem(
-    @Param("sessionCode") sessionCode: string,
+    @Headers("x-session-code") sessionCode: string | undefined,
     @Param("itemId", ParseIntPipe) itemId: number,
   ) {
-    return this.orders.cancelGuestItem(sessionCode, BigInt(itemId));
+    return this.orders.cancelGuestItem(this.requireSessionCode(sessionCode), BigInt(itemId));
   }
 
   @Post("items")
   addItems(
-    @Param("sessionCode") sessionCode: string,
+    @Headers("x-session-code") sessionCode: string | undefined,
     @Body() dto: CreateGuestOrderItemsDto,
   ) {
-    return this.orders.addGuestItems(sessionCode, dto.items);
+    return this.orders.addGuestItems(this.requireSessionCode(sessionCode), dto.items);
   }
 }
