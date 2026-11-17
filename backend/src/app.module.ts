@@ -10,6 +10,7 @@ import { SessionsModule } from "./sessions/sessions.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
 import { MenuModule } from "./menu/menu.module.js";
 import { KitchenModule } from "./kitchen/kitchen.module.js";
+import { PaymentsModule } from "./payments/payments.module.js";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { KitchenModule } from "./kitchen/kitchen.module.js";
     OrdersModule,
     MenuModule,
     KitchenModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
