@@ -29,7 +29,7 @@ export class OrdersService {
       throw new NotFoundException("Phiên phục vụ không tồn tại hoặc đã đóng");
     }
     return {
-      session: { code: session.sessionCode, status: session.status, openedAt: session.openedAt },
+      session: { status: session.status, openedAt: session.openedAt },
       table: session.table,
       items: session.order.items.map((item) => ({
         ...item,
