@@ -5,6 +5,7 @@ import { AppService } from "./app.service.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { TablesModule } from "./tables/tables.module.js";
+import { UsersModule } from "./users/users.module.js";
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { TablesModule } from "./tables/tables.module.js";
     DatabaseModule,
     AuthModule,
     TablesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
