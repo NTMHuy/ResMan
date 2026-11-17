@@ -57,9 +57,9 @@ Expected response:
 | Tables | CRUD `/tables` | JWT + permissions |
 | Sessions | `POST /sessions`, `GET /sessions/table/:tableId/active`, `GET /sessions/:id` | JWT + permissions |
 | Menu | `GET /menu` | Public guest menu |
-| Guest Orders | `GET /guest/sessions/:sessionCode`, `POST /guest/sessions/:sessionCode/items`, `DELETE /guest/sessions/:sessionCode/items/:itemId` | Session capability code |
+| Guest Orders | `GET /guest/session`, `POST /guest/session/items`, `DELETE /guest/session/items/:itemId` | `X-Session-Code` header |
 
-Opening a session creates its order and marks the table occupied in one database transaction. The generated 256-bit random `sessionCode` is a bearer capability for guest access to that active session; treat it as a secret and do not expose it in logs or public listings. Guest calls create new order-item rows with price/name snapshots and initial status history. Guests can cancel only items still in `AWAITING_ACCEPTANCE`.
+Opening a session creates its order and marks the table occupied in one database transaction. The generated 256-bit random `sessionCode` is a bearer capability for guest access to that active session. Guest endpoints require it in the `X-Session-Code` request header (never in the URL); treat it as a secret and do not expose it in logs or public listings. Guest calls create new order-item rows with price/name snapshots and initial status history. Guests can cancel only items still in `AWAITING_ACCEPTANCE`.
 
 Menu reads expose only active categories and active, available items. The server rechecks menu availability and session state when accepting a guest order; client-supplied prices and totals are never accepted.
 
