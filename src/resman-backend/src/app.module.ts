@@ -7,6 +7,7 @@ import { AppService } from './app.service.js';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { TablesModule } from './tables/tables.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -17,16 +18,15 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       envFilePath: '.env',
       cache: true,
     }),
-
     ObserveModule.forRoot({
       appKey: process.env.OBSERVE_APP_KEY ?? 'YOUR_APP_KEY',
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
       serviceId: 'resman-backend',
     }),
-
     DatabaseModule,
-    UsersModule,
     AuthModule,
+    UsersModule,
+    TablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
