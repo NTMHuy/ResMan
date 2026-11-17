@@ -1,73 +1,77 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../database/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
-  async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { username: dto.username.trim() },
-      include: {
-        role: {
-          include: {
-            permissions: { include: { permission: true } },
-          },
-        },
-        employee: true,
-      },
-    });
+  async register(dto: RegisterDto) {
+    const username = dto.username.trim();
+    const email = dto.email?.trim().toLowerCase() || null;
+    const conditions: any[] = [{ username }];
+    if (email) conditions.push({ email });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Username hoặc password không chính xác');
+    const existingUser = await this.prisma.user.findFirst({ where: { OR: conditions } });
+    if (existingUser) {
+      if (existingUser.username === username) throw new ConflictException('Username đã được sử dụng');
+      throw new ConflictException('Email đã được sử dụng');
     }
 
-    const validPassword = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!validPassword) {
-      throw new UnauthorizedException('Username hoặc password không chính xác');
-    }
+    const customerRole = await this.prisma.role.findUnique({ where: { code: 'CUSTOMER' } });
+    if (!customerRole) throw new InternalServerErrorException('Chưa cấu hình role CUSTOMER trong hệ thống');
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    const accessToken = await this.jwtService.signAsync({
-      sub: user.id.toString(),
-      username: user.username,
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const user = await this.prisma.user.create({
+      data: { username, email, passwordHash, roleId: customerRole.id },
+      include: { role: true },
     });
 
     return {
-      accessToken,
-      tokenType: 'Bearer',
-      expiresIn: 86400,
+      message: 'Đăng ký tài khoản thành công',
       user: {
         id: user.id.toString(),
         username: user.username,
         email: user.email,
         isActive: user.isActive,
-        role: {
-          id: user.role.id.toString(),
-          code: user.role.code,
-          name: user.role.name,
-        },
-        employee: user.employee
-          ? {
-              id: user.employee.id.toString(),
-              employeeCode: user.employee.employeeCode,
-              fullName: user.employee.fullName,
-              phone: user.employee.phone,
-            }
-          : null,
-        permissions: user.role.permissions.map(
-          ({ permission }) => permission.code,
-        ),
+        role: { id: user.role.id.toString(), code: user.role.code, name: user.role.name },
+      },
+    };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { username: dto.username },
+      include: { role: true },
+    });
+    if (!user || !user.isActive) throw new UnauthorizedException('Username hoặc password không chính xác');
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) throw new UnauthorizedException('Username hoặc password không chính xác');
+
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    const accessToken = await this.jwtService.signAsync({ sub: user.id.toString(), username: user.username });
+    return {
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: '1d',
+      user: {
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        isActive: user.isActive,
+        role: { id: user.role.id.toString(), code: user.role.code, name: user.role.name },
       },
     };
   }
@@ -75,41 +79,22 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: BigInt(userId) },
-      include: {
-        role: {
-          include: {
-            permissions: { include: { permission: true } },
-          },
-        },
-        employee: true,
-      },
+      include: { role: { include: { permissions: { include: { permission: true } } } }, employee: true },
     });
-
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị khóa');
-    }
-
+    if (!user || !user.isActive) throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị khóa');
     return {
       id: user.id.toString(),
       username: user.username,
       email: user.email,
       isActive: user.isActive,
-      role: {
-        id: user.role.id.toString(),
-        code: user.role.code,
-        name: user.role.name,
-      },
-      employee: user.employee
-        ? {
-            id: user.employee.id.toString(),
-            employeeCode: user.employee.employeeCode,
-            fullName: user.employee.fullName,
-            phone: user.employee.phone,
-          }
-        : null,
-      permissions: user.role.permissions.map(
-        ({ permission }) => permission.code,
-      ),
+      role: { id: user.role.id.toString(), code: user.role.code, name: user.role.name },
+      employee: user.employee ? {
+        id: user.employee.id.toString(),
+        employeeCode: user.employee.employeeCode,
+        fullName: user.employee.fullName,
+        phone: user.employee.phone,
+      } : null,
+      permissions: user.role.permissions.map((item) => item.permission.code),
     };
   }
 }
