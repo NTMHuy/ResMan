@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
+import { AuthModule } from "../auth/auth.module.js";
 import { KitchenController } from "./kitchen.controller.js";
 import { KitchenService } from "./kitchen.service.js";
 
