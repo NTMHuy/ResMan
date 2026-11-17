@@ -1,0 +1,48 @@
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service.js";
+
+@Injectable()
+export class MenuService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findGuestMenu(categoryId?: string) {
+    const parsedCategoryId = categoryId && /^\d+$/.test(categoryId) ? BigInt(categoryId) : undefined;
+    const categories = await this.prisma.menuCategory.findMany({
+      where: {
+        isActive: true,
+        ...(parsedCategoryId ? { id: parsedCategoryId } : {}),
+        items: {
+          some: { isActive: true, availabilityStatus: "AVAILABLE" },
+        },
+      },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        description: true,
+        items: {
+          where: { isActive: true, availabilityStatus: "AVAILABLE" },
+          orderBy: { name: "asc" },
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            description: true,
+            price: true,
+            imageUrl: true,
+          },
+        },
+      },
+    });
+    return categories.map((category) => ({
+      ...category,
+      id: category.id.toString(),
+      items: category.items.map((item) => ({
+        ...item,
+        id: item.id.toString(),
+        price: item.price.toString(),
+      })),
+    }));
+  }
+}
