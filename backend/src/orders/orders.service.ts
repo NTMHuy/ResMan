@@ -70,7 +70,7 @@ export class OrdersService {
         for (const requested of requestedItems) {
           const menuItem = byId.get(String(requested.menuItemId));
           if (!menuItem) throw new ConflictException("Món ăn không còn khả dụng");
-          const lineTotal = new Prisma.Decimal(menuItem.price).mul(requested.quantity);
+          const lineTotal = menuItem.price.mul(requested.quantity);
           const item = await tx.orderItem.create({
             data: {
               orderId: session.order.id,
