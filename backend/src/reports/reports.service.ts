@@ -14,7 +14,7 @@ export class ReportsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) {
         throw new BadRequestException("from phải có định dạng YYYY-MM-DD");
       }
-      const start = new Date(`${from}T00:00:00.000Z`);
+      const start = new Date(`${from}T00:00:00+07:00`);
       if (Number.isNaN(start.getTime()) || start.toISOString().slice(0, 10) !== from) {
         throw new BadRequestException("from không phải ngày hợp lệ");
       }
@@ -24,7 +24,7 @@ export class ReportsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) {
         throw new BadRequestException("to phải có định dạng YYYY-MM-DD");
       }
-      const end = new Date(`${to}T00:00:00.000Z`);
+      const end = new Date(`${to}T00:00:00+07:00`);
       if (Number.isNaN(end.getTime()) || end.toISOString().slice(0, 10) !== to) {
         throw new BadRequestException("to không phải ngày hợp lệ");
       }
@@ -95,8 +95,8 @@ export class ReportsService {
     const buckets = new Map<string, { revenue: Prisma.Decimal; paymentCount: number }>();
     for (const payment of payments) {
       const key = grouping === "month"
-        ? payment.paidAt.toISOString().slice(0, 7)
-        : payment.paidAt.toISOString().slice(0, 10);
+        ? new Date(payment.paidAt.getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 7)
+        : new Date(payment.paidAt.getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const current = buckets.get(key) ?? { revenue: new Prisma.Decimal(0), paymentCount: 0 };
       current.revenue = current.revenue.add(payment.amount);
       current.paymentCount += 1;
