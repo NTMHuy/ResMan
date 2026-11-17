@@ -122,4 +122,55 @@ export class OrdersService {
       throw error;
     }
   }
+
+  async cancelGuestItem(sessionCode: string, itemId: bigint) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const session = await tx.diningSession.findUnique({
+          where: { sessionCode },
+          include: { order: { select: { id: true } } },
+        });
+        if (!session || session.status !== "OPEN" || !session.order) {
+          throw new NotFoundException("Phiên phục vụ không tồn tại hoặc đã đóng");
+        }
+
+        const item = await tx.orderItem.findFirst({
+          where: { id: itemId, orderId: session.order.id },
+        });
+        if (!item) throw new NotFoundException("Không tìm thấy món trong phiên này");
+        if (item.status !== "AWAITING_ACCEPTANCE") {
+          throw new ConflictException("Chỉ có thể hủy món trước khi bếp tiếp nhận");
+        }
+
+        const updated = await tx.orderItem.update({
+          where: { id: item.id },
+          data: { status: "CANCELLED" },
+        });
+        await tx.orderItemStatusHistory.create({
+          data: {
+            orderItemId: item.id,
+            fromStatus: item.status,
+            toStatus: "CANCELLED",
+            reason: "Khách hủy món trước khi bếp tiếp nhận",
+          },
+        });
+        await tx.auditLog.create({
+          data: {
+            action: "GUEST_ORDER_ITEM_CANCELLED",
+            entityType: "ORDER_ITEM",
+            entityId: item.id.toString(),
+            metadata: { sessionId: session.id.toString() },
+          },
+        });
+        return { id: updated.id.toString(), status: updated.status };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+        throw new ConflictException("Món vừa được cập nhật. Vui lòng tải lại trạng thái món.");
+      }
+      throw error;
+    }
+  }
+
 }
