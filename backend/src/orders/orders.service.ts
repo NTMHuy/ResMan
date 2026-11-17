@@ -175,4 +175,121 @@ export class OrdersService {
     }
   }
 
+
+  async findActiveOrders() {
+    const orders = await this.prisma.order.findMany({
+      where: { diningSession: { status: "OPEN" } },
+      orderBy: { createdAt: "asc" },
+      include: {
+        diningSession: {
+          select: {
+            id: true,
+            openedAt: true,
+            table: { select: { id: true, code: true, name: true } },
+          },
+        },
+        items: {
+          where: { status: { not: "CANCELLED" } },
+          orderBy: { createdAt: "asc" },
+          select: {
+            id: true, itemNameSnapshot: true, quantity: true, unitPrice: true,
+            lineTotal: true, note: true, status: true, createdAt: true,
+          },
+        },
+      },
+    });
+    return orders.map((order) => ({
+      id: order.id.toString(),
+      orderCode: order.orderCode,
+      createdAt: order.createdAt,
+      session: {
+        id: order.diningSession.id.toString(),
+        openedAt: order.diningSession.openedAt,
+        table: {
+          ...order.diningSession.table,
+          id: order.diningSession.table.id.toString(),
+        },
+      },
+      items: order.items.map((item) => ({
+        ...item,
+        id: item.id.toString(),
+        unitPrice: item.unitPrice.toString(),
+        lineTotal: item.lineTotal.toString(),
+      })),
+    }));
+  }
+
+  async updateItemNote(itemId: bigint, note: string, actorId: bigint) {
+    return this.prisma.$transaction(async (tx) => {
+      const item = await tx.orderItem.findUnique({
+        where: { id: itemId },
+        include: { order: { include: { diningSession: true } } },
+      });
+      if (!item) throw new NotFoundException("Không tìm thấy món");
+      if (item.order.diningSession.status !== "OPEN") {
+        throw new ConflictException("Phiên phục vụ đã đóng");
+      }
+      if (item.status === "IN_PREPARATION" || item.status === "COMPLETED" || item.status === "CANCELLED") {
+        throw new ConflictException("Không thể sửa ghi chú ở trạng thái hiện tại");
+      }
+
+      const updated = await tx.orderItem.update({
+        where: { id: item.id },
+        data: { note: note.trim() || null },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: "ORDER_ITEM_NOTE_UPDATED",
+          entityType: "ORDER_ITEM",
+          entityId: item.id.toString(),
+          metadata: { previousNote: item.note, note: updated.note },
+        },
+      });
+      return { id: updated.id.toString(), note: updated.note };
+    });
+  }
+
+  async cancelByOrderStaff(itemId: bigint, actorId: bigint) {
+    return this.prisma.$transaction(async (tx) => {
+      const item = await tx.orderItem.findUnique({
+        where: { id: itemId },
+        include: { order: { include: { diningSession: true } } },
+      });
+      if (!item) throw new NotFoundException("Không tìm thấy món");
+      if (item.order.diningSession.status !== "OPEN") {
+        throw new ConflictException("Phiên phục vụ đã đóng");
+      }
+      if (item.status !== "AWAITING_ACCEPTANCE" && item.status !== "ACCEPTED") {
+        throw new ConflictException("Nhân viên Order chỉ được hủy món trước khi bếp bắt đầu chế biến");
+      }
+
+      const changed = await tx.orderItem.updateMany({
+        where: { id: item.id, status: item.status },
+        data: { status: "CANCELLED" },
+      });
+      if (changed.count !== 1) throw new ConflictException("Món vừa được cập nhật bởi thao tác khác");
+
+      await tx.orderItemStatusHistory.create({
+        data: {
+          orderItemId: item.id,
+          fromStatus: item.status,
+          toStatus: "CANCELLED",
+          reason: "Nhân viên Order hủy món",
+          actorId,
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: "ORDER_STAFF_ITEM_CANCELLED",
+          entityType: "ORDER_ITEM",
+          entityId: item.id.toString(),
+          metadata: { fromStatus: item.status },
+        },
+      });
+      return { id: item.id.toString(), status: "CANCELLED" };
+    });
+  }
+
 }
