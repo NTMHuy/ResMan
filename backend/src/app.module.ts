@@ -9,6 +9,7 @@ import { UsersModule } from "./users/users.module.js";
 import { SessionsModule } from "./sessions/sessions.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
 import { MenuModule } from "./menu/menu.module.js";
+import { KitchenModule } from "./kitchen/kitchen.module.js";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MenuModule } from "./menu/menu.module.js";
     SessionsModule,
     OrdersModule,
     MenuModule,
+    KitchenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
