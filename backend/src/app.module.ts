@@ -7,6 +7,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { TablesModule } from "./tables/tables.module.js";
 import { UsersModule } from "./users/users.module.js";
 import { SessionsModule } from "./sessions/sessions.module.js";
+import { OrdersModule } from "./orders/orders.module.js";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SessionsModule } from "./sessions/sessions.module.js";
     TablesModule,
     UsersModule,
     SessionsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
