@@ -79,6 +79,6 @@ For local development migration authoring, follow `../prisma/migrations/README.m
 
 ## Current implementation boundary
 
-Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, and guest order-item creation/cancellation.
+Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, guest order-item creation/cancellation, Order Staff item operations, kitchen queue/status workflow, and payment confirmation with atomic session closure.
 
 Still to implement: manager menu CRUD, inventory, reports, and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
