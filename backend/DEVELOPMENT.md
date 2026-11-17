@@ -60,6 +60,7 @@ Expected response:
 | Kitchen | `GET /kitchen/queue`, `PATCH /kitchen/items/:itemId/status` | JWT + permissions |
 | Payments | `GET /payments/sessions/:sessionId/summary`, `POST /payments/sessions/:sessionId/confirm` | JWT + permissions |
 | Inventory | `GET /inventory/ingredients`, `POST /inventory/ingredients`, `PATCH /inventory/ingredients/:ingredientId`, `POST /inventory/ingredients/:ingredientId/stock-in`, `POST /inventory/ingredients/:ingredientId/count`, `GET /inventory/movements`, `GET /inventory/counts` | JWT + permissions |
+| Reports | `GET /reports/overview`, `GET /reports/revenue`, `GET /reports/best-sellers`, `GET /reports/orders`, `GET /reports/inventory` | JWT + `reports:read` |
 | Menu | `GET /menu` | Public guest menu |
 | Guest Orders | `GET /guest/session`, `POST /guest/session/items`, `DELETE /guest/session/items/:itemId` | `X-Session-Code` header |
 
@@ -80,6 +81,6 @@ For local development migration authoring, follow `../prisma/migrations/README.m
 
 ## Current implementation boundary
 
-Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, guest order-item creation/cancellation, Order Staff item operations, kitchen queue/status workflow, payment confirmation with atomic session closure, and manual inventory management with stock-in and physical counts.\n\nInventory balances are changed only by explicit stock-in and physical-count operations. Order creation does not deduct ingredients automatically. Count adjustments are recorded as stock movements; all stock changes retain the acting employee and timestamp.
+Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, guest order-item creation/cancellation, Order Staff item operations, kitchen queue/status workflow, payment confirmation with atomic session closure, manual inventory management with stock-in and physical counts, and management reports for revenue, sales, orders, and inventory.\n\nInventory balances are changed only by explicit stock-in and physical-count operations. Order creation does not deduct ingredients automatically. Count adjustments are recorded as stock movements; all stock changes retain the acting employee and timestamp.
 
-Still to implement: manager menu CRUD, reports, and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
+Still to implement: manager menu CRUD and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
