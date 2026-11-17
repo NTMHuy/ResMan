@@ -22,8 +22,8 @@ export class InventoryController {
 
   @Post("ingredients")
   @Permissions("inventory:manage")
-  createIngredient(@Body() dto: CreateIngredientDto) {
-    return this.inventory.createIngredient(dto);
+  createIngredient(@Body() dto: CreateIngredientDto, @CurrentUser() user: { id: string }) {
+    return this.inventory.createIngredient(dto, BigInt(user.id));
   }
 
   @Patch("ingredients/:ingredientId")
@@ -31,8 +31,9 @@ export class InventoryController {
   updateIngredient(
     @Param("ingredientId", ParseIntPipe) ingredientId: number,
     @Body() dto: UpdateIngredientDto,
+    @CurrentUser() user: { id: string },
   ) {
-    return this.inventory.updateIngredient(BigInt(ingredientId), dto);
+    return this.inventory.updateIngredient(BigInt(ingredientId), dto, BigInt(user.id));
   }
 
   @Post("ingredients/:ingredientId/stock-in")
