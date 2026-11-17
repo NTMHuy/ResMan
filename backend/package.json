@@ -10,7 +10,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
-    "db:seed": "npm run build && node dist/seed.js",
+    "db:seed": "npm run build && node dist/src/seed.js",
     "prisma:format": "prisma format --config ./prisma.config.ts",
     "prisma:validate": "prisma validate --config ./prisma.config.ts",
     "prisma:generate": "prisma generate --config ./prisma.config.ts",
