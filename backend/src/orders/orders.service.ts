@@ -50,6 +50,7 @@ export class OrdersService {
         if (!session || session.status !== "OPEN" || !session.order) {
           throw new NotFoundException("Phiên phục vụ không tồn tại hoặc đã đóng");
         }
+        const order = session.order;
 
         const menuIds = [...new Set(requestedItems.map((item) => BigInt(item.menuItemId)))];
         const menuItems = await tx.menuItem.findMany({
@@ -66,14 +67,14 @@ export class OrdersService {
           throw new ConflictException("Một hoặc nhiều món không còn khả dụng. Vui lòng tải lại thực đơn.");
         }
 
-        const created = [];
+        const created: Array<{ id: string; itemName: string; quantity: number; unitPrice: string; lineTotal: string; note: string | null; status: string; createdAt: Date }> = [];
         for (const requested of requestedItems) {
           const menuItem = byId.get(String(requested.menuItemId));
           if (!menuItem) throw new ConflictException("Món ăn không còn khả dụng");
           const lineTotal = menuItem.price.mul(requested.quantity);
           const item = await tx.orderItem.create({
             data: {
-              orderId: session.order.id,
+              orderId: order.id,
               menuItemId: menuItem.id,
               itemNameSnapshot: menuItem.name,
               quantity: requested.quantity,
@@ -107,12 +108,12 @@ export class OrdersService {
           data: {
             action: "GUEST_ORDER_ITEMS_CREATED",
             entityType: "ORDER",
-            entityId: session.order.id.toString(),
+            entityId: order.id.toString(),
             metadata: { sessionId: session.id.toString(), itemIds: created.map((item) => item.id) },
           },
         });
 
-        return { orderCode: session.order.orderCode, items: created };
+        return { orderCode: order.orderCode, items: created };
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (error) {
       if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
@@ -133,9 +134,10 @@ export class OrdersService {
         if (!session || session.status !== "OPEN" || !session.order) {
           throw new NotFoundException("Phiên phục vụ không tồn tại hoặc đã đóng");
         }
+        const order = session.order;
 
         const item = await tx.orderItem.findFirst({
-          where: { id: itemId, orderId: session.order.id },
+          where: { id: itemId, orderId: order.id },
         });
         if (!item) throw new NotFoundException("Không tìm thấy món trong phiên này");
         if (item.status !== "AWAITING_ACCEPTANCE") {
