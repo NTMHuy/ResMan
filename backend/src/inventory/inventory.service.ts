@@ -18,7 +18,7 @@ export class InventoryService {
 
   private parsePositiveId(value: string, field: string): bigint {
     if (!/^[0-9]+$/.test(value) || BigInt(value) < 1n) {
-      throw new BadRequestException(`${field} phải là số nguyên dương`);
+      throw new BadRequestException(\`\${field} phải là số nguyên dương\`);
     }
     return BigInt(value);
   }
@@ -34,11 +34,11 @@ export class InventoryService {
   }
 
   private decimal(value: string, field: string, allowZero = true): Prisma.Decimal {
-    if (!/^[0-9]+(\\.[0-9]{1,3})?$/.test(value)) {
-      throw new BadRequestException(`${field} phải là số không âm, tối đa 3 chữ số thập phân`);
+    if (!/^[0-9]+(\.[0-9]{1,3})?$/.test(value)) {
+      throw new BadRequestException(\`\${field} phải là số không âm, tối đa 3 chữ số thập phân\`);
     }
     const parsed = new Prisma.Decimal(value);
-    if (!allowZero && parsed.lte(0)) throw new BadRequestException(`${field} phải lớn hơn 0`);
+    if (!allowZero && parsed.lte(0)) throw new BadRequestException(\`\${field} phải lớn hơn 0\`);
     return parsed;
   }
 
@@ -76,6 +76,9 @@ export class InventoryService {
   }
 
   async createIngredient(input: IngredientInput, actorId: bigint) {
+    if (!input.code?.trim() || !input.name?.trim() || !input.unit?.trim()) {
+      throw new BadRequestException("Mã, tên và đơn vị nguyên liệu không được để trống");
+    }
     try {
       const threshold = input.lowStockThreshold == null
         ? null
@@ -95,7 +98,8 @@ export class InventoryService {
         });
         await tx.auditLog.create({
           data: {
-            actorId,\n            action: "INGREDIENT_CREATED",
+            actorId,
+            action: "INGREDIENT_CREATED",
             entityType: "INGREDIENT",
             entityId: created.id.toString(),
             metadata: { code: created.code, name: created.name },
@@ -119,6 +123,8 @@ export class InventoryService {
   }
 
   async updateIngredient(ingredientId: bigint, input: IngredientInput, actorId: bigint) {
+    if (input.name !== undefined && !input.name.trim()) throw new BadRequestException("Tên nguyên liệu không được để trống");
+    if (input.unit !== undefined && !input.unit.trim()) throw new BadRequestException("Đơn vị không được để trống");
     try {
       const data: Prisma.IngredientUpdateInput = {};
       if (input.name !== undefined) data.name = input.name.trim();
@@ -131,9 +137,18 @@ export class InventoryService {
       }
       if (input.note !== undefined) data.note = input.note?.trim() || null;
       if (input.isActive !== undefined) data.isActive = input.isActive;
-      const updated = await this.prisma.ingredient.update({
-        where: { id: ingredientId },
-        data,
+      const updated = await this.prisma.$transaction(async (tx) => {
+        const ingredient = await tx.ingredient.update({ where: { id: ingredientId }, data });
+        await tx.auditLog.create({
+          data: {
+            actorId,
+            action: "INGREDIENT_UPDATED",
+            entityType: "INGREDIENT",
+            entityId: ingredient.id.toString(),
+            metadata: { changedFields: Object.keys(data) },
+          },
+        });
+        return ingredient;
       });
       return { id: updated.id.toString(), code: updated.code, name: updated.name, isActive: updated.isActive };
     } catch (error) {
@@ -146,6 +161,7 @@ export class InventoryService {
 
   async stockIn(ingredientId: bigint, input: { quantity: string; reason: string; referenceCode?: string }, actorId: bigint) {
     const quantity = this.decimal(input.quantity, "quantity", false);
+    if (!input.reason.trim()) throw new BadRequestException("Lý do nhập kho không được để trống");
     try {
       return await this.prisma.$transaction(async (tx) => {
         const ingredient = await tx.ingredient.findUnique({ where: { id: ingredientId } });
@@ -220,7 +236,7 @@ export class InventoryService {
               movementType: "COUNT_ADJUSTMENT",
               quantityDelta: delta,
               reason: "Điều chỉnh theo kết quả kiểm kê",
-              referenceCode: `COUNT-${record.id}`,
+              referenceCode: \`COUNT-\${record.id}\`,
               createdBy: actorId,
             },
           });
