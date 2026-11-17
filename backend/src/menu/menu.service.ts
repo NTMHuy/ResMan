@@ -6,7 +6,7 @@ export class MenuService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findGuestMenu(categoryId?: string) {
-    if (categoryId !== undefined && (!/^\\d+$/.test(categoryId) || BigInt(categoryId) < 1n)) {
+    if (categoryId !== undefined && (!/^[0-9]+$/.test(categoryId) || BigInt(categoryId) < 1n)) {
       throw new BadRequestException("categoryId phải là số nguyên dương");
     }
     const parsedCategoryId = categoryId !== undefined ? BigInt(categoryId) : undefined;
