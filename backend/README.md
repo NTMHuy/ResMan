@@ -488,4 +488,4 @@ Các điểm trên ưu tiên hơn mọi mô tả cũ còn sót trong tài liệu
 
 ## 17. Hướng dẫn chạy backend
 
-Workspace NestJS, cấu hình Prisma ORM 7, các lệnh cài đặt/chạy local và kiểm tra schema được mô tả tại [`backend/DEVELOPMENT.md`](DEVELOPMENT.md). Tài liệu này là hướng dẫn môi trường; backend hiện mới có bootstrap và health endpoint, chưa có module nghiệp vụ.
+Workspace NestJS, cấu hình Prisma ORM 7, các lệnh cài đặt/chạy local và kiểm tra schema được mô tả tại [`backend/DEVELOPMENT.md`](DEVELOPMENT.md). Tài liệu này là đặc tả nghiệp vụ/API, không phải bảng trạng thái triển khai. Trạng thái module và hướng dẫn chạy code thực tế được cập nhật tại [`DEVELOPMENT.md`](DEVELOPMENT.md).
