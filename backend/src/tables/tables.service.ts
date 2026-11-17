@@ -10,7 +10,7 @@ export class TablesService {
   async findAll() {
     const tables = await this.prisma.diningTable.findMany({
       orderBy: { code: "asc" },
-      include: { sessions: { where: { status: "OPEN" }, select: { id: true, sessionCode: true, status: true, openedAt: true } } },
+      include: { sessions: { where: { status: "OPEN" }, select: { id: true, status: true, openedAt: true } } },
     });
     return tables.map((table) => ({
       ...table,
