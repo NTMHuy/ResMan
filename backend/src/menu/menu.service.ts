@@ -6,11 +6,14 @@ export class MenuService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findGuestMenu(categoryId?: string) {
-    const parsedCategoryId = categoryId && /^\d+$/.test(categoryId) ? BigInt(categoryId) : undefined;
+    if (categoryId !== undefined && (!/^\\d+$/.test(categoryId) || BigInt(categoryId) < 1n)) {
+      throw new BadRequestException("categoryId phải là số nguyên dương");
+    }
+    const parsedCategoryId = categoryId !== undefined ? BigInt(categoryId) : undefined;
     const categories = await this.prisma.menuCategory.findMany({
       where: {
         isActive: true,
-        ...(parsedCategoryId ? { id: parsedCategoryId } : {}),
+        ...(parsedCategoryId !== undefined ? { id: parsedCategoryId } : {}),
         items: {
           some: { isActive: true, availabilityStatus: "AVAILABLE" },
         },
