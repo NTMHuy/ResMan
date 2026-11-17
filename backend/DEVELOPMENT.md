@@ -4,30 +4,29 @@
 
 - Node.js 24 or later
 - npm 11 or later
-- PostgreSQL 15 or later (a local development database is recommended)
+- PostgreSQL 15 or later
 
 ## Install
 
-Run these commands in PowerShell from the repository root:
+Run from the repository root:
 
 ```powershell
 cd backend
 Copy-Item .env.example .env
 ```
 
-Edit `backend/.env` and replace the sample PostgreSQL credentials/database with your local values. Do not commit `.env`.
+Edit `backend/.env` with the local PostgreSQL connection and required secrets. Do not commit `.env`.
 
-Then install dependencies and check the Prisma schema:
+Install and prepare the backend:
 
 ```powershell
 npm install
-npm run prisma:format
 npm run prisma:validate
 npm run prisma:generate
 npm run build
 ```
 
-The Prisma schema is stored at `../prisma/schema.prisma`; the Prisma 7 configuration and migration path are defined in `prisma.config.ts`. Generated Prisma Client files are placed in `src/generated/prisma` and ignored by Git.
+The Prisma schema is stored at `../prisma/schema.prisma`; Prisma 7 configuration and migration path are defined in `prisma.config.ts`. Generated Prisma Client files are placed in `src/generated/prisma` and ignored by Git.
 
 ## Run the API
 
@@ -35,9 +34,11 @@ The Prisma schema is stored at `../prisma/schema.prisma`; the Prisma 7 configura
 npm run start:dev
 ```
 
-Health endpoint:
+The global API prefix is `/api/v1`.
 
-```text
+Health check:
+
+```http
 GET http://localhost:3000/api/v1/health
 ```
 
@@ -47,17 +48,34 @@ Expected response:
 {"status":"ok","service":"resman-backend"}
 ```
 
-## Database migration
+## Implemented API modules
 
-Do not create or apply the initial migration until:
+| Module | Current endpoints | Access |
+|---|---|---|
+| Auth | `POST /auth/login`, `GET /auth/profile` | Login public; profile JWT |
+| Users | `GET /users`, `POST /users` | JWT + permissions |
+| Tables | CRUD `/tables` | JWT + permissions |
+| Sessions | `POST /sessions`, `GET /sessions/table/:tableId/active`, `GET /sessions/:id` | JWT + permissions |
+| Menu | `GET /menu` | Public guest menu |
+| Guest Orders | `GET /guest/sessions/:sessionCode`, `POST /guest/sessions/:sessionCode/items`, `DELETE /guest/sessions/:sessionCode/items/:itemId` | Session capability code |
 
-1. `prisma validate` succeeds.
-2. The schema has been reviewed against Database Design v3.2.
-3. A disposable local PostgreSQL database is available.
-4. The team has reviewed unresolved database decisions in `../prisma/migrations/README.md`.
+Opening a session creates its order and marks the table occupied in one database transaction. The generated 256-bit random `sessionCode` is a bearer capability for guest access to that active session; treat it as a secret and do not expose it in logs or public listings. Guest calls create new order-item rows with price/name snapshots and initial status history. Guests can cancel only items still in `AWAITING_ACCEPTANCE`.
 
-Follow the migration runbook at `../prisma/migrations/README.md`. Never use `prisma db push` as a substitute for versioned migrations.
+Menu reads expose only active categories and active, available items. The server rechecks menu availability and session state when accepting a guest order; client-supplied prices and totals are never accepted.
+
+## Database migrations
+
+The versioned migrations live in `../prisma/migrations`. Check status and apply migrations using:
+
+```powershell
+npx prisma migrate status
+npx prisma migrate deploy
+```
+
+For local development migration authoring, follow `../prisma/migrations/README.md`. Do not use `prisma db push` as a substitute for versioned migrations.
 
 ## Current implementation boundary
 
-This workspace currently contains only the NestJS bootstrap and health endpoint. Business modules, authentication, authorization, database services, and migration SQL have not been implemented.
+Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, and guest order-item creation/cancellation.
+
+Still to implement: manager menu CRUD, Order Staff order operations, kitchen queue and state transitions, payment confirmation/session closure, inventory, reports, and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
