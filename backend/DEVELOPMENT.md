@@ -58,6 +58,7 @@ Expected response:
 | Sessions | `POST /sessions`, `GET /sessions/table/:tableId/active`, `GET /sessions/:id` | JWT + permissions |
 | Order Staff | `GET /orders/active`, `PATCH /orders/items/:itemId/note`, `DELETE /orders/items/:itemId` | JWT + permissions |
 | Kitchen | `GET /kitchen/queue`, `PATCH /kitchen/items/:itemId/status` | JWT + permissions |
+| Payments | `GET /payments/sessions/:sessionId/summary`, `POST /payments/sessions/:sessionId/confirm` | JWT + permissions |
 | Menu | `GET /menu` | Public guest menu |
 | Guest Orders | `GET /guest/session`, `POST /guest/session/items`, `DELETE /guest/session/items/:itemId` | `X-Session-Code` header |
 
@@ -80,4 +81,4 @@ For local development migration authoring, follow `../prisma/migrations/README.m
 
 Implemented foundations: PostgreSQL/Prisma service, JWT employee authentication, permission guard, employee account management, table management, opening/reading dining sessions, public menu reading, and guest order-item creation/cancellation.
 
-Still to implement: manager menu CRUD, payment confirmation/session closure, inventory, reports, and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
+Still to implement: manager menu CRUD, inventory, reports, and automated API/integration tests. Do not infer that a module is complete merely because its Prisma models exist.
