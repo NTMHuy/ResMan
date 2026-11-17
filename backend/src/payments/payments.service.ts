@@ -141,4 +141,78 @@ export class PaymentsService {
       throw error;
     }
   }
+
+  async getSessionSummary(sessionId: bigint) {
+    const session = await this.prisma.diningSession.findUnique({
+      where: { id: sessionId },
+      include: {
+        table: { select: { id: true, code: true, name: true } },
+        order: {
+          include: {
+            items: {
+              orderBy: { createdAt: "asc" },
+              select: {
+                id: true,
+                itemNameSnapshot: true,
+                quantity: true,
+                unitPrice: true,
+                lineTotal: true,
+                status: true,
+              },
+            },
+            payment: true,
+          },
+        },
+      },
+    });
+    if (!session || !session.order) {
+      throw new NotFoundException("Không tìm thấy phiên phục vụ");
+    }
+
+    const activeItems = session.order.items.filter((item) => item.status !== "CANCELLED");
+    const amount = activeItems.reduce(
+      (total, item) => total.add(item.lineTotal),
+      new Prisma.Decimal(0),
+    );
+    const pendingItems = activeItems.filter(
+      (item) => !["ACCEPTED", "IN_PREPARATION", "COMPLETED"].includes(item.status),
+    );
+
+    return {
+      session: {
+        id: session.id.toString(),
+        status: session.status,
+        openedAt: session.openedAt,
+        closedAt: session.closedAt,
+        table: { ...session.table, id: session.table.id.toString() },
+      },
+      order: {
+        id: session.order.id.toString(),
+        orderCode: session.order.orderCode,
+      },
+      items: session.order.items.map((item) => ({
+        id: item.id.toString(),
+        itemName: item.itemNameSnapshot,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice.toString(),
+        lineTotal: item.lineTotal.toString(),
+        status: item.status,
+      })),
+      totalAmount: amount.toString(),
+      canConfirmPayment: session.status === "OPEN" && !session.order.payment && pendingItems.length === 0,
+      blockingItems: pendingItems.map((item) => ({
+        id: item.id.toString(),
+        itemName: item.itemNameSnapshot,
+        status: item.status,
+      })),
+      payment: session.order.payment ? {
+        id: session.order.payment.id.toString(),
+        amount: session.order.payment.amount.toString(),
+        paymentMethod: session.order.payment.paymentMethod,
+        status: session.order.payment.status,
+        paidAt: session.order.payment.paidAt,
+      } : null,
+    };
+  }
+
 }
