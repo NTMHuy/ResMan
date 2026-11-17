@@ -57,7 +57,7 @@ export class OrdersService {
             id: { in: menuIds },
             isActive: true,
             availabilityStatus: "AVAILABLE",
-            category: { isActive: true },
+            category: { is: { isActive: true } },
           },
           select: { id: true, name: true, price: true },
         });
