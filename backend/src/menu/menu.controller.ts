@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { PermissionsGuard } from "../auth/guards/permissions.guard.js";
 import { Permissions } from "../auth/decorators/permissions.decorator.js";
@@ -15,8 +15,8 @@ export class MenuController {
   constructor(private readonly menu: MenuService) {}
 
   @Get()
-  findGuestMenu(@Param("unused") _unused?: string) {
-    return this.menu.findGuestMenu();
+  findGuestMenu(@Query("categoryId") categoryId?: string) {
+    return this.menu.findGuestMenu(categoryId);
   }
 
   @Get("management")
