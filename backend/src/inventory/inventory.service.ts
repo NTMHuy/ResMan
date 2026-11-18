@@ -174,7 +174,7 @@ export class InventoryService {
         const movement = await tx.stockMovement.create({
           data: {
             ingredientId,
-            movementType: "STOCK_IN",
+            movementType: "IN",
             quantityDelta: quantity,
             reason: input.reason.trim(),
             referenceCode: input.referenceCode?.trim() || null,
@@ -233,7 +233,7 @@ export class InventoryService {
           await tx.stockMovement.create({
             data: {
               ingredientId,
-              movementType: "COUNT_ADJUSTMENT",
+              movementType: "ADJUSTMENT",
               quantityDelta: delta,
               reason: "Điều chỉnh theo kết quả kiểm kê",
               referenceCode: `COUNT-${record.id}`,
