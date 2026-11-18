@@ -1,13 +1,21 @@
+
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+  "moduleResolution": "Node10",
+"ignoreDeprecations": "6.0"
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": false,
+    "incremental": false
+  },
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
-    "test",
     "dist",
+    "test",
     "**/*.spec.ts",
-    "**/*.test.ts"
-  ],
-  "compilerOptions": {
-    "types": ["node"]
-  }
+    "**/*.e2e-spec.ts"
+  ]
 }

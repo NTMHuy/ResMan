@@ -1,21 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+
 import helmet from 'helmet';
+import { join } from 'node:path';
 
 import { AppModule, ObserveInstrument } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     instrument: ObserveInstrument,
   });
 
-  // API prefix
   app.setGlobalPrefix('api');
 
-  // Security headers
   app.use(helmet());
 
-  // Validate DTO automatically
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -24,7 +28,6 @@ async function bootstrap() {
     }),
   );
 
-  // CORS for React frontend
   const allowedOrigins = (
     process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000,http://localhost:5173'
   )
@@ -38,7 +41,11 @@ async function bootstrap() {
     credentials: false,
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+
+  await app.listen(port);
+
+  console.log(`ResMan Backend running on port ${port}`);
 }
 
 bootstrap();

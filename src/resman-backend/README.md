@@ -1,126 +1,188 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ResMan
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# Hệ Thống Quản Lý Nhà Hàng
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> Nền tảng quản lý vận hành nhà hàng, kết nối Khách hàng, Nhân viên Order, Nhân viên Bếp, Nhân viên Kho và Quản lý trong một quy trình thống nhất.
 
-## Description
+## 📌 Giới thiệu
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+**ResMan** là dự án xây dựng hệ thống quản lý nhà hàng với mục tiêu số hóa và kết nối các hoạt động chính: quản lý thực đơn, đặt và xử lý đơn hàng, chế biến món ăn, quản lý tồn kho, thanh toán và báo cáo vận hành.
 
-## Project setup
+Dự án được phát triển theo hướng **AI-assisted development**, trong đó AI hỗ trợ phân tích yêu cầu, lập kế hoạch, tài liệu hóa và phát triển phần mềm. Các quyết định nghiệp vụ cuối cùng vẫn được con người xác định và kiểm tra.
 
-```bash
-$ npm install
+## 👥 Actor trong hệ thống
+
+| Actor | Vai trò chính |
+|---|---|
+| **Khách hàng** | Xem thực đơn, đặt món, theo dõi đơn hàng |
+| **Nhân viên Order** | Tiếp nhận, xử lý đơn hàng và ghi nhận thanh toán |
+| **Nhân viên Bếp** | Tiếp nhận hàng đợi và chế biến món ăn |
+| **Nhân viên Kho** | Theo dõi, cập nhật và kiểm soát tồn kho |
+| **Quản lý** | Quản lý thực đơn, nhân sự và theo dõi báo cáo vận hành |
+
+## 🎯 Phạm vi dự án
+
+### MVP
+
+Vòng đời vận hành cốt lõi:
+
+**Quản lý thực đơn → Đặt món → Xác nhận đơn → Chế biến → Giao món cho khách → Thanh toán → Tồn kho → Báo cáo**
+
+Các tính năng MVP gồm **F-001 đến F-014**:
+- Quản lý món ăn và thực đơn
+- Tạo, kiểm tra và xử lý đơn hàng
+- Điều phối đơn đến bếp và hoàn tất
+- Theo dõi đơn hàng
+- Quản lý hàng đợi và tiến độ chế biến
+- Giám sát và cập nhật tồn kho
+- Ghi nhận thanh toán
+- Quản lý nhân viên
+- Báo cáo vận hành
+
+### Post-MVP
+- **F-015:** Dashboard giám sát thời gian thực
+
+### Future
+- **F-016:** Gợi ý món ăn cá nhân hóa bằng AI
+
+> F-016 hiện là định hướng tương lai và chưa thuộc phạm vi MVP.
+
+### Ngoài phạm vi
+- Đa nhà hàng / đa chi nhánh
+- Logistics giao hàng và tích hợp bên giao hàng thứ ba
+- Tích hợp cổng thanh toán nâng cao
+- BI / phân tích nâng cao
+- Chương trình khách hàng thân thiết
+- Quản lý chuỗi cung ứng nâng cao
+
+## 🔄 Hành trình sản phẩm cốt lõi
+
+```mermaid
+flowchart TD
+    A[Quản lý: Thiết lập thực đơn] --> B[Khách hàng: Xem thực đơn & tạo đơn]
+    B --> C[Nhân viên Order: Xác nhận đơn]
+    C --> D[Chuyển đơn đến hàng đợi bếp]
+    D --> E[Nhân viên Bếp: Chế biến]
+    E --> F[Nhân viên Order: Giao món cho khách]
+    F --> G[Khách hàng: Thanh toán]
+    G --> H[Nhân viên Order: Ghi nhận giao dịch]
+    H --> I[Nhân viên Kho: Cập nhật & giám sát tồn kho]
+    I --> J[Quản lý: Xem báo cáo]
 ```
 
-## Compile and run the project
+## 🤖 AI trong dự án
 
-```bash
-# development
-$ npm run start
+### AI hỗ trợ phát triển
+AI được sử dụng trong quá trình xây dựng để hỗ trợ phân tích yêu cầu, actor, user flow, use case, mô hình hệ thống, phân rã tính năng, lập kế hoạch, PRD, phát triển và kiểm thử.
 
-# watch mode
-$ npm run start:dev
+### AI trong sản phẩm
+**F-016 — Gợi ý món ăn cá nhân hóa** là tính năng AI được định hướng trong tương lai, có thể sử dụng lịch sử đặt món để tạo gợi ý phù hợp. Tính năng này chưa được xác nhận triển khai.
 
-# production mode
-$ npm run start:prod
+## 📚 Tài liệu dự án
+
+| Tài liệu | Nội dung |
+|---|---|
+| [`01-project-vision.md`](docs/01-project-vision.md) | Tầm nhìn, mục tiêu và phạm vi dự án |
+| [`02-actor-analysis.md`](docs/02-actor-analysis.md) | Phân tích actor |
+| [`03-user-flows.md`](docs/03-user-flows.md) | Luồng người dùng |
+| [`04-use-cases.md`](docs/04-use-cases.md) | Use case |
+| [`05-system-model.md`](docs/05-system-model.md) | Mô hình hệ thống |
+| [`06-feature-breakdown.md`](docs/06-feature-breakdown.md) | Phân rã tính năng |
+| [`07-project-plan.md`](docs/07-project-plan.md) | Kế hoạch và lộ trình |
+| [`08-prd.md`](docs/08-prd.md) | Product Requirements Document |
+
+### Tài liệu hỗ trợ
+- [`docs/supporting/`](docs/supporting/) — Feature specs, requirements và user stories
+- [`ai/prompts/`](ai/prompts/) — Prompt phục vụ phân tích và phát triển
+- [`database/`](database/) — Tài liệu cơ sở dữ liệu
+- [`references/`](references/) — Tài liệu tham khảo
+- [`tests/`](tests/) — Tài liệu và tài nguyên kiểm thử
+
+## 🗺️ Lộ trình phát triển
+
+| Phase | Mục tiêu | Milestone |
+|---|---|---|
+| Phase 1 | Nền tảng dữ liệu và thực đơn | M1 |
+| Phase 2 | Luồng đặt món cốt lõi | M2 |
+| Phase 3 | Bếp và theo dõi đơn hàng | M3 |
+| Phase 4 | Thanh toán và tồn kho | M4 |
+| Phase 5 | Báo cáo và hoàn thiện MVP | **M5** |
+| Phase 6 | Dashboard thời gian thực | M6 |
+| Phase 7 | AI gợi ý món ăn | M7 |
+
+## 🛠️ Công nghệ
+
+> Công nghệ triển khai chi tiết sẽ được cập nhật khi kiến trúc kỹ thuật được chốt.
+
+Hiện tại dự án ưu tiên hoàn thiện **phân tích yêu cầu → user flow → use case → system model → feature breakdown → project plan → PRD** trước khi bước vào triển khai kỹ thuật.
+
+## 📊 Trạng thái dự án
+
+**Giai đoạn hiện tại: Hoàn thiện phân tích và đặc tả yêu cầu**
+
+```text
+Project Vision
+      ↓
+Actor Analysis
+      ↓
+User Flows
+      ↓
+Use Cases
+      ↓
+System Model
+      ↓
+Feature Breakdown
+      ↓
+Project Plan
+      ↓
+PRD
+      ↓
+UI / Implementation
 ```
 
-## Run tests
+Khi xây dựng UI, **PRD là nguồn yêu cầu sản phẩm**. Các yêu cầu cụ thể về giao diện sẽ được cung cấp bổ sung theo từng màn hình hoặc chức năng, thay vì đưa chi tiết UI vào PRD.
 
-```bash
-# unit tests
-$ npm run test
+## 📄 Quy tắc nghiệp vụ chính
 
-# e2e tests
-$ npm run test:e2e
+- Món ăn hết hàng không được đặt hoặc xác nhận.
+- Khách hàng có thể theo dõi trạng thái đơn hàng mới nhất.
+- Đơn hàng chỉ được huỷ khi còn ở trạng thái cho phép huỷ.
+- Đơn bị từ chối phải có lý do.
+- Khách hàng thực hiện thanh toán; Nhân viên Order ghi nhận giao dịch trên hệ thống.
+- Đơn hàng chỉ được đóng khi thanh toán đã được ghi nhận thành công.
+- Tồn kho không được phép có số lượng âm.
+- Khi tồn kho xuống dưới ngưỡng quy định, hệ thống phải phát cảnh báo.
 
-# test coverage
-$ npm run test:cov
-```
+> Chi tiết đầy đủ được quản lý trong [`docs/08-prd.md`](docs/08-prd.md).
 
-## Deployment
+## ⚠️ Các quyết định còn mở
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- Phương thức thanh toán
+- Ngưỡng tồn kho thấp
+- Điều kiện hủy đơn
+- Cơ chế chuyển đơn vào hàng đợi bếp
+- Có yêu cầu tài khoản khách hàng hay không
+- Xử lý món ăn đang có trong đơn khi bị xóa
+- Nhu cầu thông báo ngoài ứng dụng
+- Nguồn lực cho Post-MVP / Future
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Những nội dung này được quản lý tập trung trong PRD và không được tự ý giả định khi triển khai.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+---
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+ResMan là dự án học tập / capstone được xây dựng theo hướng **AI-assisted software development**.
 
-## Observability
+**Tài liệu trung tâm của yêu cầu sản phẩm:** [`docs/08-prd.md`](docs/08-prd.md)
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+## Quy tắc nghiệp vụ đã xác nhận
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+Các quyết định nghiệp vụ mới nhất được tổng hợp tại [docs/11-confirmed-business-rules.md](docs/11-confirmed-business-rules.md). Tài liệu này là nguồn đối chiếu khi README hoặc tài liệu cũ còn mô tả khác.
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-This project is already instrumented. To connect it, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
-
-```bash
-$ npx @nestjs/observe link
-```
-
-It writes the app key and secret into `.env` and makes every `nest start` script (`start`, `start:dev`, `start:debug`) load it. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
-
-Or do it by hand: create an application and an API key at [observe.nestjs.com](https://observe.nestjs.com), and set the pair as `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment the app runs in.
-
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Tóm tắt:
+- Phiên bàn do Quản lý/Nhân viên Order mở; tablet gắn cố định với bàn.
+- Gọi thêm tạo món mới trong cùng đơn; không chỉnh số lượng item cũ.
+- Nhân viên Order sửa ghi chú và hủy món đến trước trạng thái Đang chế biến; sau đó chỉ được gọi thêm.
+- Bếp dùng trạng thái Chờ tiếp nhận, Đã tiếp nhận, Đang chế biến, Đã hoàn thành và Đã hủy; không có Bị từ chối.
+- Thanh toán một lần cho một đơn; món đã hủy không tính tiền; đơn đã thanh toán không chỉnh sửa.
+- Tồn thấp chỉ cảnh báo Nhân viên Kho; không tự động khóa món hoặc trừ kho.
+- Kiểm kê linh hoạt; chi tiết nhãn đầu/cuối ngày còn chờ xác nhận.

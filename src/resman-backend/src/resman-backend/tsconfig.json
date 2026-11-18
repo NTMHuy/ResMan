@@ -1,0 +1,53 @@
+
+{
+  "compilerOptions": {
+<<<<<<< HEAD:src/resman-backend/tsconfig.json
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+
+=======
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+>>>>>>> baa2968 (feat(menu): implement menu categories, items, image upload, and search/filter):tsconfig.json
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+<<<<<<< HEAD:src/resman-backend/tsconfig.json
+    "allowSyntheticDefaultImports": true,
+
+    "target": "ES2023",
+=======
+>>>>>>> baa2968 (feat(menu): implement menu categories, items, image upload, and search/filter):tsconfig.json
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "incremental": true,
+
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+<<<<<<< HEAD:src/resman-backend/tsconfig.json
+
+    "types": ["node"]
+  }
+}
+=======
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.spec.ts",
+    "**/*.e2e-spec.ts"
+  ]
+}
+>>>>>>> baa2968 (feat(menu): implement menu categories, items, image upload, and search/filter):tsconfig.json
