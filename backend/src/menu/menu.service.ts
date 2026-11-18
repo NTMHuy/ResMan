@@ -16,7 +16,7 @@ export class MenuService {
   }
 
   private price(value: string): Prisma.Decimal {
-    if (!/^(0|[1-9][0-9]*)(\\.[0-9]{1,2})?$/.test(value)) {
+    if (!/^(0|[1-9][0-9]*)(\.[0-9]{1,2})?$/.test(value)) {
       throw new BadRequestException("Giá phải là số không âm, tối đa 2 chữ số thập phân");
     }
     return new Prisma.Decimal(value);
