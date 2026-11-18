@@ -170,13 +170,15 @@ export class PaymentsService {
       throw new NotFoundException("Không tìm thấy phiên phục vụ");
     }
 
-    const activeItems = session.order.items.filter((item) => item.status !== "CANCELLED");
-    const amount = activeItems.reduce(
+    const chargeableItems = session.order.items.filter(
+      (item) => ["ACCEPTED", "IN_PREPARATION", "COMPLETED"].includes(item.status),
+    );
+    const amount = chargeableItems.reduce(
       (total, item) => total.add(item.lineTotal),
       new Prisma.Decimal(0),
     );
-    const pendingItems = activeItems.filter(
-      (item) => !["ACCEPTED", "IN_PREPARATION", "COMPLETED"].includes(item.status),
+    const pendingItems = session.order.items.filter(
+      (item) => item.status === "AWAITING_ACCEPTANCE",
     );
 
     return {
