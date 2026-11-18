@@ -125,6 +125,7 @@ export class SessionsService {
       order: session.order ? {
         ...session.order,
         id: session.order.id.toString(),
+        diningSessionId: session.order.diningSessionId.toString(),
         items: session.order.items.map((item) => ({
           ...item,
           id: item.id.toString(),

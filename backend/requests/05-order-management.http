@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:3000/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJtYW5hZ2VyIiwiaWF0IjoxNzk0OTczMDg3LCJleHAiOjE3OTUwNTk0ODd9.uCkqWXiBTI9G5Hl7p37gxApgYBFIqFQYTy-2GZbbRYg
+@orderItemId = 1
+
+### 5.1 Lấy danh sách đơn hàng đang hoạt động
+# @name getActiveOrders
+GET {{baseUrl}}/orders/active
+Authorization: Bearer {{token}}
+
+
+### 5.2 Nhân viên cập nhật ghi chú món
+# @name updateOrderItemNote
+PATCH {{baseUrl}}/orders/items/{{orderItemId}}/note
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "note": "Không hành, ít cay"
+}
+
+
+### 5.3 Kiểm tra lại danh sách đơn hàng
+# @name getActiveOrdersAfterUpdate
+GET {{baseUrl}}/orders/active
+Authorization: Bearer {{token}}
