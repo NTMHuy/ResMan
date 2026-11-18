@@ -1,0 +1,16 @@
+
+@baseUrl = http://localhost:3000/api/v1
+
+### 1.1 Login manager
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "manager",
+  "password": "manager12345"
+}
+
+### 1.2 Get profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{login.response.body.$.accessToken}}

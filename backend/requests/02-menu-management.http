@@ -1,0 +1,46 @@
+
+@baseUrl = http://localhost:3000/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJtYW5hZ2VyIiwiaWF0IjoxNzk0OTczMDg3LCJleHAiOjE3OTUwNTk0ODd9.uCkqWXiBTI9G5Hl7p37gxApgYBFIqFQYTy-2GZbbRYg
+
+### 2.1 Lấy danh sách menu quản lý
+GET {{baseUrl}}/menu/management
+Authorization: Bearer {{token}}
+
+### 2.2 Tạo danh mục thử nghiệm
+# @name createCategory
+POST {{baseUrl}}/menu/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "QA_CATEGORY",
+  "name": "Danh mục kiểm thử",
+  "description": "Danh mục dùng để kiểm thử API ResMan"
+}
+
+### 2.3 Tạo món thử nghiệm
+# @name createMenuItem
+POST {{baseUrl}}/menu/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "QA_ITEM_01",
+  "categoryId": {{createCategory.response.body.$.id}},
+  "name": "Món kiểm thử",
+  "description": "Món dùng để kiểm thử chức năng quản lý thực đơn",
+  "price": "45000"
+}
+
+### 2.4 Cập nhật món
+PATCH {{baseUrl}}/menu/items/{{createMenuItem.response.body.$.id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Món kiểm thử đã cập nhật",
+  "price": "50000"
+}
+
+### 2.5 Xem thực đơn công khai
+GET {{baseUrl}}/menu

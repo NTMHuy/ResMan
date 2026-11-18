@@ -1,0 +1,59 @@
+
+@baseUrl = http://localhost:3000/api/v1
+
+### 3.1 Login manager
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "manager",
+  "password": "manager12345"
+}
+
+### 3.2 Lấy danh sách bàn
+GET {{baseUrl}}/tables
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 3.3 Tạo bàn kiểm thử
+# @name createTable
+POST {{baseUrl}}/tables
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "code": "QA_TABLE_01",
+  "name": "Bàn kiểm thử 01",
+  "capacity": 4
+}
+
+### 3.4 Xem chi tiết bàn vừa tạo
+GET {{baseUrl}}/tables/{{createTable.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 3.5 Mở phiên phục vụ
+# @name openSession
+POST {{baseUrl}}/sessions
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "tableId": {{createTable.response.body.$.id}}
+}
+
+### 3.6 Lấy phiên đang hoạt động của bàn
+GET {{baseUrl}}/sessions/table/{{createTable.response.body.$.id}}/active
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 3.7 Xem chi tiết phiên
+GET {{baseUrl}}/sessions/{{openSession.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 3.8 Kiểm tra không cho mở phiên trùng
+POST {{baseUrl}}/sessions
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "tableId": {{createTable.response.body.$.id}}
+}
