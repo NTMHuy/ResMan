@@ -1,0 +1,16 @@
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+
+@Injectable()
+export class ParseBigIntPipe implements PipeTransform<string, bigint> {
+  transform(value: string): bigint {
+    try {
+      if (!/^[1-9]\d*$/.test(value)) {
+        throw new Error();
+      }
+
+      return BigInt(value);
+    } catch {
+      throw new BadRequestException('Invalid ID');
+    }
+  }
+}
