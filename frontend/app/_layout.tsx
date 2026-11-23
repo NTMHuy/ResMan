@@ -1,9 +1,23 @@
+
 import React from 'react';
 import { Slot } from 'expo-router';
-import { ThemeProvider } from '@/src/theme/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
+
+import { ThemeProvider, useTheme } from '@/src/theme/ThemeContext';
 import { ToastProvider } from '@/src/contexts/ToastContext';
 import { AuthProvider } from '@/src/contexts/AuthContext';
 import { NavigationProvider } from '@/src/contexts/NavigationContext';
+
+function RootContent() {
+  const { isDark } = useTheme();
+
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Slot />
+    </>
+  );
+}
 
 export default function RootLayout() {
   return (
@@ -11,7 +25,7 @@ export default function RootLayout() {
       <ToastProvider>
         <AuthProvider>
           <NavigationProvider>
-            <Slot />
+            <RootContent />
           </NavigationProvider>
         </AuthProvider>
       </ToastProvider>

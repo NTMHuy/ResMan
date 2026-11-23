@@ -10,7 +10,6 @@ import React, {
 import {
   usePathname,
   useRouter,
-  type Href,
 } from 'expo-router';
 
 import type { AppRoute } from '@/src/types/common';
@@ -20,7 +19,7 @@ import {
   getDefaultRouteForRole,
 } from '@/src/constants/rbac';
 
-const ROUTE_PATHS: Record<AppRoute, Href> = {
+const ROUTE_PATHS = {
   dashboard: '/(main)/dashboard',
   menu: '/(main)/menu',
   'customer-order': '/(main)/customer-order',
@@ -29,7 +28,7 @@ const ROUTE_PATHS: Record<AppRoute, Href> = {
   inventory: '/(main)/inventory',
   employees: '/(main)/employees',
   reports: '/(main)/reports',
-};
+} as const;
 
 const VALID_ROUTES: AppRoute[] = [
   'dashboard',
@@ -42,15 +41,15 @@ const VALID_ROUTES: AppRoute[] = [
   'reports',
 ];
 
-function getRouteFromPathname(pathname: string): AppRoute | null {
+function getRouteFromPathname(
+  pathname: string
+): AppRoute | null {
   const segments = pathname.split('/').filter(Boolean);
   const lastSegment = segments[segments.length - 1];
 
-  if (VALID_ROUTES.includes(lastSegment as AppRoute)) {
-    return lastSegment as AppRoute;
-  }
-
-  return null;
+  return VALID_ROUTES.includes(lastSegment as AppRoute)
+    ? (lastSegment as AppRoute)
+    : null;
 }
 
 interface NavigationContextValue {
@@ -58,10 +57,11 @@ interface NavigationContextValue {
   navigate: (route: AppRoute) => void;
 }
 
-const NavigationContext = createContext<NavigationContextValue>({
-  currentRoute: 'dashboard',
-  navigate: () => {},
-});
+const NavigationContext =
+  createContext<NavigationContextValue>({
+    currentRoute: 'dashboard',
+    navigate: () => {},
+  });
 
 export function NavigationProvider({
   children,
@@ -78,28 +78,29 @@ export function NavigationProvider({
     [pathname]
   );
 
-  // Kiểm tra quyền truy cập khi URL thay đổi.
+  // Bảo vệ cả trường hợp người dùng nhập URL trực tiếp.
   useEffect(() => {
     if (!user) return;
 
     const requestedRoute = getRouteFromPathname(pathname);
 
-    // Chỉ xử lý các trang thuộc khu vực quản lý.
-    if (!pathname.includes('(main)') && !requestedRoute) {
-      return;
-    }
+    if (!requestedRoute) return;
 
-    if (!requestedRoute || !canAccessRoute(user.role, requestedRoute)) {
+    if (!canAccessRoute(user.role, requestedRoute)) {
       const fallback = getDefaultRouteForRole(user.role);
 
       router.replace(ROUTE_PATHS[fallback]);
     }
   }, [user, pathname, router]);
 
-  // Điều hướng bằng Expo Router.
   const navigate = useCallback(
     (route: AppRoute) => {
-      if (user && !canAccessRoute(user.role, route)) {
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+
+      if (!canAccessRoute(user.role, route)) {
         const fallback = getDefaultRouteForRole(user.role);
 
         router.replace(ROUTE_PATHS[fallback]);
@@ -126,6 +127,6 @@ export function NavigationProvider({
   );
 }
 
-export function useAppNavigation(): NavigationContextValue {
+export function useAppNavigation() {
   return useContext(NavigationContext);
 }

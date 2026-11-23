@@ -1,13 +1,14 @@
-
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "paths": {
-      "@/*": ["./*"]
-    },
+    "noEmit": true,
     "ignoreDeprecations": "6.0",
-    "noEmit": true
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   },
   "include": [
     "**/*.ts",
@@ -15,6 +16,8 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/main.tsx",
+    "vite.config.ts"
   ]
 }
