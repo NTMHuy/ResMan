@@ -8,7 +8,9 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findGuestTables() {
+    const fixedCodes = Array.from({ length: 20 }, (_, index) => `T${String(index + 1).padStart(2, "0")}`);
     const tables = await this.prisma.diningTable.findMany({
+      where: { code: { in: fixedCodes } },
       orderBy: [{ code: "asc" }, { id: "asc" }],
       select: {
         id: true,
