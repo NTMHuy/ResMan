@@ -24,7 +24,7 @@ export const TABLE_OPTIONS = [
 
 const USE_MOCK_CUSTOMER_ORDER = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
 
-type OpenGuestTable = { id: string; code: string; name: string; status: string; sessionCode: string | null };
+type OpenGuestTable = { id: string; code: string; name: string; status: string };
 
 export function useCustomerOrder() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
@@ -134,12 +134,17 @@ export function useCustomerOrder() {
 
   const connectTable = useCallback(async (tableId: string) => {
     const table = openTables.find((item) => item.id === tableId);
-    if (!table?.sessionCode) {
+    if (!table || table.status !== 'OPEN') {
       throw new Error('Bàn này chưa được nhân viên mở phiên. Vui lòng chọn bàn đang mở.');
     }
-    await storageService.setCustomerSessionCode(table.sessionCode);
-    setSessionCode(table.sessionCode);
-    setTableNumber(table.name || table.code);
+    const response = await apiClient.post('/guest/session/connect', { tableId: Number(table.id) });
+    const payload = response.data && typeof response.data === 'object' && 'data' in response.data
+      ? (response.data as { data: { sessionCode: string; table: { name: string; code: string } } }).data
+      : response.data as { sessionCode: string; table: { name: string; code: string } };
+    const code = payload.sessionCode;
+    await storageService.setCustomerSessionCode(code);
+    setSessionCode(code);
+    setTableNumber(payload.table.name || payload.table.code);
     const orders = await repositories.customerOrder.getRecentTableOrders('');
     setTableOrders(orders);
   }, [openTables]);
