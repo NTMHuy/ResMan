@@ -32,7 +32,8 @@ import { ApiDashboardRepository } from "@/src/repositories/api/ApiDashboardRepos
 
 const useMockData = APP_CONFIG.USE_MOCK_DATA;
 const useMockAuth = APP_CONFIG.USE_MOCK_AUTH;
-const useMockMenu = APP_CONFIG.USE_MOCK_MENU;
+// Mock data is never used in production builds, even if an env flag is accidentally enabled.
+const useMockMenu = __DEV__ && APP_CONFIG.USE_MOCK_MENU;
 
 export const repositories: {
   auth: AuthRepository;
