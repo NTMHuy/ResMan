@@ -9,6 +9,7 @@ export type AppRoute =
   | "dashboard"
   | "menu"
   | "customer-order"
+  | "tables"
   | "orders"
   | "kitchen"
   | "inventory"
