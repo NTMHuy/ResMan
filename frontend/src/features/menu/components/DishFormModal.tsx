@@ -117,9 +117,14 @@ export function DishFormModal({
       if (result.canceled || !result.assets[0]) return;
 
       const asset = result.assets[0];
-      const fileName = asset.fileName || asset.uri.split('/').pop() || 'menu-image';
-      const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-      const mimeType = asset.mimeType || ALLOWED_IMAGE_TYPES[extension];
+      const mimeType = asset.mimeType || asset.file?.type || '';
+      const inferredExtension = Object.entries(ALLOWED_IMAGE_TYPES)
+        .find(([, mime]) => mime === mimeType)?.[0];
+      const originalName = asset.fileName || asset.file?.name || asset.uri.split('/').pop() || 'menu-image';
+      const extension = originalName.split('.').pop()?.toLowerCase() || inferredExtension || '';
+      const fileName = /\\.(jpg|jpeg|png|webp)$/i.test(originalName)
+        ? originalName
+        : `${originalName}.${inferredExtension || extension}`;
 
       if (!ALLOWED_IMAGE_TYPES[extension] || !mimeType || mimeType !== ALLOWED_IMAGE_TYPES[extension]) {
         setSubmitError('Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WEBP.');
