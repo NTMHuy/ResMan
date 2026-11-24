@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import {
   BookOpen,
   Edit3,
@@ -14,7 +14,6 @@ import { useToast } from '@/src/contexts/ToastContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { formatVND } from '@/src/utils/formatters';
 import { useMenu } from '@/src/features/menu/hooks/useMenu';
-import { resolveMenuImageUrl } from '@/src/constants/config';
 import type {
   CreateMenuItemInput,
   DishStatus,
@@ -31,6 +30,7 @@ import { PermissionGate } from '@/src/components/common/PermissionGate';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 import { DishFormModal } from '@/src/features/menu/components/DishFormModal';
+import { MenuItemImage } from '@/src/features/menu/components/MenuItemImage';
 import { CategoryManagerModal } from '@/src/features/menu/components/CategoryManagerModal';
 
 const STATUS_BADGE: Record<DishStatus, { label: string; tone: 'success' | 'danger' | 'neutral' }> = {
@@ -294,11 +294,7 @@ export function MenuScreen() {
                     },
                   ]}
                 >
-                  <Image
-                    source={dish.imageUrl ? { uri: resolveMenuImageUrl(dish.imageUrl) } : undefined}
-                    style={styles.dishThumb}
-                    resizeMode="cover"
-                  />
+                  <MenuItemImage uri={dish.imageUrl} style={styles.dishThumb} />
                   <View style={styles.dishMain}>
                     <View style={styles.dishTitleRow}>
                       <Text
@@ -389,11 +385,7 @@ export function MenuScreen() {
 
           {isDesktop && activePreview ? (
             <Card style={styles.previewPanel} padding="md">
-              <Image
-                source={activePreview.imageUrl ? { uri: resolveMenuImageUrl(activePreview.imageUrl) } : undefined}
-                style={styles.previewImage}
-                resizeMode="cover"
-              />
+              <MenuItemImage uri={activePreview.imageUrl} style={styles.previewImage} />
               <View style={styles.previewHeader}>
                 <Badge
                   label={activePreview.sku}
