@@ -23,6 +23,12 @@ const USE_MOCK_AUTH =
 const USE_MOCK_MENU =
   (process.env.EXPO_PUBLIC_USE_MOCK_MENU ?? "false").toLowerCase() !== "false";
 
+// Customer ordering is connected to the real API by default, independently
+// from other modules that may still use mock data during development.
+const USE_MOCK_CUSTOMER_ORDER =
+  __DEV__ &&
+  (process.env.EXPO_PUBLIC_USE_MOCK_CUSTOMER_ORDER ?? "false").toLowerCase() === "true";
+
 export const APP_CONFIG = {
   APP_NAME: "ResMan",
   BRANCH_NAME: "Downtown #04",
@@ -32,6 +38,7 @@ export const APP_CONFIG = {
   USE_MOCK_DATA,
   USE_MOCK_AUTH,
   USE_MOCK_MENU,
+  USE_MOCK_CUSTOMER_ORDER,
   MOCK_LATENCY_MS: 220,
 } as const;
 
