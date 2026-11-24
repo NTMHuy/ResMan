@@ -50,6 +50,7 @@ const rolePermissions: Record<string, string[]> = {
   ORDER_STAFF: [
     "tables:read",
     "sessions:open",
+    "sessions:close",
     "orders:read",
     "orders:create-item",
     "orders:manage-item",
@@ -168,6 +169,21 @@ async function main(): Promise<void> {
       update: { fullName, employeeCode },
       create: { userId, fullName, employeeCode },
     });
+
+    // Tạo sẵn 20 bàn cố định; upsert giúp chạy seed nhiều lần không tạo trùng.
+    for (let number = 1; number <= 20; number += 1) {
+      const code = `T${String(number).padStart(2, "0")}`;
+      await prisma.diningTable.upsert({
+        where: { code },
+        update: { name: `Bàn ${String(number).padStart(2, "0")}` },
+        create: {
+          code,
+          name: `Bàn ${String(number).padStart(2, "0")}`,
+          capacity: 4,
+          status: "AVAILABLE",
+        },
+      });
+    }
 
     console.log(
       "Đã khởi tạo roles, permissions và tài khoản quản lý đầu tiên.",
