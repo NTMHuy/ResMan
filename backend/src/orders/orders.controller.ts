@@ -13,6 +13,11 @@ export class OrdersController {
     return sessionCode;
   }
 
+  @Get("tables")
+  getGuestTables() {
+    return this.orders.findGuestTables();
+  }
+
   @Get()
   getGuestSession(@Headers("x-session-code") sessionCode?: string) {
     return this.orders.getGuestSession(this.requireSessionCode(sessionCode));
