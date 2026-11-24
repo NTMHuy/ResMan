@@ -118,7 +118,7 @@ export function useMenu() {
         !query ||
         String(item.name ?? "")
           .toLowerCase()
-          .includes(q) ||
+          .includes(query) ||
         String(item.sku ?? "")
           .toLowerCase()
           .includes(q) ||
