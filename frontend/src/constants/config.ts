@@ -17,14 +17,16 @@ const API_URL = (
 const USE_MOCK_DATA =
   (process.env.EXPO_PUBLIC_USE_MOCK_DATA ?? "true").toLowerCase() !== "false";
 
+const USE_MOCK_ORDERS =
+  __DEV__ &&
+  (process.env.EXPO_PUBLIC_USE_MOCK_ORDERS ?? "false").toLowerCase() === "true";
+
 const USE_MOCK_AUTH =
   (process.env.EXPO_PUBLIC_USE_MOCK_AUTH ?? "false").toLowerCase() !== "false";
 
 const USE_MOCK_MENU =
   (process.env.EXPO_PUBLIC_USE_MOCK_MENU ?? "false").toLowerCase() !== "false";
 
-// Customer ordering is connected to the real API by default, independently
-// from other modules that may still use mock data during development.
 const USE_MOCK_CUSTOMER_ORDER =
   __DEV__ &&
   (process.env.EXPO_PUBLIC_USE_MOCK_CUSTOMER_ORDER ?? "false").toLowerCase() === "true";
@@ -36,6 +38,7 @@ export const APP_CONFIG = {
   API_ORIGIN: new URL(API_URL).origin,
   API_TIMEOUT_MS: 15000,
   USE_MOCK_DATA,
+  USE_MOCK_ORDERS,
   USE_MOCK_AUTH,
   USE_MOCK_MENU,
   USE_MOCK_CUSTOMER_ORDER,
