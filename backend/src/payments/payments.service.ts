@@ -48,14 +48,11 @@ export class PaymentsService {
         }
 
         const notYetReceived = session.order.items.filter(
-          (item) => item.status !== "CANCELLED" &&
-            item.status !== "ACCEPTED" &&
-            item.status !== "IN_PREPARATION" &&
-            item.status !== "COMPLETED",
+          (item) => item.status === "AWAITING_ACCEPTANCE",
         );
         if (notYetReceived.length > 0) {
           throw new ConflictException(
-            "Chưa thể thanh toán: vẫn còn món đang chờ bếp tiếp nhận",
+            `Chưa thể thanh toán: còn ${notYetReceived.length} món đang chờ bếp tiếp nhận: ${notYetReceived.map((item) => item.itemNameSnapshot).join(", ")}. Hãy tiếp nhận hoặc hủy các món này trước.`,
           );
         }
 

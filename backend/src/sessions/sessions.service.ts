@@ -99,19 +99,11 @@ export class SessionsService {
     return this.prisma.$transaction(async (tx) => {
       const session = await tx.diningSession.findUnique({
         where: { id: sessionId },
-        include: {
-          table: { select: { id: true, code: true, name: true } },
-          order: { select: { payment: true } },
-        },
+        include: { table: { select: { id: true, code: true, name: true } } },
       });
       if (!session) throw new NotFoundException("Không tìm thấy phiên phục vụ");
       if (session.status !== "OPEN") {
         throw new ConflictException("Phiên phục vụ đã được đóng trước đó");
-      }
-      if (session.order?.payment?.status !== "PAID") {
-        throw new ConflictException(
-          "Không thể đóng bàn khi chưa thanh toán thành công. Hãy thực hiện thanh toán để hệ thống tự giải phóng bàn.",
-        );
       }
 
       const closed = await tx.diningSession.updateMany({

@@ -367,6 +367,18 @@ export function OrdersScreen() {
                       </PermissionGate>
                     ) : null}
 
+                    {selectedOrder.paymentStatus === 'UNPAID' ? (
+                      <PermissionGate permission="ORDER_PAYMENT">
+                        <Button
+                          label="Thu tiền & Hoàn tất"
+                          variant="success"
+                          size="sm"
+                          leftIcon={<CreditCard size={15} color={theme.colors.onSuccess} />}
+                          onPress={() => setPaymentOpen(true)}
+                        />
+                      </PermissionGate>
+                    ) : null}
+
                     <PermissionGate permission="ORDER_CANCEL">
                       <Button
                         label="Hủy đơn"
@@ -379,18 +391,6 @@ export function OrdersScreen() {
                   </>
                 ) : null}
               </View>
-
-              {selectedOrder.paymentStatus === 'UNPAID' ? (
-                <PermissionGate permission="ORDER_PAYMENT">
-                  <Button
-                    label="Thu tiền & Hoàn tất"
-                    variant="success"
-                    size="sm"
-                    leftIcon={<CreditCard size={15} color={theme.colors.onSuccess} />}
-                    onPress={() => setPaymentOpen(true)}
-                  />
-                </PermissionGate>
-              ) : null}
 
               {selectedOrder.cancelReason ? (
                 <View

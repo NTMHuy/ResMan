@@ -54,6 +54,33 @@ export function TablesScreen() {
     }
   };
 
+  const closeTable = (table: DiningTable) => {
+    const session = table.sessions?.[0];
+    if (!session) {
+      void loadTables();
+      return;
+    }
+    Alert.alert("Đóng phiên phục vụ", `Bạn có chắc muốn đóng ${table.name}?`, [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Đóng phiên",
+        style: "destructive",
+        onPress: async () => {
+          setBusyId(table.id);
+          try {
+            await apiClient.patch(`/sessions/${session.id}/close`);
+            await loadTables();
+          } catch (err) {
+            Alert.alert("Không thể đóng phiên", err instanceof Error ? err.message : "Vui lòng thử lại.");
+            await loadTables();
+          } finally {
+            setBusyId(null);
+          }
+        },
+      },
+    ]);
+  };
+
   const occupiedCount = tables.filter((table) => table.sessions?.length || table.status === "OCCUPIED").length;
   const isOpen = (table: DiningTable) => Boolean(table.sessions?.length) || table.status === "OCCUPIED";
 
@@ -62,7 +89,7 @@ export function TablesScreen() {
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { color: theme.colors.onSurface }]}>Quản lý bàn</Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>Mở bàn trống; bàn đang phục vụ chỉ được giải phóng sau thanh toán</Text>
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>Chọn bàn để mở phiên hoặc đóng phiên đang phục vụ</Text>
         </View>
         <Pressable onPress={() => void loadTables()} style={[styles.refresh, { backgroundColor: theme.colors.surfaceLow }]}>
           <RefreshCw size={18} color={theme.colors.onSurface} />
@@ -86,13 +113,7 @@ export function TablesScreen() {
             <Pressable
               key={table.id}
               disabled={busy || loading}
-              onPress={() => {
-                if (opened) {
-                  Alert.alert("Bàn đang phục vụ", "Bàn chỉ được giải phóng sau khi thanh toán thành công. Hãy vào Đơn hàng để thực hiện thanh toán.");
-                  return;
-                }
-                void openTable(table);
-              }}
+              onPress={() => opened ? closeTable(table) : void openTable(table)}
               style={[
                 styles.tableCard,
                 {
@@ -105,7 +126,7 @@ export function TablesScreen() {
               {busy ? <ActivityIndicator color={theme.colors.primary} /> : <Armchair size={25} color={opened ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant} />}
               <Text style={[styles.tableName, { color: opened ? theme.colors.onSecondaryContainer : theme.colors.onSurface }]}>{table.name}</Text>
               <Text style={{ color: opened ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant, fontSize: 12, fontWeight: "700" }}>
-                {opened ? "ĐANG PHỤC VỤ · Chờ thanh toán" : "BÀN TRỐNG · Nhấn để mở"}
+                {opened ? "MỞ · Nhấn để đóng" : "ĐÓNG · Nhấn để mở"}
               </Text>
               {opened && table.sessions?.[0] ? (
                 <Text style={{ color: theme.colors.onSecondaryContainer, fontSize: 10 }}>

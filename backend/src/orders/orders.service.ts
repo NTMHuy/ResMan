@@ -290,59 +290,130 @@ export class OrdersService {
       return await this.prisma.$transaction(async (tx) => {
         const order = await tx.order.findUnique({
           where: { id: orderId },
-          include: { diningSession: true, items: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] } },
+          include: {
+            diningSession: true,
+            items: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+          },
         });
         if (!order) throw new NotFoundException("Không tìm thấy đơn hàng");
-        if (order.diningSession.status !== "OPEN") throw new ConflictException("Phiên phục vụ đã đóng");
+        if (order.diningSession.status !== "OPEN") {
+          throw new ConflictException("Phiên phục vụ đã đóng");
+        }
 
         const activeItems = order.items.filter((item) => item.status !== "CANCELLED");
-        if (activeItems.length === 0) throw new ConflictException("Đơn hàng không còn món cần xử lý");
+        if (activeItems.length === 0) {
+          throw new ConflictException("Đơn hàng không còn món cần xử lý");
+        }
 
-        const allowedFrom: Record<string, string[]> = {
-          ACCEPTED: ["AWAITING_ACCEPTANCE", "ACCEPTED"],
-          IN_PREPARATION: ["ACCEPTED", "IN_PREPARATION", "COMPLETED"],
-          COMPLETED: ["IN_PREPARATION", "COMPLETED"],
+        // A table order may contain old items already cooking and newly-added
+        // items still awaiting acceptance. Advance only eligible items.
+        if (nextStatus === "IN_PREPARATION") {
+          const waiting = activeItems.filter((item) => item.status === "AWAITING_ACCEPTANCE");
+          if (waiting.length > 0) {
+            throw new ConflictException(
+              `Còn ${waiting.length} món chưa được bếp tiếp nhận: ${waiting.map((item) => item.itemNameSnapshot).join(", ")}. Hãy tiếp nhận các món trước.`,
+            );
+          }
+        }
+
+        if (nextStatus === "COMPLETED") {
+          const notStarted = activeItems.filter(
+            (item) => item.status === "AWAITING_ACCEPTANCE" || item.status === "ACCEPTED",
+          );
+          if (notStarted.length > 0) {
+            throw new ConflictException(
+              `Còn ${notStarted.length} món chưa bắt đầu chế biến. Không thể hoàn tất đơn.`,
+            );
+          }
+        }
+
+        if (nextStatus === "CANCELLED") {
+          const alreadyStarted = activeItems.filter(
+            (item) => item.status === "IN_PREPARATION" || item.status === "COMPLETED",
+          );
+          if (alreadyStarted.length > 0) {
+            throw new ConflictException(
+              "Đơn có món đang chế biến hoặc đã hoàn tất. Không thể từ chối/hủy toàn bộ đơn; hãy xử lý các món chưa bắt đầu riêng.",
+            );
+          }
+          if (!reason?.trim()) {
+            throw new ConflictException("Vui lòng nhập lý do từ chối hoặc hủy đơn");
+          }
+        }
+
+        const eligibleStatuses: Record<typeof nextStatus, string[]> = {
+          ACCEPTED: ["AWAITING_ACCEPTANCE"],
+          IN_PREPARATION: ["ACCEPTED"],
+          COMPLETED: ["IN_PREPARATION"],
           CANCELLED: ["AWAITING_ACCEPTANCE", "ACCEPTED"],
         };
-        if (activeItems.some((item) => !allowedFrom[nextStatus].includes(item.status))) {
-          throw new ConflictException("Trạng thái món không hợp lệ để thực hiện thao tác này");
-        }
-        if (nextStatus === "CANCELLED" && !reason?.trim()) {
-          throw new ConflictException("Vui lòng nhập lý do từ chối hoặc hủy đơn");
+        const itemsToUpdate = activeItems.filter((item) =>
+          eligibleStatuses[nextStatus].includes(item.status),
+        );
+
+        if (itemsToUpdate.length === 0) {
+          const alreadyAtOrBeyond: Record<typeof nextStatus, string[]> = {
+            ACCEPTED: ["ACCEPTED", "IN_PREPARATION", "COMPLETED"],
+            IN_PREPARATION: ["IN_PREPARATION", "COMPLETED"],
+            COMPLETED: ["COMPLETED"],
+            CANCELLED: [],
+          };
+          if (
+            nextStatus === "CANCELLED" ||
+            activeItems.some((item) => !alreadyAtOrBeyond[nextStatus].includes(item.status))
+          ) {
+            throw new ConflictException("Không có món nào phù hợp để cập nhật trạng thái");
+          }
         }
 
-        const itemsToUpdate = activeItems.filter((item) =>
-          nextStatus === "IN_PREPARATION" ? item.status === "ACCEPTED" : item.status !== nextStatus,
-        );
         for (const item of itemsToUpdate) {
           const changed = await tx.orderItem.updateMany({
             where: { id: item.id, status: item.status },
             data: { status: nextStatus },
           });
-          if (changed.count !== 1) throw new ConflictException("Có món vừa được cập nhật bởi thao tác khác");
+          if (changed.count !== 1) {
+            throw new ConflictException("Có món vừa được cập nhật bởi thao tác khác. Vui lòng tải lại đơn.");
+          }
           await tx.orderItemStatusHistory.create({
             data: {
-              orderItemId: item.id, fromStatus: item.status, toStatus: nextStatus,
-              reason: reason?.trim() || null, actorId,
+              orderItemId: item.id,
+              fromStatus: item.status,
+              toStatus: nextStatus,
+              reason: reason?.trim() || null,
+              actorId,
             },
           });
         }
-        if (itemsToUpdate.length) {
+
+        if (itemsToUpdate.length > 0) {
           await tx.auditLog.create({
             data: {
               actorId,
-              action: nextStatus === "CANCELLED" ? "ORDER_STAFF_ORDER_CANCELLED" : "ORDER_STAFF_ORDER_STATUS_CHANGED",
+              action: nextStatus === "CANCELLED"
+                ? "ORDER_STAFF_ORDER_CANCELLED"
+                : "ORDER_STAFF_ORDER_STATUS_CHANGED",
               entityType: "ORDER",
               entityId: order.id.toString(),
               metadata: {
                 fromStatuses: [...new Set(itemsToUpdate.map((item) => item.status))],
-                toStatus: nextStatus, reason: reason?.trim() || null,
+                toStatus: nextStatus,
+                reason: reason?.trim() || null,
                 itemIds: itemsToUpdate.map((item) => item.id.toString()),
               },
             },
           });
         }
-        return { id: order.id.toString(), orderCode: order.orderCode, status: nextStatus, updatedItemCount: itemsToUpdate.length };
+
+        return {
+          id: order.id.toString(),
+          orderCode: order.orderCode,
+          status: nextStatus,
+          updatedItemCount: itemsToUpdate.length,
+          remainingAwaitingAcceptance: activeItems.filter(
+            (item) => item.status === "AWAITING_ACCEPTANCE" &&
+              !itemsToUpdate.some((updated) => updated.id === item.id),
+          ).length,
+        };
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (error) {
       if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
