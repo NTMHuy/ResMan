@@ -77,8 +77,8 @@ export function CustomerOrderScreen() {
     tableNumber,
     changeTable,
     sessionCode,
-    setSessionCode,
-    connectSession,
+    openTables,
+    connectTable,
     disconnectSession,
     guestName,
     setGuestName,
@@ -191,30 +191,45 @@ export function CustomerOrderScreen() {
           </ScrollView>
         ) : (
           <View style={{ gap: 8 }}>
-            <Input
-              label="Mã phiên bàn"
-              value={sessionCode}
-              onChangeText={setSessionCode}
-              placeholder="Nhập mã phiên 64 ký tự từ nhân viên/QR"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={tableNumber === 'Chưa kết nối'}
-            />
+            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+              Chọn một bàn đang mở để bắt đầu gọi món. Bạn không cần nhập mã phiên.
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tableChips}>
+              {openTables.filter((table) => table.status === 'OPEN').map((table) => {
+                const active = tableNumber === (table.name || table.code);
+                return (
+                  <Pressable
+                    key={table.id}
+                    onPress={async () => {
+                      try {
+                        await connectTable(table.id);
+                        showToast('Đã kết nối bàn', 'success', 'Bạn có thể bắt đầu gọi món.');
+                      } catch (err) {
+                        showToast('Không thể kết nối', 'error', getErrorMessage(err, 'Bàn chưa có phiên hoạt động.'));
+                      }
+                    }}
+                    style={[
+                      styles.tableChip,
+                      {
+                        backgroundColor: active ? theme.colors.primary : theme.colors.surfaceLow,
+                        borderColor: active ? theme.colors.primary : theme.colors.border,
+                        borderRadius: theme.radius.md,
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.tableChipText, { color: active ? theme.colors.onPrimary : theme.colors.onSurface }]}>
+                      {table.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            {openTables.every((table) => table.status !== 'OPEN') ? (
+              <Text style={{ color: theme.colors.error, fontSize: 12 }}>
+                Hiện chưa có bàn nào được mở. Vui lòng đợi nhân viên mở bàn.
+              </Text>
+            ) : null}
             <View style={styles.dishBtnGroup}>
-              <Button
-                label="Kết nối phiên"
-                size="sm"
-                variant="primary"
-                disabled={tableNumber !== 'Chưa kết nối' || !sessionCode.trim()}
-                onPress={async () => {
-                  try {
-                    await connectSession();
-                    showToast('Đã kết nối bàn', 'success', 'Bạn có thể bắt đầu gọi món.');
-                  } catch (err) {
-                    showToast('Không thể kết nối', 'error', getErrorMessage(err, 'Vui lòng kiểm tra mã phiên và kết nối mạng.'));
-                  }
-                }}
-              />
               <Button
                 label="Ngắt kết nối"
                 size="sm"
