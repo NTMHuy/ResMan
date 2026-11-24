@@ -5,8 +5,13 @@ const metroHost = Constants.expoConfig?.hostUri?.split(":")[0];
 const defaultHost =
   metroHost || (Platform.OS === "android" ? "10.0.2.2" : "localhost");
 
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
+if (!configuredApiUrl && !__DEV__) {
+  throw new Error("EXPO_PUBLIC_API_URL must be configured for production builds.");
+}
+
 const API_URL = (
-  process.env.EXPO_PUBLIC_API_URL ?? `http://${defaultHost}:3000/api/v1`
+  configuredApiUrl ?? `http://${defaultHost}:3000/api/v1`
 ).replace(/\/+$/, "");
 
 const USE_MOCK_DATA =
