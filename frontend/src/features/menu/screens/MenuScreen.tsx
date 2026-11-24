@@ -14,10 +14,12 @@ import { useToast } from '@/src/contexts/ToastContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { formatVND } from '@/src/utils/formatters';
 import { useMenu } from '@/src/features/menu/hooks/useMenu';
+import { resolveMenuImageUrl } from '@/src/constants/config';
 import type {
   CreateMenuItemInput,
   DishStatus,
   MenuItem,
+  UploadMenuImageInput,
 } from '@/src/features/menu/types/menu.types';
 import { Card } from '@/src/components/common/Card';
 import { Badge } from '@/src/components/common/Badge';
@@ -61,7 +63,6 @@ export function MenuScreen() {
     setSelectedCategoryId,
     selectedStatus,
     setSelectedStatus,
-    imagePresets,
     reload,
     createCategory,
     updateCategory,
@@ -70,6 +71,8 @@ export function MenuScreen() {
     updateMenuItem,
     deleteMenuItem,
     toggleMenuItemStatus,
+    uploadMenuItemImage,
+    deleteMenuItemImage,
   } = useMenu();
 
   const [dishModalOpen, setDishModalOpen] = useState(false);
@@ -91,14 +94,38 @@ export function MenuScreen() {
     return items[0] ?? null;
   }, [items, selectedPreview]);
 
-  const handleDishSubmit = async (values: CreateMenuItemInput, editingId?: string) => {
-    if (editingId) {
-      await updateMenuItem(editingId, values);
-      showToast('Đã cập nhật món ăn', 'success', values.name);
-    } else {
-      await createMenuItem(values);
-      showToast('Đã thêm món ăn mới', 'success', values.name);
+  const handleDishSubmit = async (
+    values: CreateMenuItemInput,
+    editingId?: string,
+    selectedImage?: UploadMenuImageInput | null,
+    removeImage?: boolean,
+  ) => {
+    // Persist the menu item first. The image is uploaded only after we have its real backend ID.
+    const savedItem = editingId
+      ? await updateMenuItem(editingId, values)
+      : await createMenuItem({ ...values, imageUrl: '' });
+
+    try {
+      if (selectedImage) {
+        await uploadMenuItemImage(savedItem.id, selectedImage);
+      } else if (editingId && removeImage) {
+        await deleteMenuItemImage(savedItem.id);
+      }
+    } catch (error) {
+      // The item itself is already saved; don't re-create it on a retry.
+      showToast(
+        'Đã lưu thông tin món nhưng chưa cập nhật được ảnh',
+        'error',
+        error instanceof Error ? error.message : 'Vui lòng mở chỉnh sửa và thử tải ảnh lại.',
+      );
+      return;
     }
+
+    showToast(
+      editingId ? 'Đã cập nhật món ăn' : 'Đã thêm món ăn mới',
+      'success',
+      values.name,
+    );
   };
 
   const handleToggleSale = async (dish: MenuItem, isSelling: boolean) => {
@@ -268,7 +295,7 @@ export function MenuScreen() {
                   ]}
                 >
                   <Image
-                    source={{ uri: dish.imageUrl }}
+                    source={dish.imageUrl ? { uri: resolveMenuImageUrl(dish.imageUrl) } : undefined}
                     style={styles.dishThumb}
                     resizeMode="cover"
                   />
@@ -363,7 +390,7 @@ export function MenuScreen() {
           {isDesktop && activePreview ? (
             <Card style={styles.previewPanel} padding="md">
               <Image
-                source={{ uri: activePreview.imageUrl }}
+                source={activePreview.imageUrl ? { uri: resolveMenuImageUrl(activePreview.imageUrl) } : undefined}
                 style={styles.previewImage}
                 resizeMode="cover"
               />
@@ -450,7 +477,6 @@ export function MenuScreen() {
         visible={dishModalOpen}
         editingItem={editingDish}
         categories={categories}
-        imagePresets={imagePresets}
         loading={mutating}
         onClose={() => setDishModalOpen(false)}
         onSubmit={handleDishSubmit}
