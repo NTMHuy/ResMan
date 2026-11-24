@@ -1,21 +1,21 @@
 export type UserRole =
-  | 'MANAGER'
-  | 'ORDER_STAFF'
-  | 'KITCHEN_STAFF'
-  | 'INVENTORY_STAFF'
-  | 'GUEST';
+  | "MANAGER"
+  | "ORDER_STAFF"
+  | "KITCHEN_STAFF"
+  | "INVENTORY_STAFF"
+  | "GUEST";
 
 export type AppRoute =
-  | 'dashboard'
-  | 'menu'
-  | 'customer-order'
-  | 'orders'
-  | 'kitchen'
-  | 'inventory'
-  | 'employees'
-  | 'reports';
+  | "dashboard"
+  | "menu"
+  | "customer-order"
+  | "orders"
+  | "kitchen"
+  | "inventory"
+  | "employees"
+  | "reports";
 
-export type KitchenStation = 'HOT_KITCHEN' | 'COLD_KITCHEN' | 'BAR';
+export type KitchenStation = "HOT_KITCHEN" | "COLD_KITCHEN" | "BAR";
 
 export interface AuthUser {
   id: string;
@@ -24,11 +24,16 @@ export interface AuthUser {
   email: string;
   phone: string;
   role: UserRole;
+
   station?: string;
   shift?: string;
+
   isActive: boolean;
   avatarInitials: string;
   createdAt: string;
+
+  // Permission code thực tế do Backend trả về.
+  permissions?: string[];
 }
 
 export interface ApiResponse<T> {
@@ -44,6 +49,6 @@ export interface ApiError {
   details?: string;
 }
 
-export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';
+export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
-export type ReportPeriod = 'DAY' | 'WEEK' | 'MONTH';
+export type ReportPeriod = "DAY" | "WEEK" | "MONTH";

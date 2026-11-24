@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 
 import type { AuthUser, AppRoute } from '@/src/types/common';
+
 import type {
   LoginRequest,
   QuickLoginAccount,
@@ -64,11 +65,11 @@ export function AuthProvider({
 }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const [quickAccounts, setQuickAccounts] = useState<
     QuickLoginAccount[]
   >([]);
 
-  // Xử lý trường hợp API trả về 401.
   const handleSessionExpired = useCallback(() => {
     setUser(null);
   }, []);
@@ -81,55 +82,44 @@ export function AuthProvider({
     };
   }, [handleSessionExpired]);
 
-  // Khôi phục phiên đăng nhập khi ứng dụng khởi động.
+  // Khôi phục phiên đăng nhập.
   useEffect(() => {
     let active = true;
 
     const bootstrap = async () => {
       try {
-        const presets = await repositories.auth
+        const accounts = await repositories.auth
           .getQuickLoginAccounts()
           .catch(() => []);
 
         if (!active) return;
 
-        setQuickAccounts(presets);
+        setQuickAccounts(accounts);
 
-        const [savedToken, savedUser] = await Promise.all([
-          storageService.getToken(),
-          storageService.getUser(),
-        ]);
+        const token = await storageService.getToken();
 
         if (!active) return;
 
-        // Không có đủ thông tin phiên thì không giữ trạng thái đăng nhập.
-        if (!savedToken || !savedUser) {
-          if (savedToken || savedUser) {
-            await storageService.clearAuth();
-          }
-
+        if (!token) {
+          await storageService.clearAuth();
           return;
         }
 
-        try {
-          const freshUser =
-            await repositories.auth.getCurrentUser();
+        // Không tin hoàn toàn user đã lưu.
+        // Luôn xác thực lại bằng Backend.
+        const freshUser =
+          await repositories.auth.getCurrentUser();
 
-          if (active) {
-            setUser(freshUser);
-          }
-        } catch {
-          await storageService.clearAuth();
-
-          if (active) {
-            setUser(null);
-          }
+        if (active) {
+          setUser(freshUser);
         }
       } catch (error) {
         console.error(
           '[AuthContext] Cannot restore session:',
           error
         );
+
+        await storageService.clearAuth();
 
         if (active) {
           setUser(null);
@@ -148,31 +138,34 @@ export function AuthProvider({
     };
   }, []);
 
-  // Đăng nhập.
-  const login = useCallback(
-    async (payload: LoginRequest): Promise<AuthUser> => {
-      const response = await repositories.auth.login(payload);
+const login = useCallback(
+  async (payload: LoginRequest): Promise<AuthUser> => {
+    const response = await repositories.auth.login(payload);
 
-      setUser(response.user);
+    console.log('[AUTH DEBUG] User sau đăng nhập:', response.user);
+    console.log('[AUTH DEBUG] Role:', response.user?.role);
 
-      return response.user;
-    },
-    []
-  );
+    setUser(response.user);
 
-  // Đăng xuất: luôn xóa phiên local kể cả khi request logout thất bại.
- const logout = useCallback(async () => {
-  try {
-    await repositories.auth.logout();
-  } catch (error) {
-    console.warn('[AuthContext] Logout request failed:', error);
-  } finally {
-    await storageService.clearAuth();
-    setUser(null);
-  }
-}, []);
+    return response.user;
+  },
+  []
+);
 
-  // Làm mới thông tin người dùng.
+  const logout = useCallback(async () => {
+    try {
+      await repositories.auth.logout();
+    } catch (error) {
+      console.warn(
+        '[AuthContext] Logout failed:',
+        error
+      );
+    } finally {
+      await storageService.clearAuth();
+      setUser(null);
+    }
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     const freshUser =
       await repositories.auth.getCurrentUser();
@@ -182,9 +175,13 @@ export function AuthProvider({
 
   const hasPermission = useCallback(
     (permission: Permission) => {
-      return checkPermission(user?.role, permission);
+      return checkPermission(
+        user?.role,
+        permission,
+        user?.permissions
+      );
     },
-    [user?.role]
+    [user]
   );
 
   const canAccessRoute = useCallback(
@@ -203,9 +200,11 @@ export function AuthProvider({
     isLoading,
     isAuthenticated: Boolean(user),
     quickAccounts,
+
     login,
     logout,
     refreshProfile,
+
     hasPermission,
     canAccessRoute,
     getDefaultRoute,
