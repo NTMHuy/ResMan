@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
+  Armchair,
   BarChart3,
   BookOpen,
   ChefHat,
@@ -31,6 +32,7 @@ const ROUTE_ORDER: AppRoute[] = [
   'dashboard',
   'menu',
   'customer-order',
+  'tables',
   'orders',
   'kitchen',
   'inventory',
@@ -46,6 +48,8 @@ function renderRouteIcon(route: AppRoute, color: string, size = 18) {
       return <BookOpen size={size} color={color} />;
     case 'customer-order':
       return <ShoppingBag size={size} color={color} />;
+    case 'tables':
+      return <Armchair size={size} color={color} />;
     case 'orders':
       return <ClipboardList size={size} color={color} />;
     case 'kitchen':
