@@ -1,5 +1,12 @@
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+
+const metroHost = Constants.expoConfig?.hostUri?.split(":")[0];
+const defaultHost =
+  metroHost || (Platform.OS === "android" ? "10.0.2.2" : "localhost");
+
 const API_URL = (
-  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000/api/v1"
+  process.env.EXPO_PUBLIC_API_URL ?? `http://${defaultHost}:3000/api/v1`
 ).replace(/\/+$/, "");
 
 const USE_MOCK_DATA =
