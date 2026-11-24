@@ -19,6 +19,7 @@ import { KitchenScreen } from '@/src/features/kds/screens/KitchenScreen';
 import { InventoryScreen } from '@/src/features/inventory/screens/InventoryScreen';
 import { EmployeesScreen } from '@/src/features/employees/screens/EmployeesScreen';
 import { ReportsScreen } from '@/src/features/reports/screens/ReportsScreen';
+import { TablesScreen } from '@/src/features/tables/screens/TablesScreen';
 
 export function FeatureRouteView({
   route,
@@ -48,6 +49,9 @@ export function FeatureRouteView({
 
     case 'customer-order':
       return <CustomerOrderScreen />;
+
+    case 'tables':
+      return <TablesScreen />;
 
     case 'orders':
       return <OrdersScreen />;
