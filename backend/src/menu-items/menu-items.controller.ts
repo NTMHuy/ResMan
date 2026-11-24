@@ -13,51 +13,57 @@ import {
   BadRequestException,
   ParseBoolPipe,
 } from '@nestjs/common';
-
 import { FileInterceptor } from '@nestjs/platform-express';
-
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname } from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 import { MenuItemsService } from './menu-items.service.js';
-
 import { CreateMenuItemDto } from './dto/create-menu-item.dto.js';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto.js';
 import { QueryMenuItemDto } from './dto/query-menu-item.dto.js';
-
 import { ParseBigIntPipe } from '../common/pipes/parse-bigint.pipe.js';
+import {
+  ensureMenuItemsUploadDirectory,
+  MENU_ITEMS_UPLOAD_DIRECTORY,
+  removeMenuImageFile,
+} from '../common/utils/menu-image-storage.js';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { PermissionsGuard } from '../auth/guards/permissions.guard.js';
 import { Permissions } from '../auth/decorators/permissions.decorator.js';
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
 
 @Controller('menu-items')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MenuItemsController {
   constructor(private readonly service: MenuItemsService) {}
 
-  // CREATE
   @Post()
   @Permissions('menu.item.create')
   create(@Body() dto: CreateMenuItemDto) {
     return this.service.create(dto);
   }
 
-  // LIST
   @Get()
   @Permissions('menu.item.read')
   findAll(@Query() query: QueryMenuItemDto) {
     return this.service.findAll(query);
   }
 
-  // DETAIL
   @Get(':id')
   @Permissions('menu.item.read')
   findOne(@Param('id', ParseBigIntPipe) id: bigint) {
     return this.service.findOne(id);
   }
 
-  // UPDATE
   @Patch(':id')
   @Permissions('menu.item.update')
   update(
@@ -67,14 +73,12 @@ export class MenuItemsController {
     return this.service.update(id, dto);
   }
 
-  // DELETE
   @Delete(':id')
   @Permissions('menu.item.delete')
   remove(@Param('id', ParseBigIntPipe) id: bigint) {
     return this.service.remove(id);
   }
 
-  // CHANGE STATUS
   @Patch(':id/status')
   @Permissions('menu.item.update')
   updateStatus(
@@ -91,32 +95,29 @@ export class MenuItemsController {
     );
   }
 
-  // UPLOAD IMAGE
+  // The multipart field name is "file" and matches the Frontend FormData contract.
   @Post(':id/image')
   @Permissions('menu.item.update')
   @UseInterceptors(
-    FileInterceptor('image', {
+    FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads/menu-items',
+        destination: (_req, _file, callback) => {
+          ensureMenuItemsUploadDirectory();
+          callback(null, MENU_ITEMS_UPLOAD_DIRECTORY);
+        },
         filename: (_req, file, callback) => {
-          const uniqueName =
-            `${Date.now()}-${Math.round(Math.random() * 1e9)}` +
-            extname(file.originalname).toLowerCase();
-
-          callback(null, uniqueName);
+          const extension = extname(file.originalname).toLowerCase();
+          callback(null, `${randomUUID()}${extension}`);
         },
       }),
-
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-
+      limits: { fileSize: MAX_IMAGE_SIZE, files: 1 },
       fileFilter: (_req, file, callback) => {
-        if (!file.mimetype.match(/^image\/(jpeg|png|webp)$/)) {
+        const extension = extname(file.originalname).toLowerCase();
+        const expectedMimeType = ALLOWED_IMAGE_TYPES[extension];
+
+        if (!expectedMimeType || file.mimetype.toLowerCase() !== expectedMimeType) {
           return callback(
-            new BadRequestException(
-              'Only JPG, PNG and WEBP images are allowed',
-            ),
+            new BadRequestException('Only JPG, JPEG, PNG and WEBP images are allowed'),
             false,
           );
         }
@@ -135,13 +136,27 @@ export class MenuItemsController {
 
     const imageUrl = `/uploads/menu-items/${file.filename}`;
 
-    return this.service.updateImage(id, imageUrl);
+    try {
+      const previousItem = await this.service.findOne(id);
+      const updated = await this.service.updateImage(id, imageUrl);
+
+      if (previousItem.imageUrl && previousItem.imageUrl !== imageUrl) {
+        await removeMenuImageFile(previousItem.imageUrl).catch(() => undefined);
+      }
+
+      return updated;
+    } catch (error) {
+      await removeMenuImageFile(imageUrl).catch(() => undefined);
+      throw error;
+    }
   }
 
-  // DELETE IMAGE
   @Delete(':id/image')
   @Permissions('menu.item.update')
-  deleteImage(@Param('id', ParseBigIntPipe) id: bigint) {
-    return this.service.deleteImage(id);
+  async deleteImage(@Param('id', ParseBigIntPipe) id: bigint) {
+    const previousItem = await this.service.findOne(id);
+    const result = await this.service.deleteImage(id);
+    await removeMenuImageFile(previousItem.imageUrl);
+    return result;
   }
 }
