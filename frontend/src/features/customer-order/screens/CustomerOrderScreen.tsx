@@ -28,7 +28,6 @@ import { Badge } from '@/src/components/common/Badge';
 import { Button } from '@/src/components/common/Button';
 import { Input } from '@/src/components/common/Input';
 import { SegmentedTabs } from '@/src/components/common/SegmentedTabs';
-import { PermissionGate } from '@/src/components/common/PermissionGate';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 import { DishCustomizerModal } from '@/src/features/customer-order/components/DishCustomizerModal';
 
@@ -412,18 +411,17 @@ export function CustomerOrderScreen() {
               </View>
             </View>
 
-            <PermissionGate permission="CUSTOMER_ORDER_SUBMIT">
-              <Button
-                label="Gửi đơn xuống bếp"
-                variant="primary"
-                size="lg"
-                fullWidth
-                loading={submitting}
-                disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && tableNumber === 'Chưa kết nối'}
-                leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
-                onPress={() => void handleSubmitOrder()}
-              />
-            </PermissionGate>
+            {/* Guest ordering is authorized by the active session code, not staff RBAC. */}
+            <Button
+              label="Gửi đơn xuống bếp"
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={submitting}
+              disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && tableNumber === 'Chưa kết nối'}
+              leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
+              onPress={() => void handleSubmitOrder()}
+            />
           </View>
         )}
       </Card>
