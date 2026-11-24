@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { APP_CONFIG } from '@/src/constants/config';
+import { apiClient } from '@/src/services/api/apiClient';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import { mockStoreEvents } from '@/src/data/mock/mockStore';
@@ -23,6 +24,8 @@ export const TABLE_OPTIONS = [
 
 const USE_MOCK_CUSTOMER_ORDER = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
 
+type OpenGuestTable = { id: string; code: string; name: string; status: string; sessionCode: string | null };
+
 export function useCustomerOrder() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -32,6 +35,7 @@ export function useCustomerOrder() {
   const [guestName, setGuestName] = useState('');
   const [guestCount, setGuestCount] = useState(2);
   const [tableOrders, setTableOrders] = useState<CustomerOrderTracking[]>([]);
+  const [openTables, setOpenTables] = useState<OpenGuestTable[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +52,14 @@ export function useCustomerOrder() {
         const menu = await repositories.customerOrder.getCustomerMenu();
         setCategories(menu.categories);
         setItems(menu.items);
+
+        if (!USE_MOCK_CUSTOMER_ORDER) {
+          const response = await apiClient.get('/guest/tables');
+          const payload = response.data && typeof response.data === 'object' && 'data' in response.data
+            ? (response.data as { data: OpenGuestTable[] }).data
+            : response.data as OpenGuestTable[];
+          setOpenTables(Array.isArray(payload) ? payload : []);
+        }
 
         if (USE_MOCK_CUSTOMER_ORDER) {
           const recentOrders = await repositories.customerOrder.getRecentTableOrders(
@@ -112,30 +124,17 @@ export function useCustomerOrder() {
     return unsubscribe;
   }, [loadCustomerData]);
 
-  const connectSession = useCallback(async () => {
-    const code = sessionCode.trim().toLowerCase();
-    if (!/^[a-f0-9]{64}$/.test(code)) {
-      throw new Error('Mã phiên không hợp lệ. Vui lòng nhập đủ 64 ký tự từ mã QR hoặc nhân viên.');
+  const connectTable = useCallback(async (tableId: string) => {
+    const table = openTables.find((item) => item.id === tableId);
+    if (!table?.sessionCode) {
+      throw new Error('Bàn này chưa được nhân viên mở phiên. Vui lòng chọn bàn đang mở.');
     }
-    await storageService.setCustomerSessionCode(code);
-    try {
-      const orders = await repositories.customerOrder.getRecentTableOrders('');
-      if (orders.length === 0) {
-        throw new Error('Không tìm thấy phiên đang hoạt động cho mã này.');
-      }
-      setSessionCode(code);
-      setTableOrders(orders);
-      setTableNumber(orders[0].tableNumber);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : typeof err === 'object' && err !== null && 'message' in err
-            ? String(err.message)
-            : 'Không thể kết nối phiên bàn. Vui lòng kiểm tra mã phiên và kết nối mạng.';
-      throw new Error(message);
-    }
-  }, [sessionCode]);
+    await storageService.setCustomerSessionCode(table.sessionCode);
+    setSessionCode(table.sessionCode);
+    setTableNumber(table.name || table.code);
+    const orders = await repositories.customerOrder.getRecentTableOrders('');
+    setTableOrders(orders);
+  }, [openTables]);
 
   const disconnectSession = useCallback(async () => {
     await storageService.removeCustomerSessionCode();
@@ -304,7 +303,8 @@ export function useCustomerOrder() {
     changeTable,
     sessionCode,
     setSessionCode,
-    connectSession,
+    openTables,
+    connectTable,
     disconnectSession,
     guestName,
     setGuestName,
