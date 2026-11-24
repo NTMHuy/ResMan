@@ -1,17 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { z } from 'zod';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { ModalDialog } from '@/src/components/common/ModalDialog';
 import { Input } from '@/src/components/common/Input';
 import { Button } from '@/src/components/common/Button';
+import { resolveMenuImageUrl } from '@/src/constants/config';
 import type {
   CreateMenuItemInput,
   DishStatus,
   MenuCategory,
   MenuItem,
+  UploadMenuImageInput,
 } from '@/src/features/menu/types/menu.types';
 import type { KitchenStation } from '@/src/types/common';
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
 
 const dishSchema = z.object({
   sku: z.string().trim().min(2, 'Mã SKU tối thiểu 2 ký tự'),
@@ -20,10 +31,7 @@ const dishSchema = z.object({
   price: z.number().min(1000, 'Giá bán phải từ 1.000đ trở lên'),
   prepTimeMinutes: z.number().min(1, 'Thời gian chế biến tối thiểu 1 phút').max(120),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
-  imageUrl: z.string().trim().min(1, 'Vui lòng chọn hoặc nhập URL hình ảnh'),
 });
-
-
 
 const STATUS_OPTIONS: Array<{ value: DishStatus; label: string }> = [
   { value: 'AVAILABLE', label: 'Đang bán' },
@@ -34,17 +42,20 @@ interface DishFormModalProps {
   visible: boolean;
   editingItem: MenuItem | null;
   categories: MenuCategory[];
-  imagePresets: Array<{ label: string; url: string }>;
   loading: boolean;
   onClose: () => void;
-  onSubmit: (values: CreateMenuItemInput, editingId?: string) => Promise<void>;
+  onSubmit: (
+    values: CreateMenuItemInput,
+    editingId?: string,
+    selectedImage?: UploadMenuImageInput | null,
+    removeImage?: boolean,
+  ) => Promise<void>;
 }
 
 export function DishFormModal({
   visible,
   editingItem,
   categories,
-  imagePresets,
   loading,
   onClose,
   onSubmit,
@@ -59,43 +70,88 @@ export function DishFormModal({
   const [station, setStation] = useState<KitchenStation>('HOT_KITCHEN');
   const [status, setStatus] = useState<DishStatus>('AVAILABLE');
   const [imageUrl, setImageUrl] = useState('');
+  const [selectedImage, setSelectedImage] = useState<UploadMenuImageInput | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-  if (!visible) return;
+    if (!visible) return;
 
-  setFieldErrors({});
-  setSubmitError(null);
+    setFieldErrors({});
+    setSubmitError(null);
+    setSelectedImage(null);
+    setRemoveImage(false);
 
-  if (editingItem) {
-    setSku(editingItem.sku ?? '');
-    setName(editingItem.name ?? '');
-    setDescription(editingItem.description ?? '');
-    setPriceText(String(editingItem.price ?? 0));
-    setPrepText(String(editingItem.prepTimeMinutes ?? 10));
+    if (editingItem) {
+      setSku(editingItem.sku ?? '');
+      setName(editingItem.name ?? '');
+      setDescription(editingItem.description ?? '');
+      setPriceText(String(editingItem.price ?? 0));
+      setPrepText(String(editingItem.prepTimeMinutes ?? 10));
+      setCategoryId(editingItem.categoryId ?? categories[0]?.id ?? '');
+      setStation(editingItem.station ?? 'HOT_KITCHEN');
+      setStatus(editingItem.status ?? 'AVAILABLE');
+      setImageUrl(editingItem.imageUrl ?? '');
+    } else {
+      setSku(`MN-${Math.floor(100 + Math.random() * 899)}`);
+      setName('');
+      setDescription('');
+      setPriceText('65000');
+      setPrepText('10');
+      setCategoryId(categories[0]?.id ?? '');
+      setStation('HOT_KITCHEN');
+      setStatus('AVAILABLE');
+      setImageUrl('');
+    }
+  }, [visible, editingItem, categories]);
 
-    setCategoryId(
-      editingItem.categoryId ?? categories[0]?.id ?? ''
-    );
+  const handleChooseImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.85,
+      });
 
-    setStation(editingItem.station ?? 'HOT_KITCHEN');
-    setStatus(editingItem.status ?? 'AVAILABLE');
+      if (result.canceled || !result.assets[0]) return;
 
-    setImageUrl(
-      editingItem.imageUrl ?? imagePresets[0]?.url ?? ''
-    );
-  } else {
-    setSku(`MN-${Math.floor(100 + Math.random() * 899)}`);
-    setName('');
-    setDescription('');
-    setPriceText('65000');
-    setPrepText('10');
-    setCategoryId(categories[0]?.id ?? '');
-    setStatus('AVAILABLE');
-    setImageUrl(imagePresets[0]?.url ?? '');
-  }
-}, [visible, editingItem, categories, imagePresets]);
+      const asset = result.assets[0];
+      const fileName = asset.fileName || asset.uri.split('/').pop() || 'menu-image';
+      const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+      const mimeType = asset.mimeType || ALLOWED_IMAGE_TYPES[extension];
+
+      if (!ALLOWED_IMAGE_TYPES[extension] || !mimeType || mimeType !== ALLOWED_IMAGE_TYPES[extension]) {
+        setSubmitError('Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WEBP.');
+        return;
+      }
+
+      const size = asset.fileSize ?? asset.file?.size ?? 0;
+      if (size > MAX_IMAGE_SIZE) {
+        setSubmitError('Ảnh vượt quá dung lượng tối đa 5MB.');
+        return;
+      }
+
+      setSubmitError(null);
+      setSelectedImage({
+        uri: asset.uri,
+        name: fileName,
+        type: mimeType,
+        size,
+        ...(asset.file ? { file: asset.file } : {}),
+      });
+      setRemoveImage(false);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Không thể chọn ảnh.');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImageUrl('');
+    setRemoveImage(Boolean(editingItem?.imageUrl));
+    setSubmitError(null);
+  };
 
   const handleSave = async () => {
     setFieldErrors({});
@@ -110,7 +166,6 @@ export function DishFormModal({
       price: parsedPrice,
       prepTimeMinutes: parsedPrep,
       categoryId,
-      imageUrl,
     });
 
     if (!parsed.success) {
@@ -132,19 +187,24 @@ export function DishFormModal({
           price: parsed.data.price,
           categoryId: parsed.data.categoryId,
           station,
-          imageUrl: parsed.data.imageUrl,
+          // Existing URL is display state only; ApiMenuRepository never sends it in JSON.
+          imageUrl,
           status,
           prepTimeMinutes: parsed.data.prepTimeMinutes,
           modifiers: editingItem?.modifiers ?? [],
           linkedIngredientIds: editingItem?.linkedIngredientIds ?? [],
         },
-        editingItem?.id
+        editingItem?.id,
+        selectedImage,
+        removeImage,
       );
       onClose();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Không thể lưu món ăn.');
     }
   };
+
+  const previewUri = selectedImage?.uri || resolveMenuImageUrl(imageUrl);
 
   return (
     <ModalDialog
@@ -222,12 +282,7 @@ export function DishFormModal({
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: active ? theme.colors.onPrimary : theme.colors.onSurface },
-                  ]}
-                >
+                <Text style={[styles.optionText, { color: active ? theme.colors.onPrimary : theme.colors.onSurface }]}>
                   {cat.name}
                 </Text>
               </Pressable>
@@ -235,9 +290,7 @@ export function DishFormModal({
           })}
         </View>
         {fieldErrors.categoryId ? (
-          <Text style={[styles.errText, { color: theme.colors.error }]}>
-            {fieldErrors.categoryId}
-          </Text>
+          <Text style={[styles.errText, { color: theme.colors.error }]}>{fieldErrors.categoryId}</Text>
         ) : null}
       </View>
 
@@ -261,12 +314,7 @@ export function DishFormModal({
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: active ? theme.colors.onPrimary : theme.colors.onSurface },
-                  ]}
-                >
+                <Text style={[styles.optionText, { color: active ? theme.colors.onPrimary : theme.colors.onSurface }]}>
                   {opt.label}
                 </Text>
               </Pressable>
@@ -277,41 +325,40 @@ export function DishFormModal({
 
       <View style={styles.section}>
         <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
-          Hình ảnh món ăn (chọn mẫu hoặc dán URL)
+          Ảnh món ăn (JPG, JPEG, PNG, WEBP · tối đa 5MB)
         </Text>
-        <View style={styles.imageRow}>
-          {imagePresets.map((preset) => {
-            const selected = imageUrl === preset.url;
-            return (
-              <Pressable
-                key={preset.url}
-                onPress={() => setImageUrl(preset.url)}
-                style={[
-                  styles.presetCard,
-                  {
-                    borderColor: selected ? theme.colors.secondary : theme.colors.border,
-                    borderWidth: selected ? 2 : 1,
-                    borderRadius: theme.radius.md,
-                  },
-                ]}
-              >
-                <Image source={{ uri: preset.url }} style={styles.presetThumb} resizeMode="cover" />
-                <Text
-                  numberOfLines={1}
-                  style={[styles.presetLabel, { color: theme.colors.onSurface }]}
-                >
-                  {preset.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+        {previewUri ? (
+          <Image source={{ uri: previewUri }} style={styles.imagePreview} resizeMode="cover" />
+        ) : (
+          <View style={[styles.imagePlaceholder, { borderColor: theme.colors.border }]}>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>Chưa có ảnh món ăn</Text>
+          </View>
+        )}
+        {selectedImage ? (
+          <Text style={[styles.imageMeta, { color: theme.colors.onSurfaceVariant }]}>
+            Ảnh mới: {selectedImage.name}
+          </Text>
+        ) : imageUrl && !removeImage ? (
+          <Text style={[styles.imageMeta, { color: theme.colors.onSurfaceVariant }]}>
+            Ảnh hiện tại trên máy chủ
+          </Text>
+        ) : null}
+        <View style={styles.imageActions}>
+          <Button
+            label={selectedImage || imageUrl ? 'Thay đổi ảnh' : 'Chọn ảnh'}
+            variant="secondary"
+            onPress={() => void handleChooseImage()}
+            disabled={loading}
+          />
+          {(selectedImage || imageUrl) ? (
+            <Button
+              label="Xóa ảnh"
+              variant="secondary"
+              onPress={handleRemoveImage}
+              disabled={loading}
+            />
+          ) : null}
         </View>
-        <Input
-          value={imageUrl}
-          onChangeText={setImageUrl}
-          placeholder="Đường dẫn ảnh món ăn..."
-          error={fieldErrors.imageUrl}
-        />
       </View>
 
       {submitError ? (
@@ -322,30 +369,11 @@ export function DishFormModal({
 }
 
 const styles = StyleSheet.create({
-  rowTwo: {
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  flexOne: {
-    flex: 1,
-    minWidth: 180,
-  },
-  prepInput: {
-    width: 150,
-  },
-  section: {
-    gap: 6,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  chipWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  rowTwo: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
+  flexOne: { flex: 1, minWidth: 180 },
+  section: { gap: 6 },
+  sectionLabel: { fontSize: 12, fontWeight: '600' },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   optionChip: {
     borderWidth: 1,
     paddingHorizontal: 12,
@@ -353,32 +381,18 @@ const styles = StyleSheet.create({
     minHeight: 36,
     justifyContent: 'center',
   },
-  optionText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  imageRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  presetCard: {
-    width: 82,
-    padding: 4,
+  optionText: { fontSize: 12, fontWeight: '600' },
+  imagePreview: { width: '100%', height: 180, borderRadius: 10 },
+  imagePlaceholder: {
+    width: '100%',
+    height: 120,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 10,
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
   },
-  presetThumb: {
-    width: 72,
-    height: 52,
-    borderRadius: 6,
-  },
-  presetLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  errText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  imageMeta: { fontSize: 11 },
+  imageActions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  errText: { fontSize: 12, fontWeight: '600' },
 });
