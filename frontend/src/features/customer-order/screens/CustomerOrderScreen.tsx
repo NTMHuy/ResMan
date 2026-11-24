@@ -76,7 +76,6 @@ export function CustomerOrderScreen() {
     cartSummary,
     tableNumber,
     changeTable,
-    sessionCode,
     openTables,
     connectTable,
     disconnectSession,
