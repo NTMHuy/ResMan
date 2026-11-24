@@ -1,4 +1,4 @@
-import { mkdir, unlink } from 'node:fs/promises';
+import { unlink } from 'node:fs/promises';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
