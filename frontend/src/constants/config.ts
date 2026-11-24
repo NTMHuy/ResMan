@@ -39,6 +39,6 @@ export const APP_CONFIG = {
 export function resolveMenuImageUrl(imageUrl?: string | null): string {
   const value = imageUrl?.trim();
   if (!value) return "";
-  if (/^https?:\/\//i.test(value)) return value;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return value;
   return new URL(value.replace(/^\/+/, ""), `${APP_CONFIG.API_ORIGIN}/`).toString();
 }
