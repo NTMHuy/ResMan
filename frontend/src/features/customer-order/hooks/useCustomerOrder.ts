@@ -21,13 +21,13 @@ export const TABLE_OPTIONS = [
   'Bàn VIP-2',
 ];
 
-const USE_MOCK_DATA = APP_CONFIG.USE_MOCK_DATA;
+const USE_MOCK_CUSTOMER_ORDER = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
 
 export function useCustomerOrder() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [tableNumber, setTableNumber] = useState(USE_MOCK_DATA ? 'Bàn 04' : 'Chưa kết nối');
+  const [tableNumber, setTableNumber] = useState(USE_MOCK_CUSTOMER_ORDER ? 'Bàn 04' : 'Chưa kết nối');
   const [sessionCode, setSessionCode] = useState('');
   const [guestName, setGuestName] = useState('');
   const [guestCount, setGuestCount] = useState(2);
@@ -49,7 +49,7 @@ export function useCustomerOrder() {
         setCategories(menu.categories);
         setItems(menu.items);
 
-        if (USE_MOCK_DATA) {
+        if (USE_MOCK_CUSTOMER_ORDER) {
           const recentOrders = await repositories.customerOrder.getRecentTableOrders(
             targetTable ?? tableNumber,
           );
@@ -89,7 +89,7 @@ export function useCustomerOrder() {
         if (!mounted) return;
         if (Array.isArray(savedCart)) setCart(savedCart);
         if (savedCode) setSessionCode(savedCode);
-        if (USE_MOCK_DATA && savedTable) setTableNumber(savedTable);
+        if (USE_MOCK_CUSTOMER_ORDER && savedTable) setTableNumber(savedTable);
         await loadCustomerData(savedCode ?? undefined, false, savedTable ?? undefined);
       } catch (err) {
         if (mounted) {
@@ -105,7 +105,7 @@ export function useCustomerOrder() {
   }, [loadCustomerData]);
 
   useEffect(() => {
-    if (!USE_MOCK_DATA) return;
+    if (!USE_MOCK_CUSTOMER_ORDER) return;
     const unsubscribe = mockStoreEvents.subscribe(() => {
       void loadCustomerData(undefined, true);
     });
@@ -146,7 +146,7 @@ export function useCustomerOrder() {
 
   const changeTable = useCallback(
     (nextTable: string) => {
-      if (!USE_MOCK_DATA) return;
+      if (!USE_MOCK_CUSTOMER_ORDER) return;
       setTableNumber(nextTable);
       void storageService.setJson(storageService.KEYS.CUSTOMER_TABLE, nextTable);
       void loadCustomerData(undefined, true, nextTable);
@@ -235,7 +235,7 @@ export function useCustomerOrder() {
     async (orderNote?: string) => {
       if (cart.length === 0) throw new Error('Giỏ hàng đang trống.');
       if (cart.length > 30) throw new Error('Mỗi lần gửi không được vượt quá 30 loại món.');
-      if (!USE_MOCK_DATA && !sessionCode.trim()) {
+      if (!USE_MOCK_CUSTOMER_ORDER && !sessionCode.trim()) {
         throw new Error('Vui lòng kết nối phiên bàn trước khi gửi món.');
       }
       setSubmitting(true);
@@ -281,11 +281,11 @@ export function useCustomerOrder() {
     const totalItems = cart.reduce((sum, entry) => sum + entry.quantity, 0);
     const subtotal = cart.reduce(
       (sum, entry) => sum + entry.menuItem.price * entry.quantity +
-        (USE_MOCK_DATA ? entry.extraPrice * entry.quantity : 0),
+        (USE_MOCK_CUSTOMER_ORDER ? entry.extraPrice * entry.quantity : 0),
       0,
     );
-    const serviceFee = USE_MOCK_DATA ? Math.round(subtotal * 0.05) : 0;
-    const taxAmount = USE_MOCK_DATA ? Math.round((subtotal + serviceFee) * 0.08) : 0;
+    const serviceFee = USE_MOCK_CUSTOMER_ORDER ? Math.round(subtotal * 0.05) : 0;
+    const taxAmount = USE_MOCK_CUSTOMER_ORDER ? Math.round((subtotal + serviceFee) * 0.08) : 0;
     return {
       totalItems,
       subtotal,
