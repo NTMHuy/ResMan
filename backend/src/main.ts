@@ -1,20 +1,18 @@
 import "dotenv/config";
-import { mkdirSync } from "node:fs";
-import { resolve } from "node:path";
 
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
-
 import helmet from "helmet";
 
 import { AppModule } from "./app.module.js";
+import {
+  UPLOAD_DIRECTORY,
+  ensureMenuItemsUploadDirectory,
+} from "./common/utils/menu-image-storage.js";
 
 async function bootstrap(): Promise<void> {
-  const uploadDirectory = resolve(process.cwd(), "uploads");
-  const menuImageDirectory = resolve(uploadDirectory, "menu-items");
-
-  mkdirSync(menuImageDirectory, { recursive: true });
+  ensureMenuItemsUploadDirectory();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -28,7 +26,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.useStaticAssets(uploadDirectory, {
+  // Static image URLs intentionally stay outside the /api/v1 prefix.
+  app.useStaticAssets(UPLOAD_DIRECTORY, {
     prefix: "/uploads/",
     index: false,
     dotfiles: "deny",
