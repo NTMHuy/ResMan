@@ -23,16 +23,11 @@ const dishSchema = z.object({
   imageUrl: z.string().trim().min(1, 'Vui lòng chọn hoặc nhập URL hình ảnh'),
 });
 
-const STATION_OPTIONS: Array<{ value: KitchenStation; label: string }> = [
-  { value: 'HOT_KITCHEN', label: 'Bếp Nóng' },
-  { value: 'COLD_KITCHEN', label: 'Bếp Nguội' },
-  { value: 'BAR', label: 'Quầy Bar' },
-];
+
 
 const STATUS_OPTIONS: Array<{ value: DishStatus; label: string }> = [
   { value: 'AVAILABLE', label: 'Đang bán' },
   { value: 'OUT_OF_STOCK', label: 'Hết hàng (86)' },
-  { value: 'INACTIVE', label: 'Ngừng kinh doanh' },
 ];
 
 interface DishFormModalProps {
@@ -68,31 +63,39 @@ export function DishFormModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!visible) return;
-    setFieldErrors({});
-    setSubmitError(null);
-    if (editingItem) {
-      setSku(editingItem.sku);
-      setName(editingItem.name);
-      setDescription(editingItem.description);
-      setPriceText(String(editingItem.price));
-      setPrepText(String(editingItem.prepTimeMinutes));
-      setCategoryId(editingItem.categoryId);
-      setStation(editingItem.station);
-      setStatus(editingItem.status);
-      setImageUrl(editingItem.imageUrl);
-    } else {
-      setSku(`MN-${Math.floor(100 + Math.random() * 899)}`);
-      setName('');
-      setDescription('');
-      setPriceText('65000');
-      setPrepText('10');
-      setCategoryId(categories[0]?.id ?? '');
-      setStation('HOT_KITCHEN');
-      setStatus('AVAILABLE');
-      setImageUrl(imagePresets[0]?.url ?? '');
-    }
-  }, [visible, editingItem, categories, imagePresets]);
+  if (!visible) return;
+
+  setFieldErrors({});
+  setSubmitError(null);
+
+  if (editingItem) {
+    setSku(editingItem.sku ?? '');
+    setName(editingItem.name ?? '');
+    setDescription(editingItem.description ?? '');
+    setPriceText(String(editingItem.price ?? 0));
+    setPrepText(String(editingItem.prepTimeMinutes ?? 10));
+
+    setCategoryId(
+      editingItem.categoryId ?? categories[0]?.id ?? ''
+    );
+
+    setStation(editingItem.station ?? 'HOT_KITCHEN');
+    setStatus(editingItem.status ?? 'AVAILABLE');
+
+    setImageUrl(
+      editingItem.imageUrl ?? imagePresets[0]?.url ?? ''
+    );
+  } else {
+    setSku(`MN-${Math.floor(100 + Math.random() * 899)}`);
+    setName('');
+    setDescription('');
+    setPriceText('65000');
+    setPrepText('10');
+    setCategoryId(categories[0]?.id ?? '');
+    setStatus('AVAILABLE');
+    setImageUrl(imagePresets[0]?.url ?? '');
+  }
+}, [visible, editingItem, categories, imagePresets]);
 
   const handleSave = async () => {
     setFieldErrors({});
@@ -236,52 +239,6 @@ export function DishFormModal({
             {fieldErrors.categoryId}
           </Text>
         ) : null}
-      </View>
-
-      <View style={styles.rowTwo}>
-        <View style={[styles.section, styles.flexOne]}>
-          <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
-            Trạm bếp chế biến
-          </Text>
-          <View style={styles.chipWrap}>
-            {STATION_OPTIONS.map((st) => {
-              const active = st.value === station;
-              return (
-                <Pressable
-                  key={st.value}
-                  onPress={() => setStation(st.value)}
-                  style={[
-                    styles.optionChip,
-                    {
-                      backgroundColor: active ? theme.colors.secondary : theme.colors.surfaceLow,
-                      borderColor: active ? theme.colors.secondary : theme.colors.border,
-                      borderRadius: theme.radius.md,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      { color: active ? theme.colors.onSecondary : theme.colors.onSurface },
-                    ]}
-                  >
-                    {st.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <Input
-          label="Thời gian nấu (phút) *"
-          value={prepText}
-          onChangeText={setPrepText}
-          keyboardType="numeric"
-          placeholder="10"
-          error={fieldErrors.prepTimeMinutes}
-          containerStyle={styles.prepInput}
-        />
       </View>
 
       <View style={styles.section}>

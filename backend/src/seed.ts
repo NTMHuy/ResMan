@@ -15,8 +15,19 @@ const permissionDefinitions = [
   ["users:read", "Xem người dùng", "users"],
   ["users:create", "Tạo người dùng", "users"],
   ["users:update", "Cập nhật người dùng", "users"],
+
   ["menu:read", "Xem thực đơn", "menu"],
   ["menu:manage", "Quản lý thực đơn", "menu"],
+
+  ["menu.category.create", "Tạo danh mục", "menu"],
+  ["menu.category.read", "Xem danh mục", "menu"],
+  ["menu.category.update", "Cập nhật danh mục", "menu"],
+  ["menu.category.delete", "Xóa danh mục", "menu"],
+  ["menu.item.create", "Tạo món ăn", "menu"],
+  ["menu.item.read", "Xem món ăn", "menu"],
+  ["menu.item.update", "Cập nhật món ăn", "menu"],
+  ["menu.item.delete", "Xóa món ăn", "menu"],
+
   ["tables:read", "Xem bàn", "tables"],
   ["tables:manage", "Quản lý bàn", "tables"],
   ["sessions:open", "Mở phiên bàn", "sessions"],
@@ -36,7 +47,15 @@ const permissionDefinitions = [
 
 const rolePermissions: Record<string, string[]> = {
   MANAGER: permissionDefinitions.map(([code]) => code),
-  ORDER_STAFF: ["tables:read", "sessions:open", "orders:read", "orders:create-item", "orders:manage-item", "payments:read", "payments:confirm"],
+  ORDER_STAFF: [
+    "tables:read",
+    "sessions:open",
+    "orders:read",
+    "orders:create-item",
+    "orders:manage-item",
+    "payments:read",
+    "payments:confirm",
+  ],
   KITCHEN_STAFF: ["kitchen:read", "kitchen:update-item"],
   INVENTORY_STAFF: ["inventory:read", "inventory:manage", "inventory:count"],
 };
@@ -49,41 +68,61 @@ async function main(): Promise<void> {
   const employeeCode = process.env.INITIAL_ADMIN_EMPLOYEE_CODE?.trim();
 
   if (!databaseUrl || !username || !password || !fullName || !employeeCode) {
-    throw new Error("Thiếu DATABASE_URL hoặc thông tin INITIAL_ADMIN_* trong backend/.env");
+    throw new Error(
+      "Thiếu DATABASE_URL hoặc thông tin INITIAL_ADMIN_* trong backend/.env",
+    );
   }
-  if (password.length < 12) throw new Error("INITIAL_ADMIN_PASSWORD phải có ít nhất 12 ký tự");
+
+  if (password.length < 12) {
+    throw new Error("INITIAL_ADMIN_PASSWORD phải có ít nhất 12 ký tự");
+  }
 
   const pool = new Pool({ connectionString: databaseUrl });
   const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+
   try {
     const roles = new Map<string, bigint>();
+
     for (const definition of roleDefinitions) {
       const role = await prisma.role.upsert({
         where: { code: definition.code },
         update: { name: definition.name },
         create: definition,
       });
+
       roles.set(role.code, role.id);
     }
 
     const permissions = new Map<string, bigint>();
+
     for (const [code, name, module] of permissionDefinitions) {
       const permission = await prisma.permission.upsert({
         where: { code },
         update: { name, module },
         create: { code, name, module },
       });
+
       permissions.set(code, permission.id);
     }
 
     for (const [roleCode, codes] of Object.entries(rolePermissions)) {
       const roleId = roles.get(roleCode);
-      if (!roleId) throw new Error(`Không tìm thấy role ${roleCode}`);
+
+      if (!roleId) {
+        throw new Error(`Không tìm thấy role ${roleCode}`);
+      }
+
       for (const code of codes) {
         const permissionId = permissions.get(code);
-        if (!permissionId) throw new Error(`Không tìm thấy permission ${code}`);
+
+        if (!permissionId) {
+          throw new Error(`Không tìm thấy permission ${code}`);
+        }
+
         await prisma.rolePermission.upsert({
-          where: { roleId_permissionId: { roleId, permissionId } },
+          where: {
+            roleId_permissionId: { roleId, permissionId },
+          },
           update: {},
           create: { roleId, permissionId },
         });
@@ -91,17 +130,36 @@ async function main(): Promise<void> {
     }
 
     const managerRoleId = roles.get("MANAGER");
-    if (!managerRoleId) throw new Error("Không tạo được role MANAGER");
-    const existing = await prisma.user.findUnique({ where: { username }, select: { id: true, roleId: true } });
+
+    if (!managerRoleId) {
+      throw new Error("Không tạo được role MANAGER");
+    }
+
+    const existing = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true, roleId: true },
+    });
+
     let userId: bigint;
+
     if (existing) {
-      if (existing.roleId !== managerRoleId) throw new Error("INITIAL_ADMIN_USERNAME đã tồn tại nhưng không thuộc role MANAGER");
+      if (existing.roleId !== managerRoleId) {
+        throw new Error(
+          "INITIAL_ADMIN_USERNAME đã tồn tại nhưng không thuộc role MANAGER",
+        );
+      }
+
       userId = existing.id;
     } else {
       const user = await prisma.user.create({
-        data: { username, passwordHash: await bcrypt.hash(password, 12), roleId: managerRoleId },
+        data: {
+          username,
+          passwordHash: await bcrypt.hash(password, 12),
+          roleId: managerRoleId,
+        },
         select: { id: true },
       });
+
       userId = user.id;
     }
 
@@ -110,7 +168,10 @@ async function main(): Promise<void> {
       update: { fullName, employeeCode },
       create: { userId, fullName, employeeCode },
     });
-    console.log("Đã khởi tạo roles, permissions và tài khoản quản lý đầu tiên.");
+
+    console.log(
+      "Đã khởi tạo roles, permissions và tài khoản quản lý đầu tiên.",
+    );
   } finally {
     await prisma.$disconnect();
     await pool.end();

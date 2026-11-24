@@ -32,6 +32,7 @@ import { ApiDashboardRepository } from "@/src/repositories/api/ApiDashboardRepos
 
 const useMockData = APP_CONFIG.USE_MOCK_DATA;
 const useMockAuth = APP_CONFIG.USE_MOCK_AUTH;
+const useMockMenu = APP_CONFIG.USE_MOCK_MENU;
 
 export const repositories: {
   auth: AuthRepository;
@@ -46,7 +47,7 @@ export const repositories: {
 } = {
   auth: useMockAuth ? new MockAuthRepository() : new ApiAuthRepository(),
 
-  menu: useMockData ? new MockMenuRepository() : new ApiMenuRepository(),
+  menu: useMockMenu ? new MockMenuRepository() : new ApiMenuRepository(),
 
   customerOrder: useMockData
     ? new MockCustomerOrderRepository()

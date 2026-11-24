@@ -211,12 +211,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, ReadonlySet<Permission>> = {
  *
  * Không tự tạo permission code mới ở đây.
  */
+
 export const BACKEND_PERMISSION_MAP: Partial<Record<Permission, string[]>> = {
-  MENU_VIEW: ["menu:read"],
-  MENU_CREATE: ["menu:manage"],
-  MENU_UPDATE: ["menu:manage"],
-  MENU_DELETE: ["menu:manage"],
-  MENU_TOGGLE_STATUS: ["menu:manage"],
+  MENU_VIEW: ["menu.category.read", "menu.item.read"],
+  MENU_CREATE: ["menu.category.create", "menu.item.create"],
+  MENU_UPDATE: ["menu.category.update", "menu.item.update"],
+  MENU_DELETE: ["menu.category.delete", "menu.item.delete"],
+  MENU_TOGGLE_STATUS: ["menu.item.update"],
 
   ORDER_VIEW: ["orders:read"],
   ORDER_CREATE: ["orders:create-item"],
@@ -288,16 +289,27 @@ export function canAccessRoute(
 export function hasPermission(
   role: UserRole | undefined | null,
   permission: Permission,
+  backendPermissions?: string[],
 ): boolean {
   const normalizedRole = normalizeRole(role);
 
   if (!normalizedRole) return false;
 
-  const permissions = ROLE_PERMISSIONS[normalizedRole];
+  // Khi Backend đã trả permission, ưu tiên kiểm tra quyền thực tế.
+  if (backendPermissions && backendPermissions.length > 0) {
+    const requiredPermissions = BACKEND_PERMISSION_MAP[permission];
 
-  if (!permissions) return false;
+    if (requiredPermissions) {
+      return requiredPermissions.every((required) =>
+        backendPermissions.includes(required),
+      );
+    }
+  }
 
-  return permissions.has(permission);
+  // Fallback cho Mock Repository hoặc user chưa có permission từ API.
+  const rolePermissions = ROLE_PERMISSIONS[normalizedRole];
+
+  return rolePermissions?.has(permission) ?? false;
 }
 
 export function getDefaultRouteForRole(
