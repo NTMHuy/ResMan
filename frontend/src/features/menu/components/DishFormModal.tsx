@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { z } from 'zod';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { ModalDialog } from '@/src/components/common/ModalDialog';
 import { Input } from '@/src/components/common/Input';
 import { Button } from '@/src/components/common/Button';
+import { MenuItemImage } from '@/src/features/menu/components/MenuItemImage';
 import { resolveMenuImageUrl } from '@/src/constants/config';
 import type {
   CreateMenuItemInput,
@@ -333,13 +334,7 @@ export function DishFormModal({
         <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
           Ảnh món ăn (JPG, JPEG, PNG, WEBP · tối đa 5MB)
         </Text>
-        {previewUri ? (
-          <Image source={{ uri: previewUri }} style={styles.imagePreview} resizeMode="cover" />
-        ) : (
-          <View style={[styles.imagePlaceholder, { borderColor: theme.colors.border }]}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Chưa có ảnh món ăn</Text>
-          </View>
-        )}
+        <MenuItemImage uri={previewUri} style={styles.imagePreview} />
         {selectedImage ? (
           <Text style={[styles.imageMeta, { color: theme.colors.onSurfaceVariant }]}>
             Ảnh mới: {selectedImage.name}
@@ -389,15 +384,6 @@ const styles = StyleSheet.create({
   },
   optionText: { fontSize: 12, fontWeight: '600' },
   imagePreview: { width: '100%', height: 180, borderRadius: 10 },
-  imagePlaceholder: {
-    width: '100%',
-    height: 120,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   imageMeta: { fontSize: 11 },
   imageActions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   errText: { fontSize: 12, fontWeight: '600' },
