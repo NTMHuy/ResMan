@@ -95,11 +95,6 @@ export interface MenuItemsPage {
   pagination: MenuPagination;
 }
 
-/**
- * Response thực tế của Backend.
- * ID BigInt được Backend serialize thành string.
- * Decimal price được Backend serialize thành string.
- */
 export interface BackendMenuCategory {
   id: string;
   code: string;
@@ -136,4 +131,7 @@ export interface UploadMenuImageInput {
   uri: string;
   name: string;
   type: string;
+  size?: number;
+  /** Available on web; native platforms upload the URI descriptor. */
+  file?: Blob;
 }
