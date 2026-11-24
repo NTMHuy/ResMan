@@ -7,6 +7,30 @@ import { GuestOrderItemDto } from "./dto/create-guest-order-items.dto.js";
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findGuestTables() {
+    const tables = await this.prisma.diningTable.findMany({
+      orderBy: [{ code: "asc" }, { id: "asc" }],
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        status: true,
+        sessions: {
+          where: { status: "OPEN" },
+          take: 1,
+          select: { sessionCode: true },
+        },
+      },
+    });
+    return tables.map((table) => ({
+      id: table.id.toString(),
+      code: table.code,
+      name: table.name,
+      status: table.sessions.length > 0 ? "OPEN" : "CLOSED",
+      sessionCode: table.sessions[0]?.sessionCode ?? null,
+    }));
+  }
+
   async getGuestSession(sessionCode: string) {
     const session = await this.prisma.diningSession.findUnique({
       where: { sessionCode },
