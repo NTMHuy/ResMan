@@ -20,7 +20,7 @@ export class OrdersService {
         sessions: {
           where: { status: "OPEN" },
           take: 1,
-          select: { sessionCode: true },
+          select: { id: true },
         },
       },
     });
