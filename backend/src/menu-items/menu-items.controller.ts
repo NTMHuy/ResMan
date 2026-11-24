@@ -75,8 +75,11 @@ export class MenuItemsController {
 
   @Delete(':id')
   @Permissions('menu.item.delete')
-  remove(@Param('id', ParseBigIntPipe) id: bigint) {
-    return this.service.remove(id);
+  async remove(@Param('id', ParseBigIntPipe) id: bigint) {
+    const existingItem = await this.service.findOne(id);
+    const result = await this.service.remove(id);
+    await removeMenuImageFile(existingItem.imageUrl).catch(() => undefined);
+    return result;
   }
 
   @Patch(':id/status')
