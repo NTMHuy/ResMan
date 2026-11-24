@@ -157,7 +157,7 @@ export function CustomerOrderScreen() {
           <Badge label={tableNumber} tone="info" mono />
         </View>
 
-        {APP_CONFIG.USE_MOCK_DATA ? (
+        {APP_CONFIG.USE_MOCK_CUSTOMER_ORDER ? (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -230,7 +230,7 @@ export function CustomerOrderScreen() {
           </View>
         )}
 
-        {APP_CONFIG.USE_MOCK_DATA ? (
+        {APP_CONFIG.USE_MOCK_CUSTOMER_ORDER ? (
           <View style={styles.guestRow}>
             <Input
               label="Tên khách"
@@ -388,7 +388,7 @@ export function CustomerOrderScreen() {
               </View>
               <View style={styles.totalLine}>
                 <Text style={[styles.totalKey, { color: theme.colors.onSurfaceVariant }]}>
-                  {APP_CONFIG.USE_MOCK_DATA ? 'Phí phục vụ (5%) & VAT (8%)' : 'Phí dịch vụ / VAT (chưa áp dụng)'}
+                  {APP_CONFIG.USE_MOCK_CUSTOMER_ORDER ? 'Phí phục vụ (5%) & VAT (8%)' : 'Phí dịch vụ / VAT (chưa áp dụng)'}
                 </Text>
                 <Text
                   style={[
@@ -419,7 +419,7 @@ export function CustomerOrderScreen() {
                 size="lg"
                 fullWidth
                 loading={submitting}
-                disabled={!APP_CONFIG.USE_MOCK_DATA && tableNumber === 'Chưa kết nối'}
+                disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && tableNumber === 'Chưa kết nối'}
                 leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
                 onPress={() => void handleSubmitOrder()}
               />
@@ -548,7 +548,7 @@ export function CustomerOrderScreen() {
                             {' · '}{formatVND(item.unitPrice * item.quantity)}
                           </Text>
                         </View>
-                        {!APP_CONFIG.USE_MOCK_DATA && item.kitchenStatus === 'QUEUED' ? (
+                        {!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && item.kitchenStatus === 'QUEUED' ? (
                           <Button
                             label="Hủy món"
                             size="sm"
