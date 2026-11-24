@@ -58,6 +58,7 @@ function mapOrderStatus(items: ActiveOrderApi['items']): OrderStatus {
   const statuses = items.map((item) => item.status);
   const active = statuses.filter((status) => status !== 'CANCELLED');
   if (active.length === 0) return statuses.length > 0 ? 'CANCELLED' : 'PENDING';
+  if (active.some((status) => status === 'AWAITING_ACCEPTANCE')) return 'PENDING';
   if (active.every((status) => status === 'COMPLETED')) return 'COMPLETED';
   if (active.some((status) => status === 'IN_PREPARATION')) return 'COOKING';
   if (active.some((status) => status === 'ACCEPTED')) return 'CONFIRMED';
@@ -87,6 +88,7 @@ function mapActiveOrder(source: ActiveOrderApi): Order {
 
   return {
     id: String(source.id),
+    sessionId: String(source.session.id),
     orderNumber: source.orderCode,
     tableNumber: source.session.table.code,
     orderType: 'DINE_IN',
@@ -124,22 +126,25 @@ export class ApiOrderRepository implements OrderRepository {
     throw new Error('Tạo đơn POS trực tiếp chưa được backend hỗ trợ. Khách hàng cần gọi món qua phiên QR.');
   }
 
-  async acceptOrder(_id: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
-    throw new Error('Tiếp nhận món được thực hiện tại màn hình KDS.');
+  async acceptOrder(id: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
+    await apiClient.patch(`/orders/${id}/items/status`, { status: 'ACCEPTED' });
+    return this.getOrderById(id);
   }
 
-  async rejectOrder(_id: string, _reason: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
-    throw new Error('Backend hiện chưa hỗ trợ từ chối toàn bộ đơn hàng.');
+  async rejectOrder(id: string, reason: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
+    await apiClient.patch(`/orders/${id}/items/status`, { status: 'CANCELLED', reason });
+    return this.getOrderById(id);
   }
 
   async updateOrderStatus(
-    _id: string,
-    _status: OrderStatus,
-    _note: string,
-    _actorName: string,
-    _actorRole: UserRole,
+    id: string, status: OrderStatus, note: string,
+    _actorName: string, _actorRole: UserRole,
   ): Promise<Order> {
-    throw new Error('Trạng thái món được cập nhật tại màn hình KDS.');
+    const backendStatus = status === 'COOKING' ? 'IN_PREPARATION'
+      : status === 'READY' ? 'COMPLETED' : null;
+    if (!backendStatus) throw new Error('Trạng thái đơn hàng không được hỗ trợ.');
+    await apiClient.patch(`/orders/${id}/items/status`, { status: backendStatus, reason: note });
+    return this.getOrderById(id);
   }
 
   async addOrderItem(
@@ -151,16 +156,15 @@ export class ApiOrderRepository implements OrderRepository {
     throw new Error('Thêm món từ POS chưa được backend hỗ trợ. Vui lòng gọi món qua phiên QR.');
   }
 
-  async cancelOrder(_id: string, _reason: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
-    throw new Error('Backend hiện chỉ hỗ trợ hủy từng món, không hỗ trợ hủy toàn bộ đơn.');
+  async cancelOrder(id: string, reason: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
+    await apiClient.patch(`/orders/${id}/items/status`, { status: 'CANCELLED', reason });
+    return this.getOrderById(id);
   }
 
-  async recordPayment(
-    _id: string,
-    _method: PaymentMethod,
-    _actorName: string,
-    _actorRole: UserRole,
-  ): Promise<Order> {
-    throw new Error('Ghi nhận thanh toán chưa được kết nối trong API đơn hàng hiện tại.');
+  async recordPayment(id: string, method: PaymentMethod, _actorName: string, _actorRole: UserRole): Promise<Order> {
+    const order = await this.getOrderById(id);
+    if (!order.sessionId) throw new Error('Không tìm thấy phiên phục vụ của đơn hàng.');
+    await apiClient.post(`/payments/sessions/${order.sessionId}/confirm`, { paymentMethod: method });
+    return { ...order, paymentStatus: 'PAID' };
   }
 }

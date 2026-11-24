@@ -4,6 +4,7 @@ import { Permissions } from "../auth/decorators/permissions.decorator.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { PermissionsGuard } from "../auth/guards/permissions.guard.js";
 import { UpdateOrderItemNoteDto } from "./dto/update-order-item-note.dto.js";
+import { UpdateOrderItemsStatusDto } from "./dto/update-order-items-status.dto.js";
 import { OrdersService } from "./orders.service.js";
 
 @Controller("orders")
@@ -15,6 +16,16 @@ export class StaffOrdersController {
   @Permissions("orders:read")
   findActive() {
     return this.orders.findActiveOrders();
+  }
+
+  @Patch(":orderId/items/status")
+  @Permissions("orders:manage-item")
+  updateOrderItemsStatus(
+    @Param("orderId", ParseIntPipe) orderId: number,
+    @Body() dto: UpdateOrderItemsStatusDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.orders.updateOrderItemsStatus(BigInt(orderId), dto.status, dto.reason, BigInt(user.id));
   }
 
   @Patch("items/:itemId/note")
