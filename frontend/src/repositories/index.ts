@@ -31,9 +31,9 @@ import { ApiReportRepository } from "@/src/repositories/api/ApiReportRepository"
 import { ApiDashboardRepository } from "@/src/repositories/api/ApiDashboardRepository";
 
 const useMockData = APP_CONFIG.USE_MOCK_DATA;
+const useMockOrders = APP_CONFIG.USE_MOCK_ORDERS;
 const useMockCustomerOrder = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
 const useMockAuth = APP_CONFIG.USE_MOCK_AUTH;
-// Mock data is never used in production builds, even if an env flag is accidentally enabled.
 const useMockMenu = __DEV__ && APP_CONFIG.USE_MOCK_MENU;
 
 export const repositories: {
@@ -48,28 +48,14 @@ export const repositories: {
   dashboard: DashboardRepository;
 } = {
   auth: useMockAuth ? new MockAuthRepository() : new ApiAuthRepository(),
-
   menu: useMockMenu ? new MockMenuRepository() : new ApiMenuRepository(),
-
   customerOrder: useMockCustomerOrder
     ? new MockCustomerOrderRepository()
     : new ApiCustomerOrderRepository(),
-
-  order: useMockData ? new MockOrderRepository() : new ApiOrderRepository(),
-
+  order: useMockOrders ? new MockOrderRepository() : new ApiOrderRepository(),
   kds: useMockData ? new MockKDSRepository() : new ApiKDSRepository(),
-
-  inventory: useMockData
-    ? new MockInventoryRepository()
-    : new ApiInventoryRepository(),
-
-  employee: useMockData
-    ? new MockEmployeeRepository()
-    : new ApiEmployeeRepository(),
-
+  inventory: useMockData ? new MockInventoryRepository() : new ApiInventoryRepository(),
+  employee: useMockData ? new MockEmployeeRepository() : new ApiEmployeeRepository(),
   report: useMockData ? new MockReportRepository() : new ApiReportRepository(),
-
-  dashboard: useMockData
-    ? new MockDashboardRepository()
-    : new ApiDashboardRepository(),
+  dashboard: useMockData ? new MockDashboardRepository() : new ApiDashboardRepository(),
 };
