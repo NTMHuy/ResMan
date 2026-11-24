@@ -95,6 +95,48 @@ export class SessionsService {
     };
   }
 
+  async close(sessionId: bigint, actorId: bigint) {
+    return this.prisma.$transaction(async (tx) => {
+      const session = await tx.diningSession.findUnique({
+        where: { id: sessionId },
+        include: { table: { select: { id: true, code: true, name: true } } },
+      });
+      if (!session) throw new NotFoundException("Không tìm thấy phiên phục vụ");
+      if (session.status !== "OPEN") {
+        throw new ConflictException("Phiên phục vụ đã được đóng trước đó");
+      }
+
+      const closed = await tx.diningSession.updateMany({
+        where: { id: sessionId, status: "OPEN" },
+        data: { status: "CLOSED", closedAt: new Date(), closedBy: actorId },
+      });
+      if (closed.count !== 1) {
+        throw new ConflictException("Phiên vừa được đóng bởi thao tác khác. Hãy tải lại danh sách bàn.");
+      }
+
+      await tx.diningTable.update({
+        where: { id: session.tableId },
+        data: { status: "AVAILABLE" },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: "DINING_SESSION_CLOSED",
+          entityType: "DINING_SESSION",
+          entityId: session.id.toString(),
+          metadata: { tableId: session.tableId.toString(), tableCode: session.table.code },
+        },
+      });
+
+      return {
+        id: session.id.toString(),
+        status: "CLOSED",
+        closedAt: new Date(),
+        table: { id: session.table.id.toString(), code: session.table.code, name: session.table.name, status: "AVAILABLE" },
+      };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+
   async findById(id: bigint) {
     const session = await this.prisma.diningSession.findUnique({
       where: { id },
