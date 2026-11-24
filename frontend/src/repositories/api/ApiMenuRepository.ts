@@ -8,6 +8,7 @@ import type {
   MenuItem,
   UpdateCategoryInput,
   UpdateMenuItemInput,
+  UploadMenuImageInput,
 } from "@/src/features/menu/types/menu.types";
 
 import { apiClient } from "@/src/services/api/apiClient";
@@ -277,4 +278,45 @@ export class ApiMenuRepository implements MenuRepository {
 
     return mapMenuItem(unwrapData<any>(response.data));
   }
+
+  // =====================================================
+  // MENU ITEM IMAGE
+  // =====================================================
+
+  async uploadMenuItemImage(
+    id: string,
+    file: UploadMenuImageInput,
+  ): Promise<MenuItem> {
+    const formData = new FormData();
+
+    if (file.file) {
+      formData.append("file", file.file, file.name);
+    } else {
+      // React Native FormData accepts this URI descriptor and streams the local file.
+      formData.append(
+        "file",
+        {
+          uri: file.uri,
+          name: file.name,
+          type: file.type,
+        } as unknown as Blob,
+      );
+    }
+
+    const response = await apiClient.post(
+      `/menu-items/${id}/image`,
+      formData,
+      {
+        // Let Axios/the platform create the multipart boundary.
+        headers: { "Content-Type": undefined },
+      },
+    );
+
+    return mapMenuItem(unwrapData<any>(response.data));
+  }
+
+  async deleteMenuItemImage(id: string): Promise<void> {
+    await apiClient.delete(`/menu-items/${id}/image`);
+  }
+
 }
