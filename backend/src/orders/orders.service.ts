@@ -17,7 +17,7 @@ export class OrdersService {
             items: {
               orderBy: { createdAt: "asc" },
               select: {
-                id: true, itemNameSnapshot: true, quantity: true, unitPrice: true,
+                id: true, menuItemId: true, itemNameSnapshot: true, quantity: true, unitPrice: true,
                 lineTotal: true, note: true, status: true, createdAt: true,
               },
             },
@@ -31,9 +31,15 @@ export class OrdersService {
     return {
       session: { status: session.status, openedAt: session.openedAt },
       table: session.table,
+      order: {
+        id: session.order.id.toString(),
+        orderCode: session.order.orderCode,
+        createdAt: session.order.createdAt,
+      },
       items: session.order.items.map((item) => ({
         ...item,
         id: item.id.toString(),
+        menuItemId: item.menuItemId.toString(),
         unitPrice: item.unitPrice.toString(),
         lineTotal: item.lineTotal.toString(),
       })),
@@ -41,6 +47,16 @@ export class OrdersService {
   }
 
   async addGuestItems(sessionCode: string, requestedItems: GuestOrderItemDto[]) {
+    if (!Array.isArray(requestedItems) || requestedItems.length < 1 || requestedItems.length > 30) {
+      throw new ConflictException("Mỗi lần gửi đơn phải có từ 1 đến 30 món");
+    }
+    if (requestedItems.some((item) =>
+      !Number.isSafeInteger(item.menuItemId) || item.menuItemId < 1 ||
+      !Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 99
+    )) {
+      throw new ConflictException("Thông tin món ăn hoặc số lượng không hợp lệ");
+    }
+
     try {
       return await this.prisma.$transaction(async (tx) => {
         const session = await tx.diningSession.findUnique({

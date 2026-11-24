@@ -124,9 +124,11 @@ export const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const isLoginRequest = config.url?.replace(/\/+$/, "") === "/auth/login";
+    const requestUrl = config.url?.replace(/\/+$/, "") ?? "";
+    const isLoginRequest = requestUrl === "/auth/login";
+    const isGuestSessionRequest = requestUrl.startsWith("/guest/session");
 
-    if (isLoginRequest) {
+    if (isLoginRequest || isGuestSessionRequest) {
       delete config.headers.Authorization;
       return config;
     }
@@ -148,9 +150,11 @@ apiClient.interceptors.response.use(
     const normalized = normalizeApiError(error);
 
     const requestUrl = error?.config?.url ?? "";
-    const isLoginRequest = requestUrl.replace(/\/+$/, "") === "/auth/login";
+    const normalizedUrl = requestUrl.replace(/\/+$/, "");
+    const isLoginRequest = normalizedUrl === "/auth/login";
+    const isGuestSessionRequest = normalizedUrl.startsWith("/guest/session");
 
-    if (normalized.statusCode === 401 && !isLoginRequest) {
+    if (normalized.statusCode === 401 && !isLoginRequest && !isGuestSessionRequest) {
       await storageService.clearAuth();
       onUnauthorizedHandler?.();
     }

@@ -11,6 +11,7 @@ export interface CartItem {
 }
 
 export interface SubmitCustomerOrderInput {
+  sessionCode?: string;
   tableNumber: string;
   guestName?: string;
   guestCount: number;

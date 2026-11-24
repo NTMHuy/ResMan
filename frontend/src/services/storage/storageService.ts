@@ -10,6 +10,7 @@ const KEYS = {
   THEME: "@resman/theme",
   CUSTOMER_CART: "@resman/customer_cart",
   CUSTOMER_TABLE: "@resman/customer_table",
+  CUSTOMER_SESSION_CODE: "@resman/customer_session_code",
 } as const;
 
 async function readToken(): Promise<string | null> {
@@ -53,6 +54,34 @@ export const storageService = {
 
   async removeToken(): Promise<void> {
     await deleteToken();
+  },
+
+  async getCustomerSessionCode(): Promise<string | null> {
+    try {
+      if (Platform.OS === "web") {
+        return await AsyncStorage.getItem(KEYS.CUSTOMER_SESSION_CODE);
+      }
+      return await SecureStore.getItemAsync(KEYS.CUSTOMER_SESSION_CODE);
+    } catch {
+      return null;
+    }
+  },
+
+  async setCustomerSessionCode(code: string): Promise<void> {
+    const value = code.trim();
+    if (Platform.OS === "web") {
+      await AsyncStorage.setItem(KEYS.CUSTOMER_SESSION_CODE, value);
+      return;
+    }
+    await SecureStore.setItemAsync(KEYS.CUSTOMER_SESSION_CODE, value);
+  },
+
+  async removeCustomerSessionCode(): Promise<void> {
+    if (Platform.OS === "web") {
+      await AsyncStorage.removeItem(KEYS.CUSTOMER_SESSION_CODE);
+      return;
+    }
+    await SecureStore.deleteItemAsync(KEYS.CUSTOMER_SESSION_CODE);
   },
 
   async getUser(): Promise<AuthUser | null> {

@@ -16,6 +16,7 @@ import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { useToast } from '@/src/contexts/ToastContext';
 import { formatTime, formatVND } from '@/src/utils/formatters';
+import { APP_CONFIG } from '@/src/constants/config';
 import {
   TABLE_OPTIONS,
   useCustomerOrder,
@@ -32,6 +33,14 @@ import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/St
 import { DishCustomizerModal } from '@/src/features/customer-order/components/DishCustomizerModal';
 
 type ViewMode = 'MENU' | 'TRACKING';
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String(error.message);
+  }
+  return fallback;
+}
 
 const ORDER_STEPS: Array<{ key: OrderStatus; label: string }> = [
   { key: 'CONFIRMED', label: '1. Đã gửi bếp' },
@@ -68,6 +77,10 @@ export function CustomerOrderScreen() {
     cartSummary,
     tableNumber,
     changeTable,
+    sessionCode,
+    setSessionCode,
+    connectSession,
+    disconnectSession,
     guestName,
     setGuestName,
     guestCount,
@@ -85,6 +98,7 @@ export function CustomerOrderScreen() {
     removeFromCart,
     clearCart,
     submitOrder,
+    cancelGuestItem,
     reload,
   } = useCustomerOrder();
 
@@ -105,7 +119,7 @@ export function CustomerOrderScreen() {
         setViewMode('TRACKING');
       }
     } catch (err) {
-      showToast('Không thể gửi đơn', 'error', err instanceof Error ? err.message : undefined);
+      showToast('Không thể gửi đơn', 'error', getErrorMessage(err, 'Vui lòng thử lại.'));
     }
   };
 
@@ -143,75 +157,117 @@ export function CustomerOrderScreen() {
           <Badge label={tableNumber} tone="info" mono />
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tableChips}
-        >
-          {TABLE_OPTIONS.map((t) => {
-            const active = t === tableNumber;
-            return (
-              <Pressable
-                key={t}
-                onPress={() => changeTable(t)}
-                style={[
-                  styles.tableChip,
-                  {
-                    backgroundColor: active ? theme.colors.primary : theme.colors.surfaceLow,
-                    borderColor: active ? theme.colors.primary : theme.colors.border,
-                    borderRadius: theme.radius.md,
-                  },
-                ]}
-              >
-                <Text
+        {APP_CONFIG.USE_MOCK_DATA ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tableChips}
+          >
+            {TABLE_OPTIONS.map((table) => {
+              const active = table === tableNumber;
+              return (
+                <Pressable
+                  key={table}
+                  onPress={() => changeTable(table)}
                   style={[
-                    styles.tableChipText,
-                    { color: active ? theme.colors.onPrimary : theme.colors.onSurface },
+                    styles.tableChip,
+                    {
+                      backgroundColor: active ? theme.colors.primary : theme.colors.surfaceLow,
+                      borderColor: active ? theme.colors.primary : theme.colors.border,
+                      borderRadius: theme.radius.md,
+                    },
                   ]}
                 >
-                  {t}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.guestRow}>
-          <Input
-            label="Tên khách"
-            value={guestName}
-            onChangeText={setGuestName}
-            placeholder="Khách tại bàn"
-            containerStyle={styles.flexOne}
-          />
-          <View style={styles.guestCountBox}>
-            <Text style={[styles.guestCountLabel, { color: theme.colors.onSurfaceVariant }]}>
-              Số khách
-            </Text>
-            <View style={styles.miniStepper}>
-              <Pressable
-                onPress={() => setGuestCount((c) => Math.max(1, c - 1))}
-                style={[styles.miniBtn, { backgroundColor: theme.colors.surfaceLow }]}
-              >
-                <Minus size={14} color={theme.colors.onSurface} />
-              </Pressable>
-              <Text
-                style={[
-                  styles.miniQty,
-                  { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
-                ]}
-              >
-                {guestCount}
-              </Text>
-              <Pressable
-                onPress={() => setGuestCount((c) => Math.min(20, c + 1))}
-                style={[styles.miniBtn, { backgroundColor: theme.colors.surfaceLow }]}
-              >
-                <Plus size={14} color={theme.colors.onSurface} />
-              </Pressable>
+                  <Text
+                    style={[
+                      styles.tableChipText,
+                      { color: active ? theme.colors.onPrimary : theme.colors.onSurface },
+                    ]}
+                  >
+                    {table}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        ) : (
+          <View style={{ gap: 8 }}>
+            <Input
+              label="Mã phiên bàn"
+              value={sessionCode}
+              onChangeText={setSessionCode}
+              placeholder="Nhập mã phiên 64 ký tự từ nhân viên/QR"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={tableNumber === 'Chưa kết nối'}
+            />
+            <View style={styles.dishBtnGroup}>
+              <Button
+                label="Kết nối phiên"
+                size="sm"
+                variant="primary"
+                disabled={tableNumber !== 'Chưa kết nối' || !sessionCode.trim()}
+                onPress={async () => {
+                  try {
+                    await connectSession();
+                    showToast('Đã kết nối bàn', 'success', 'Bạn có thể bắt đầu gọi món.');
+                  } catch (err) {
+                    showToast('Không thể kết nối', 'error', getErrorMessage(err, 'Vui lòng kiểm tra mã phiên và kết nối mạng.'));
+                  }
+                }}
+              />
+              <Button
+                label="Ngắt kết nối"
+                size="sm"
+                variant="secondary"
+                disabled={tableNumber === 'Chưa kết nối'}
+                onPress={() => {
+                  void disconnectSession();
+                  showToast('Đã ngắt kết nối phiên bàn', 'success');
+                }}
+              />
             </View>
           </View>
-        </View>
+        )}
+
+        {APP_CONFIG.USE_MOCK_DATA ? (
+          <View style={styles.guestRow}>
+            <Input
+              label="Tên khách"
+              value={guestName}
+              onChangeText={setGuestName}
+              placeholder="Khách tại bàn"
+              containerStyle={styles.flexOne}
+            />
+            <View style={styles.guestCountBox}>
+              <Text style={[styles.guestCountLabel, { color: theme.colors.onSurfaceVariant }]}>
+                Số khách
+              </Text>
+              <View style={styles.miniStepper}>
+                <Pressable
+                  onPress={() => setGuestCount((c) => Math.max(1, c - 1))}
+                  style={[styles.miniBtn, { backgroundColor: theme.colors.surfaceLow }]}
+                >
+                  <Minus size={14} color={theme.colors.onSurface} />
+                </Pressable>
+                <Text
+                  style={[
+                    styles.miniQty,
+                    { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
+                  ]}
+                >
+                  {guestCount}
+                </Text>
+                <Pressable
+                  onPress={() => setGuestCount((c) => Math.min(20, c + 1))}
+                  style={[styles.miniBtn, { backgroundColor: theme.colors.surfaceLow }]}
+                >
+                  <Plus size={14} color={theme.colors.onSurface} />
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </Card>
 
       {/* Cart */}
@@ -332,7 +388,7 @@ export function CustomerOrderScreen() {
               </View>
               <View style={styles.totalLine}>
                 <Text style={[styles.totalKey, { color: theme.colors.onSurfaceVariant }]}>
-                  Phí phục vụ (5%) & VAT (8%)
+                  {APP_CONFIG.USE_MOCK_DATA ? 'Phí phục vụ (5%) & VAT (8%)' : 'Phí dịch vụ / VAT (chưa áp dụng)'}
                 </Text>
                 <Text
                   style={[
@@ -363,6 +419,7 @@ export function CustomerOrderScreen() {
                 size="lg"
                 fullWidth
                 loading={submitting}
+                disabled={!APP_CONFIG.USE_MOCK_DATA && tableNumber === 'Chưa kết nối'}
                 leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
                 onPress={() => void handleSubmitOrder()}
               />
@@ -468,12 +525,47 @@ export function CustomerOrderScreen() {
                     </View>
                   )}
 
-                  <Text
-                    numberOfLines={2}
-                    style={[styles.trackItems, { color: theme.colors.onSurfaceVariant }]}
-                  >
-                    {ord.items.map((i) => `${i.quantity}x ${i.menuItemName}`).join(', ')}
-                  </Text>
+                  <View style={{ gap: 7 }}>
+                    {ord.items.map((item, index) => (
+                      <View
+                        key={item.id}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                        }}
+                      >
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text style={[styles.trackItems, { color: theme.colors.onSurface }]}>
+                            {index + 1}. {item.quantity}x {item.menuItemName}
+                          </Text>
+                          <Text style={[styles.trackItems, { color: theme.colors.onSurfaceVariant }]}>
+                            {item.kitchenStatus === 'QUEUED' ? 'Chờ bếp tiếp nhận' :
+                              item.kitchenStatus === 'ACCEPTED' ? 'Đã tiếp nhận' :
+                              item.kitchenStatus === 'COOKING' ? 'Đang chế biến' :
+                              item.kitchenStatus === 'COMPLETED' ? 'Đã hoàn thành' : 'Đã hủy'}
+                            {' · '}{formatVND(item.unitPrice * item.quantity)}
+                          </Text>
+                        </View>
+                        {!APP_CONFIG.USE_MOCK_DATA && item.kitchenStatus === 'QUEUED' ? (
+                          <Button
+                            label="Hủy món"
+                            size="sm"
+                            variant="danger"
+                            onPress={async () => {
+                              try {
+                                await cancelGuestItem(item.id);
+                                showToast('Đã hủy món', 'success', item.menuItemName);
+                              } catch (err) {
+                                showToast('Không thể hủy món', 'error', getErrorMessage(err, 'Món có thể đã được bếp tiếp nhận.'));
+                              }
+                            }}
+                          />
+                        ) : null}
+                      </View>
+                    ))}
+                  </View>
                 </View>
               );
             })}

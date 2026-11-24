@@ -9,4 +9,5 @@ export interface CustomerOrderRepository {
   submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking>;
   getOrderStatus(orderId: string): Promise<CustomerOrderTracking>;
   getRecentTableOrders(tableNumber: string): Promise<CustomerOrderTracking[]>;
+  cancelGuestItem?(itemId: string): Promise<void>;
 }
