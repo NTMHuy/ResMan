@@ -29,8 +29,25 @@ export class OrdersService {
       code: table.code,
       name: table.name,
       status: table.sessions.length > 0 ? "OPEN" : "CLOSED",
-      sessionCode: table.sessions[0]?.sessionCode ?? null,
     }));
+  }
+
+  async connectGuestTable(tableId: number) {
+    const session = await this.prisma.diningSession.findFirst({
+      where: { tableId: BigInt(tableId), status: "OPEN" },
+      include: { table: { select: { id: true, code: true, name: true } } },
+    });
+    if (!session) {
+      throw new NotFoundException("Bàn hiện chưa được nhân viên mở phiên");
+    }
+    return {
+      sessionCode: session.sessionCode,
+      table: {
+        id: session.table.id.toString(),
+        code: session.table.code,
+        name: session.table.name,
+      },
+    };
   }
 
   async getGuestSession(sessionCode: string) {
