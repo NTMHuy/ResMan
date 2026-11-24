@@ -116,7 +116,11 @@ export function MenuScreen() {
       showToast(
         'Đã lưu thông tin món nhưng chưa cập nhật được ảnh',
         'error',
-        error instanceof Error ? error.message : 'Vui lòng mở chỉnh sửa và thử tải ảnh lại.',
+        error instanceof Error
+          ? error.message
+          : error && typeof error === 'object' && 'message' in error
+            ? String(error.message)
+            : 'Vui lòng mở chỉnh sửa và thử tải ảnh lại.',
       );
       return;
     }
