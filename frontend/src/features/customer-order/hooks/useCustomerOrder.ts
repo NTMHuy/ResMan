@@ -54,7 +54,7 @@ export function useCustomerOrder() {
         setItems(menu.items);
 
         if (!USE_MOCK_CUSTOMER_ORDER) {
-          const response = await apiClient.get('/guest/tables');
+          const response = await apiClient.get('/guest/session/tables');
           const payload = response.data && typeof response.data === 'object' && 'data' in response.data
             ? (response.data as { data: OpenGuestTable[] }).data
             : response.data as OpenGuestTable[];
