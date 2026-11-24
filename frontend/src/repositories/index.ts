@@ -31,6 +31,7 @@ import { ApiReportRepository } from "@/src/repositories/api/ApiReportRepository"
 import { ApiDashboardRepository } from "@/src/repositories/api/ApiDashboardRepository";
 
 const useMockData = APP_CONFIG.USE_MOCK_DATA;
+const useMockCustomerOrder = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
 const useMockAuth = APP_CONFIG.USE_MOCK_AUTH;
 // Mock data is never used in production builds, even if an env flag is accidentally enabled.
 const useMockMenu = __DEV__ && APP_CONFIG.USE_MOCK_MENU;
@@ -50,7 +51,7 @@ export const repositories: {
 
   menu: useMockMenu ? new MockMenuRepository() : new ApiMenuRepository(),
 
-  customerOrder: useMockData
+  customerOrder: useMockCustomerOrder
     ? new MockCustomerOrderRepository()
     : new ApiCustomerOrderRepository(),
 
