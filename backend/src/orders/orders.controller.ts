@@ -18,6 +18,11 @@ export class OrdersController {
     return this.orders.findGuestTables();
   }
 
+  @Post("connect")
+  connectGuestTable(@Body("tableId", ParseIntPipe) tableId: number) {
+    return this.orders.connectGuestTable(tableId);
+  }
+
   @Get()
   getGuestSession(@Headers("x-session-code") sessionCode?: string) {
     return this.orders.getGuestSession(this.requireSessionCode(sessionCode));
