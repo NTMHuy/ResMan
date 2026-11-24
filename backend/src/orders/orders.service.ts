@@ -237,7 +237,10 @@ export class OrdersService {
 
   async findActiveOrders() {
     const orders = await this.prisma.order.findMany({
-      where: { diningSession: { status: "OPEN" } },
+      where: {
+        diningSession: { status: "OPEN" },
+        items: { some: {} },
+      },
       orderBy: { createdAt: "asc" },
       include: {
         diningSession: {
@@ -248,7 +251,6 @@ export class OrdersService {
           },
         },
         items: {
-          where: { status: { not: "CANCELLED" } },
           orderBy: { createdAt: "asc" },
           select: {
             id: true, itemNameSnapshot: true, quantity: true, unitPrice: true,
@@ -276,6 +278,79 @@ export class OrdersService {
         lineTotal: item.lineTotal.toString(),
       })),
     }));
+  }
+
+  async updateOrderItemsStatus(
+    orderId: bigint,
+    nextStatus: "ACCEPTED" | "IN_PREPARATION" | "COMPLETED" | "CANCELLED",
+    reason: string | undefined,
+    actorId: bigint,
+  ) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: { diningSession: true, items: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] } },
+        });
+        if (!order) throw new NotFoundException("Không tìm thấy đơn hàng");
+        if (order.diningSession.status !== "OPEN") throw new ConflictException("Phiên phục vụ đã đóng");
+
+        const activeItems = order.items.filter((item) => item.status !== "CANCELLED");
+        if (activeItems.length === 0) throw new ConflictException("Đơn hàng không còn món cần xử lý");
+
+        const allowedFrom: Record<string, string[]> = {
+          ACCEPTED: ["AWAITING_ACCEPTANCE", "ACCEPTED"],
+          IN_PREPARATION: ["ACCEPTED", "IN_PREPARATION", "COMPLETED"],
+          COMPLETED: ["IN_PREPARATION", "COMPLETED"],
+          CANCELLED: ["AWAITING_ACCEPTANCE", "ACCEPTED"],
+        };
+        if (activeItems.some((item) => !allowedFrom[nextStatus].includes(item.status))) {
+          throw new ConflictException("Trạng thái món không hợp lệ để thực hiện thao tác này");
+        }
+        if (nextStatus === "CANCELLED" && !reason?.trim()) {
+          throw new ConflictException("Vui lòng nhập lý do từ chối hoặc hủy đơn");
+        }
+
+        const itemsToUpdate = activeItems.filter((item) =>
+          nextStatus === "IN_PREPARATION" ? item.status === "ACCEPTED" : item.status !== nextStatus,
+        );
+        for (const item of itemsToUpdate) {
+          const changed = await tx.orderItem.updateMany({
+            where: { id: item.id, status: item.status },
+            data: { status: nextStatus },
+          });
+          if (changed.count !== 1) throw new ConflictException("Có món vừa được cập nhật bởi thao tác khác");
+          await tx.orderItemStatusHistory.create({
+            data: {
+              orderItemId: item.id, fromStatus: item.status, toStatus: nextStatus,
+              reason: reason?.trim() || null, actorId,
+            },
+          });
+        }
+        if (itemsToUpdate.length) {
+          await tx.auditLog.create({
+            data: {
+              actorId,
+              action: nextStatus === "CANCELLED" ? "ORDER_STAFF_ORDER_CANCELLED" : "ORDER_STAFF_ORDER_STATUS_CHANGED",
+              entityType: "ORDER",
+              entityId: order.id.toString(),
+              metadata: {
+                fromStatuses: [...new Set(itemsToUpdate.map((item) => item.status))],
+                toStatus: nextStatus, reason: reason?.trim() || null,
+                itemIds: itemsToUpdate.map((item) => item.id.toString()),
+              },
+            },
+          });
+        }
+        return { id: order.id.toString(), orderCode: order.orderCode, status: nextStatus, updatedItemCount: itemsToUpdate.length };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+        throw new ConflictException("Đơn hàng vừa được cập nhật. Vui lòng tải lại dữ liệu.");
+      }
+      throw error;
+    }
   }
 
   async updateItemNote(itemId: bigint, note: string, actorId: bigint) {

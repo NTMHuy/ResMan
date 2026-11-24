@@ -42,6 +42,7 @@ export interface OrderStatusHistoryEntry {
 
 export interface Order {
   id: string;
+  sessionId?: string;
   orderNumber: string;
   tableNumber: string;
   orderType: 'DINE_IN' | 'TAKEAWAY';
