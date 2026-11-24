@@ -124,6 +124,14 @@ export function useCustomerOrder() {
     return unsubscribe;
   }, [loadCustomerData]);
 
+  useEffect(() => {
+    if (USE_MOCK_CUSTOMER_ORDER || sessionCode) return;
+    const interval = setInterval(() => {
+      void loadCustomerData(undefined, true);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [loadCustomerData, sessionCode]);
+
   const connectTable = useCallback(async (tableId: string) => {
     const table = openTables.find((item) => item.id === tableId);
     if (!table?.sessionCode) {
