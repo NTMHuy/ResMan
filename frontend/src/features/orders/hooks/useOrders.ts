@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import { useAuth } from '@/src/contexts/AuthContext';
 import type {
   AddOrderItemInput,
@@ -60,13 +59,8 @@ export function useOrders() {
       void fetchOrders(true);
     }, 5000);
 
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchOrders(true);
-    });
-
     return () => {
       clearInterval(refreshId);
-      unsubscribe();
     };
   }, [fetchOrders]);
 

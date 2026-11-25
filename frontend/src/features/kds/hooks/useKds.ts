@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import { getElapsedMinutes } from '@/src/utils/formatters';
 import type { KitchenStation } from '@/src/types/common';
 import type { KdsItem, KdsItemStatus, KdsTicket } from '@/src/features/kds/types/kds.types';
@@ -40,13 +39,8 @@ export function useKds() {
     return () => clearInterval(timer);
   }, []);
 
-  // Subscribe to store updates + optional realtime polling
   useEffect(() => {
     void fetchQueue();
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchQueue(true);
-    });
-    return unsubscribe;
   }, [fetchQueue]);
 
   useEffect(() => {

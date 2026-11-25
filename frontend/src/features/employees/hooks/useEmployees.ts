@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import type { UserRole } from '@/src/types/common';
 import type {
   CreateEmployeeInput,
@@ -34,10 +33,6 @@ export function useEmployees() {
 
   useEffect(() => {
     void fetchEmployees();
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchEmployees(true);
-    });
-    return unsubscribe;
   }, [fetchEmployees]);
 
   const counts = useMemo(() => {

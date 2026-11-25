@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import { useAuth } from '@/src/contexts/AuthContext';
 import type {
   CreateIngredientInput,
@@ -46,10 +45,6 @@ export function useInventory() {
 
   useEffect(() => {
     void fetchInventory();
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchInventory(true);
-    });
-    return unsubscribe;
   }, [fetchInventory]);
 
   const summary = useMemo(() => {

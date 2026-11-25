@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import type { ReportPeriod } from '@/src/types/common';
 import type { ReportSummary } from '@/src/features/reports/types/report.types';
 
@@ -30,10 +29,7 @@ export function useReports() {
 
   useEffect(() => {
     void fetchReport(period);
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchReport(period, true);
-    });
-    return unsubscribe;
+    return undefined;
   }, [period, fetchReport]);
 
   return {
