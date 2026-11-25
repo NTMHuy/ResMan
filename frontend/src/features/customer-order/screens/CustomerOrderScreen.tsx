@@ -317,7 +317,8 @@ export function CustomerOrderScreen() {
             {cart.map((entry) => {
               const unit = entry.menuItem.price + entry.extraPrice;
               const isPerUnit = entry.menuItem.pricingType === "PER_UNIT";
-              const priceUnit = entry.menuItem.priceUnit || "lạng";
+              const hasUnit = isPerUnit || Boolean(entry.menuItem.priceUnit);
+              const priceUnit = entry.menuItem.priceUnit || (isPerUnit ? "lạng" : "phần");
               return (
                 <View
                   key={entry.cartItemId}
@@ -349,7 +350,7 @@ export function CustomerOrderScreen() {
                         { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
                       ]}
                     >
-                      {formatVND(unit)}{isPerUnit ? `/${priceUnit}` : ""} × {entry.quantity}{isPerUnit ? ` ${priceUnit}` : " phần"} = {formatVND(unit * entry.quantity)}
+                      {formatVND(unit)}{hasUnit ? `/${priceUnit}` : ""} × {entry.quantity}{hasUnit ? ` ${priceUnit}` : " phần"} = {formatVND(unit * entry.quantity)}
                     </Text>
                   </View>
 
