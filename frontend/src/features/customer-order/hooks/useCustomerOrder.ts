@@ -42,6 +42,7 @@ export function useCustomerOrder() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
   const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý món ăn thông minh sẽ xuất hiện tại đây khi hệ thống được kết nối AI.');
+  const [recommendationAvailable, setRecommendationAvailable] = useState(false);
 
   const loadCustomerData = useCallback(
     async (code?: string, silent = false, targetTable?: string) => {
@@ -144,10 +145,12 @@ export function useCustomerOrder() {
       if (!active) return;
       setMealSuggestions(result.items);
       setSuggestionMessage(result.message);
+      setRecommendationAvailable(result.available);
     }).catch(() => {
       if (!active) return;
       setMealSuggestions([]);
       setSuggestionMessage('Chưa thể tải gợi ý món ăn. Bạn vẫn có thể chọn món trong thực đơn.');
+      setRecommendationAvailable(false);
     });
     return () => {
       active = false;
@@ -355,6 +358,7 @@ export function useCustomerOrder() {
     setSelectedCategoryId,
     mealSuggestions,
     suggestionMessage,
+    recommendationAvailable,
     addToCart,
     updateCartQuantity,
     removeFromCart,
