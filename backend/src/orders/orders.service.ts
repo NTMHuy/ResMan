@@ -119,7 +119,7 @@ export class OrdersService {
             availabilityStatus: "AVAILABLE",
             category: { is: { isActive: true } },
           },
-          select: { id: true, name: true, price: true },
+          select: { id: true, name: true, price: true, pricingType: true },
         });
         const byId = new Map(menuItems.map((item) => [item.id.toString(), item]));
         if (byId.size !== menuIds.length) {
@@ -130,6 +130,9 @@ export class OrdersService {
         for (const requested of requestedItems) {
           const menuItem = byId.get(String(requested.menuItemId));
           if (!menuItem) throw new ConflictException("Món ăn không còn khả dụng");
+          if (menuItem.price === null || menuItem.pricingType === "MARKET_PRICE" || menuItem.pricingType === "UNSET") {
+            throw new ConflictException(`Món "${menuItem.name}" chưa có giá cố định để khách tự đặt. Vui lòng liên hệ nhân viên.`);
+          }
           const lineTotal = menuItem.price.mul(requested.quantity);
           const item = await tx.orderItem.create({
             data: {
