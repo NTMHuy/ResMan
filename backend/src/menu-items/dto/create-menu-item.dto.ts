@@ -44,4 +44,17 @@ export class CreateMenuItemDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => value === "true" ? true : value === "false" ? false : value)
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsIn(["AVAILABLE", "MANUAL_UNAVAILABLE"])
+  availabilityStatus?: "AVAILABLE" | "MANUAL_UNAVAILABLE";
+
+  @IsOptional()
+  @IsString()
+  availabilityReason?: string | null;
 }
