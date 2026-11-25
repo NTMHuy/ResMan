@@ -28,7 +28,20 @@ export interface StockMovement {
   newStock: number;
   unit: string;
   reason: string;
+  actorName: string;
   createdAt: string;
+}
+
+export interface InventoryCount {
+  id: string;
+  ingredientId: string;
+  ingredientSku: string;
+  ingredientName: string;
+  actualQuantity: number;
+  unit: string;
+  note: string;
+  countedBy: string;
+  countedAt: string;
 }
 
 export interface CreateIngredientInput {
@@ -53,7 +66,6 @@ export interface StockOperationInput {
   ingredientId: string;
   quantity: number;
   reason: string;
-  actorName: string;
 }
 
 export interface InventoryFilterParams {
