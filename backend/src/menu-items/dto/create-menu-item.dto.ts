@@ -1,6 +1,6 @@
 import { Transform, Type } from "class-transformer";
 import {
-  IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength,
+  IsBoolean, IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength,
 } from "class-validator";
 
 export const MENU_PRICING_TYPES = ["FIXED", "PER_UNIT", "MARKET_PRICE", "UNSET"] as const;
