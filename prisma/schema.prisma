@@ -78,6 +78,13 @@ model Employee {
   @@map("employees")
 }
 
+enum MenuPricingType {
+  FIXED
+  PER_UNIT
+  MARKET_PRICE
+  UNSET
+}
+
 model MenuCategory {
   id          BigInt     @id @default(autoincrement())
   code        String     @unique @db.VarChar(40)
@@ -97,7 +104,9 @@ model MenuItem {
   code               String       @unique @db.VarChar(40)
   name               String       @db.VarChar(150)
   description        String?
-  price              Decimal      @db.Decimal(14, 2)
+  price              Decimal?         @db.Decimal(14, 2)
+  pricingType        MenuPricingType   @default(FIXED) @map("pricing_type")
+  priceUnit          String?           @map("price_unit") @db.VarChar(30)
   imageUrl           String?      @map("image_url") @db.VarChar(1000)
   availabilityStatus String       @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
   availabilityReason String?      @map("availability_reason")
@@ -109,6 +118,7 @@ model MenuItem {
 
   @@index([availabilityStatus, categoryId])
   @@index([isActive, categoryId])
+  @@index([pricingType, categoryId])
   @@map("menu_items")
 }
 
