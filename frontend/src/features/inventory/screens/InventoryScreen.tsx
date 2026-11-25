@@ -8,7 +8,6 @@ import {
   Package,
   Plus,
   Search,
-  SlidersHorizontal,
 } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -35,7 +34,7 @@ import {
   type StockModalMode,
 } from '@/src/features/inventory/components/InventoryModals';
 
-type InventoryTab = 'ITEMS' | 'LEDGER';
+type InventoryTab = 'ITEMS' | 'LEDGER' | 'COUNTS';
 
 const STOCK_STATUS_META: Record<
   StockStatus,
@@ -69,6 +68,7 @@ export function InventoryScreen() {
   const {
     ingredients,
     movements,
+    counts,
     summary,
     loading,
     mutating,
@@ -83,8 +83,7 @@ export function InventoryScreen() {
     createIngredient,
     updateIngredient,
     stockIn,
-    adjustStock,
-    auditStock,
+    countStock,
   } = useInventory();
 
   const [activeTab, setActiveTab] = useState<InventoryTab>('ITEMS');
@@ -167,6 +166,7 @@ export function InventoryScreen() {
             options={[
               { key: 'ITEMS', label: 'Danh sách nguyên liệu', count: summary.total },
               { key: 'LEDGER', label: 'Lịch sử nhập / xuất', count: movements.length },
+              { key: 'COUNTS', label: 'Lịch sử kiểm kê', count: counts.length },
             ]}
           />
 
@@ -291,16 +291,7 @@ export function InventoryScreen() {
                           onPress={() => setOpModal({ mode: 'IMPORT', ing })}
                         />
                       </PermissionGate>
-                      <PermissionGate permission="INVENTORY_ADJUST">
-                        <Button
-                          label="Điều chỉnh"
-                          size="sm"
-                          variant="secondary"
-                          leftIcon={<SlidersHorizontal size={14} color={theme.colors.onSurface} />}
-                          onPress={() => setOpModal({ mode: 'ADJUST', ing })}
-                        />
-                      </PermissionGate>
-                      <PermissionGate permission="INVENTORY_AUDIT">
+<PermissionGate permission="INVENTORY_AUDIT">
                         <Button
                           label="Kiểm kê"
                           size="sm"
@@ -327,67 +318,97 @@ export function InventoryScreen() {
             })}
           </View>
         )
-      ) : movements.length === 0 ? (
+      ) : activeTab === 'LEDGER' ? (
+        movements.length === 0 ? (
+          <EmptyState
+            title="Chưa có lịch sử giao dịch kho"
+            description="Lịch sử nhập kho và các chênh lệch được ghi nhận tại đây."
+          />
+        ) : (
+          <View style={styles.list}>
+            {movements.map((mov) => {
+              const b = MOVEMENT_BADGE[mov.type];
+              const deltaText =
+                mov.quantityDelta > 0 ? `+${mov.quantityDelta}` : `${mov.quantityDelta}`;
+              return (
+                <Card key={mov.id} padding="md" style={styles.movCard}>
+                  <View style={styles.movTop}>
+                    <View style={styles.rowGap}>
+                      <Badge label={b.label} tone={b.tone} />
+                      <Text style={[styles.movName, { color: theme.colors.onSurface }]}>
+                        {mov.ingredientName}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.movSku,
+                          { color: theme.colors.outline, fontFamily: theme.typography.mono },
+                        ]}
+                      >
+                        {mov.ingredientSku}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.movDelta,
+                        {
+                          color:
+                            mov.quantityDelta > 0
+                              ? theme.colors.success
+                              : mov.quantityDelta < 0
+                                ? theme.colors.error
+                                : theme.colors.onSurface,
+                          fontFamily: theme.typography.mono,
+                        },
+                      ]}
+                    >
+                      {deltaText} {mov.unit}
+                    </Text>
+                  </View>
+
+                  <Text style={[styles.movReason, { color: theme.colors.onSurfaceVariant }]}>
+                    {mov.reason}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.movActor,
+                      { color: theme.colors.outline, fontFamily: theme.typography.mono },
+                    ]}
+                  >
+                    {mov.actorName} · {formatDateTime(mov.createdAt)}
+                  </Text>
+                </Card>
+              );
+            })}
+          </View>
+        )
+      ) : counts.length === 0 ? (
         <EmptyState
-          title="Chưa có lịch sử giao dịch kho"
-          description="Các thao tác nhập kho, điều chỉnh và kiểm kê sẽ được ghi nhận tại đây."
+          title="Chưa có lần kiểm kê nào"
+          description="Mỗi lần xác nhận số lượng thực tế sẽ được lưu tại đây để đối chiếu."
         />
       ) : (
         <View style={styles.list}>
-          {movements.map((mov) => {
-            const b = MOVEMENT_BADGE[mov.type];
-            const deltaText =
-              mov.quantityDelta > 0 ? `+${mov.quantityDelta}` : `${mov.quantityDelta}`;
-            return (
-              <Card key={mov.id} padding="md" style={styles.movCard}>
-                <View style={styles.movTop}>
-                  <View style={styles.rowGap}>
-                    <Badge label={b.label} tone={b.tone} />
-                    <Text style={[styles.movName, { color: theme.colors.onSurface }]}>
-                      {mov.ingredientName}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.movSku,
-                        { color: theme.colors.outline, fontFamily: theme.typography.mono },
-                      ]}
-                    >
-                      {mov.ingredientSku}
-                    </Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.movDelta,
-                      {
-                        color:
-                          mov.quantityDelta > 0
-                            ? theme.colors.success
-                            : mov.quantityDelta < 0
-                              ? theme.colors.error
-                              : theme.colors.onSurface,
-                        fontFamily: theme.typography.mono,
-                      },
-                    ]}
-                  >
-                    {deltaText} {mov.unit}
+          {counts.map((record) => (
+            <Card key={record.id} padding="md" style={styles.movCard}>
+              <View style={styles.movTop}>
+                <View style={styles.rowGap}>
+                  <Badge label="Kiểm kê" tone="neutral" />
+                  <Text style={[styles.movName, { color: theme.colors.onSurface }]}>
+                    {record.ingredientName}
                   </Text>
                 </View>
-
-                <Text style={[styles.movReason, { color: theme.colors.onSurfaceVariant }]}>
-                  {mov.reason} · Tồn trước: {mov.previousStock} → Sau: {mov.newStock} {mov.unit}
+                <Text style={[styles.movDelta, { color: theme.colors.onSurface, fontFamily: theme.typography.mono }]}>
+                  {record.actualQuantity} {record.unit}
                 </Text>
-
-                <Text
-                  style={[
-                    styles.movActor,
-                    { color: theme.colors.outline, fontFamily: theme.typography.mono },
-                  ]}
-                >
-                  {mov.actorName} · {formatDateTime(mov.createdAt)}
-                </Text>
-              </Card>
-            );
-          })}
+              </View>
+              <Text style={[styles.movReason, { color: theme.colors.onSurfaceVariant }]}>
+                Mã: {record.ingredientSku} · {record.note || 'Không có ghi chú'}
+              </Text>
+              <Text style={[styles.movActor, { color: theme.colors.outline, fontFamily: theme.typography.mono }]}>
+                Người kiểm kê: {record.countedBy} · {formatDateTime(record.countedAt)}
+              </Text>
+            </Card>
+          ))}
         </View>
       )}
 
@@ -418,11 +439,8 @@ export function InventoryScreen() {
             await stockIn(opModal.ing.id, qty, reason);
             showToast('Đã nhập kho thành công', 'success', `+${qty} ${opModal.ing.unit}`);
           } else if (opModal.mode === 'ADJUST') {
-            await adjustStock(opModal.ing.id, qty, reason);
-            showToast('Đã điều chỉnh tồn kho', 'success', `${qty} ${opModal.ing.unit}`);
-          } else {
-            await auditStock(opModal.ing.id, qty, reason);
-            showToast('Đã lưu kết quả kiểm kê', 'success', `${qty} ${opModal.ing.unit}`);
+            await countStock(opModal.ing.id, qty, reason);
+            showToast('Đã kiểm kê và cập nhật tồn kho', 'success', `${qty} ${opModal.ing.unit}`);
           }
         }}
       />
