@@ -3,6 +3,7 @@ import { repositories } from '@/src/repositories';
 import type {
   CreateIngredientInput,
   Ingredient,
+  InventoryCount,
   StockMovement,
   StockStatus,
   StorageZone,
@@ -12,6 +13,7 @@ import type {
 export function useInventory() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
+  const [counts, setCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,19 +22,20 @@ export function useInventory() {
   const [statusFilter, setStatusFilter] = useState<StockStatus | 'ALL'>('ALL');
   const [zoneFilter, setZoneFilter] = useState<StorageZone | 'ALL'>('ALL');
 
-
   const fetchInventory = useCallback(async (silent = false) => {
     if (!silent) {
       setLoading(true);
       setError(null);
     }
     try {
-      const [ingList, movList] = await Promise.all([
+      const [ingList, movList, countList] = await Promise.all([
         repositories.inventory.getIngredients(),
         repositories.inventory.getMovements(),
+        repositories.inventory.getCounts(),
       ]);
       setIngredients(ingList);
       setMovements(movList);
+      setCounts(countList);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu kho.');
     } finally {
@@ -113,18 +116,17 @@ export function useInventory() {
         setMutating(false);
       }
     },
-    [actorName, fetchInventory]
+    [fetchInventory]
   );
 
-  const adjustStock = useCallback(
+  const countStock = useCallback(
     async (ingredientId: string, quantity: number, reason: string) => {
       setMutating(true);
       try {
-        const updated = await repositories.inventory.adjustStock({
+        const updated = await repositories.inventory.countStock({
           ingredientId,
           quantity,
           reason,
-          actorName,
         });
         await fetchInventory(true);
         return updated;
@@ -132,31 +134,13 @@ export function useInventory() {
         setMutating(false);
       }
     },
-    [actorName, fetchInventory]
-  );
-
-  const auditStock = useCallback(
-    async (ingredientId: string, quantity: number, reason: string) => {
-      setMutating(true);
-      try {
-        const updated = await repositories.inventory.auditStock({
-          ingredientId,
-          quantity,
-          reason,
-          actorName,
-        });
-        await fetchInventory(true);
-        return updated;
-      } finally {
-        setMutating(false);
-      }
-    },
-    [actorName, fetchInventory]
+    [fetchInventory]
   );
 
   return {
     ingredients: filteredIngredients,
     movements,
+    counts,
     summary,
     loading,
     mutating,
@@ -171,7 +155,6 @@ export function useInventory() {
     createIngredient,
     updateIngredient,
     stockIn,
-    adjustStock,
-    auditStock,
+    countStock,
   };
 }
