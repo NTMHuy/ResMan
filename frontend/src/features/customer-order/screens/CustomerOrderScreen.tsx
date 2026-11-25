@@ -30,6 +30,7 @@ import { Input } from '@/src/components/common/Input';
 import { SegmentedTabs } from '@/src/components/common/SegmentedTabs';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 import { DishCustomizerModal } from '@/src/features/customer-order/components/DishCustomizerModal';
+import { MealSuggestionCard } from '@/src/features/customer-order/components/MealSuggestionCard';
 
 type ViewMode = 'MENU' | 'TRACKING';
 
@@ -91,6 +92,8 @@ export function CustomerOrderScreen() {
     setSearch,
     selectedCategoryId,
     setSelectedCategoryId,
+    mealSuggestions,
+    suggestionMessage,
     addToCart,
     updateCartQuantity,
     removeFromCart,
@@ -651,6 +654,15 @@ export function CustomerOrderScreen() {
                 ]}
               />
             </Card>
+
+            <MealSuggestionCard
+              items={mealSuggestions}
+              message={suggestionMessage}
+              onAdd={(dish) => {
+                addToCart(dish, 1, [], '');
+                showToast('Đã thêm món được gợi ý vào giỏ', 'success', dish.name);
+              }}
+            />
 
             {items.length === 0 ? (
               <EmptyState
