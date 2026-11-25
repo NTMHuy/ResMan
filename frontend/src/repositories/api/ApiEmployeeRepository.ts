@@ -86,7 +86,14 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       email: input.email?.trim().toLowerCase(),
       phone: input.phone,
     });
-    return mapEmployee(unwrap<BackendUser>(data));
+    let employee = mapEmployee(unwrap<BackendUser>(data));
+    if (input.role && input.role !== employee.role) {
+      const roleResponse = await apiClient.patch(`/users/${encodeURIComponent(id)}/role`, {
+        roleCode: input.role,
+      });
+      employee = mapEmployee(unwrap<BackendUser>(roleResponse.data));
+    }
+    return employee;
   }
 
   async assignRole(id: string, role: UserRole): Promise<Employee> {

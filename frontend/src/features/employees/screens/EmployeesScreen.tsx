@@ -180,10 +180,7 @@ export function EmployeesScreen() {
                       <Text style={[styles.roleText, { color: theme.colors.secondary }]}>
                         {ROLE_LABELS[emp.role]}
                       </Text>
-                      <Text style={[styles.dotText, { color: theme.colors.outline }]}>·</Text>
-                      <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>
-                        {emp.station || 'Chưa gán khu vực'} · {emp.shift || 'Chưa xếp ca'}
-                      </Text>
+
                     </View>
 
                     <View style={styles.contactRow}>

@@ -8,8 +8,6 @@ export interface CreateEmployeeInput {
   email: string;
   phone: string;
   role: UserRole;
-  station: string;
-  shift: string;
   password: string;
 }
 
@@ -18,8 +16,6 @@ export interface UpdateEmployeeInput {
   email?: string;
   phone?: string;
   role?: UserRole;
-  station?: string;
-  shift?: string;
   isActive?: boolean;
 }
 

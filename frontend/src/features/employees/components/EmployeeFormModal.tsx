@@ -20,8 +20,6 @@ const createSchema = z.object({
   fullName: z.string().trim().min(2, 'Họ tên tối thiểu 2 ký tự'),
   email: z.string().trim().email('Email không hợp lệ'),
   phone: z.string().trim().min(9, 'Số điện thoại không hợp lệ'),
-  station: z.string().trim().min(2, 'Vui lòng nhập bộ phận trực'),
-  shift: z.string().trim().min(2, 'Vui lòng nhập ca làm việc'),
   password: z.string().min(12, 'Mật khẩu tối thiểu 12 ký tự'),
 });
 
@@ -58,8 +56,6 @@ export function EmployeeFormModal({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<UserRole>('ORDER_STAFF');
-  const [station, setStation] = useState('');
-  const [shift, setShift] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -74,8 +70,6 @@ export function EmployeeFormModal({
       setEmail(editingEmployee.email);
       setPhone(editingEmployee.phone);
       setRole(editingEmployee.role);
-      setStation(editingEmployee.station || 'Sảnh chính');
-      setShift(editingEmployee.shift || 'Ca sáng (08:00 - 16:00)');
       setPassword('');
     } else {
       setCode(`NV-${Math.floor(100 + Math.random() * 899)}`);
@@ -83,8 +77,6 @@ export function EmployeeFormModal({
       setEmail('');
       setPhone('090');
       setRole('ORDER_STAFF');
-      setStation('Sảnh tầng 1');
-      setShift('Ca chiều (14:00 - 22:00)');
       setPassword('ResMan@2026!');
     }
   }, [visible, editingEmployee]);
@@ -94,7 +86,6 @@ export function EmployeeFormModal({
     setErrMsg(null);
 
     if (editingEmployee) {
-      const parsed = updateSchema.safeParse({ fullName, email, phone, station, shift });
       if (!parsed.success) {
         const next: Record<string, string> = {};
         for (const issue of parsed.error.issues) {
@@ -121,8 +112,6 @@ export function EmployeeFormModal({
       fullName,
       email,
       phone,
-      station,
-      shift,
       password,
     });
     if (!parsed.success) {
@@ -239,23 +228,6 @@ export function EmployeeFormModal({
           </View>
         </View>
       ) : null}
-
-      <View style={styles.rowTwo}>
-        <Input
-          label="Khu vực / Trạm *"
-          value={station}
-          onChangeText={setStation}
-          error={fieldErrors.station}
-          containerStyle={styles.flexOne}
-        />
-        <Input
-          label="Ca làm việc *"
-          value={shift}
-          onChangeText={setShift}
-          error={fieldErrors.shift}
-          containerStyle={styles.flexOne}
-        />
-      </View>
 
       {!editingEmployee ? (
         <Input
