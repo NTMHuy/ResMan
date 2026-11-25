@@ -62,7 +62,11 @@ export class MenuItemsService {
         categoryId,
         description: dto.description?.trim() || null,
         ...pricing,
-        imageUrl: dto.imageUrl?.trim() || null,\n        isActive: dto.isActive ?? true,\n        availabilityStatus: dto.availabilityStatus ?? "AVAILABLE",\n        availabilityReason: dto.availabilityStatus === "AVAILABLE" ? null :\n          dto.availabilityStatus ? dto.availabilityReason?.trim() || "Tạm hết món" : null,
+        imageUrl: dto.imageUrl?.trim() || null,
+        isActive: dto.isActive ?? true,
+        availabilityStatus: dto.availabilityStatus ?? "AVAILABLE",
+        availabilityReason: dto.availabilityStatus === "AVAILABLE" ? null :
+          dto.availabilityStatus ? dto.availabilityReason?.trim() || "Tạm hết món" : null,
       },
       include: { category: true },
     });
