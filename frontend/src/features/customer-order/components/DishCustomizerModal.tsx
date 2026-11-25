@@ -39,7 +39,20 @@ export function DishCustomizerModal({
   const extraPrice = dish.modifiers
     .filter((m) => selectedMods.includes(m.label))
     .reduce((sum, m) => sum + m.extraPrice, 0);
-  const lineTotal = (dish.price + extraPrice) * quantity;
+  const isOrderable =
+    dish.price > 0 &&
+    dish.pricingType !== "MARKET_PRICE" &&
+    dish.pricingType !== "UNSET";
+  const isPerUnit = dish.pricingType === "PER_UNIT";
+  const priceUnit = dish.priceUnit || "lạng";
+  const quantityLabel = isPerUnit ? `Số ${priceUnit}` : "Số lượng phần";
+  const lineTotal = isOrderable ? (dish.price + extraPrice) * quantity : 0;
+  const priceLabel =
+    dish.pricingType === "MARKET_PRICE"
+      ? "Giá theo thời điểm"
+      : dish.pricingType === "UNSET" || !isOrderable
+        ? "Liên hệ nhân viên để báo giá"
+        : `${formatVND(dish.price)}${isPerUnit ? `/${priceUnit}` : ""}`;
 
   const toggleModifier = (label: string) => {
     setSelectedMods((prev) =>
@@ -58,9 +71,9 @@ export function DishCustomizerModal({
         <>
           <Button label="Đóng" variant="secondary" onPress={onClose} />
           <Button
-            label={`Thêm vào giỏ · ${formatVND(lineTotal)}`}
+            label={isOrderable ? `Thêm vào giỏ · ${formatVND(lineTotal)}` : "Liên hệ nhân viên"}
             variant="primary"
-            disabled={dish.status !== 'AVAILABLE'}
+            disabled={dish.status !== 'AVAILABLE' || !isOrderable}
             onPress={() => {
               onAddToCart(dish, quantity, selectedMods, note);
               onClose();
@@ -78,7 +91,7 @@ export function DishCustomizerModal({
             { color: theme.colors.secondary, fontFamily: theme.typography.mono },
           ]}
         >
-          {formatVND(dish.price)}
+          {priceLabel}
         </Text>
         <View style={styles.prepBadge}>
           <Clock size={14} color={theme.colors.onSurfaceVariant} />
@@ -149,7 +162,7 @@ export function DishCustomizerModal({
       />
 
       <View style={styles.qtyRow}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>Số lượng phần</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>{quantityLabel}</Text>
         <View style={styles.stepper}>
           <Pressable
             onPress={() => setQuantity((q) => Math.max(1, q - 1))}
