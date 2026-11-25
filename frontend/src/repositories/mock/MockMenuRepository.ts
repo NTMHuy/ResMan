@@ -210,7 +210,15 @@ export class MockMenuRepository implements MenuRepository {
       target.price = input.price ?? 0;
     }
 
-    if (input.pricingType !== undefined) {\n      target.pricingType = input.pricingType;\n    }\n\n    if (input.priceUnit !== undefined) {\n      target.priceUnit = input.priceUnit;\n    }\n\n    if (input.categoryId !== undefined) {
+    if (input.pricingType !== undefined) {
+      target.pricingType = input.pricingType;
+    }
+
+    if (input.priceUnit !== undefined) {
+      target.priceUnit = input.priceUnit;
+    }
+
+    if (input.categoryId !== undefined) {
       target.categoryId = input.categoryId;
     }
 
