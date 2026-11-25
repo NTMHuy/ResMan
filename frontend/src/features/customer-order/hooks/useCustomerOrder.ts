@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { APP_CONFIG } from '@/src/constants/config';
 import { apiClient } from '@/src/services/api/apiClient';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
-import { mockStoreEvents } from '@/src/data/mock/mockStore';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
 import type {
   CartItem,
@@ -22,7 +20,7 @@ export const TABLE_OPTIONS = [
   'Bàn VIP-2',
 ];
 
-const USE_MOCK_CUSTOMER_ORDER = APP_CONFIG.USE_MOCK_CUSTOMER_ORDER;
+const USE_MOCK_CUSTOMER_ORDER = false;
 
 type OpenGuestTable = { id: string; code: string; name: string; status: string };
 
@@ -114,14 +112,6 @@ export function useCustomerOrder() {
     return () => {
       mounted = false;
     };
-  }, [loadCustomerData]);
-
-  useEffect(() => {
-    if (!USE_MOCK_CUSTOMER_ORDER) return;
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void loadCustomerData(undefined, true);
-    });
-    return unsubscribe;
   }, [loadCustomerData]);
 
   useEffect(() => {
