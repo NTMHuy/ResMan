@@ -119,7 +119,7 @@ export const ROLE_ALLOWED_ROUTES: Record<UserRole, AppRoute[]> = {
     "employees",
     "reports",
   ],
-  ORDER_STAFF: ["dashboard", "customer-order", "tables", "orders", "menu"],
+  ORDER_STAFF: ["customer-order", "tables", "orders", "menu"],
   KITCHEN_STAFF: ["kitchen", "menu", "inventory"],
   INVENTORY_STAFF: ["inventory", "menu"],
   GUEST: ["customer-order"],
@@ -175,7 +175,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ReadonlySet<Permission>> = {
   ]),
 
   ORDER_STAFF: new Set<Permission>([
-    "DASHBOARD_VIEW",
     "MENU_VIEW",
     "CUSTOMER_ORDER_VIEW",
     "CUSTOMER_ORDER_SUBMIT",
