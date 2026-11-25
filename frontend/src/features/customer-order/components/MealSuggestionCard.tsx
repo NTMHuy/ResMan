@@ -26,7 +26,7 @@ export function MealSuggestionCard({ items, message, onAdd }: MealSuggestionCard
             Gợi ý món ăn dành cho bạn
           </Text>
         </View>
-        <Badge label={items.length > 0 ? 'Đề xuất' : 'Sắp tích hợp AI'} tone="info" />
+        <Badge label={items.length > 0 ? 'Đề xuất' : 'Chưa kết nối AI'} tone="info" />
       </View>
 
       {items.length > 0 ? (
