@@ -94,6 +94,7 @@ export function CustomerOrderScreen() {
     setSelectedCategoryId,
     mealSuggestions,
     suggestionMessage,
+    recommendationAvailable,
     addToCart,
     updateCartQuantity,
     removeFromCart,
@@ -658,6 +659,7 @@ export function CustomerOrderScreen() {
             <MealSuggestionCard
               items={mealSuggestions}
               message={suggestionMessage}
+              available={recommendationAvailable}
               onAdd={(dish) => {
                 addToCart(dish, 1, [], '');
                 showToast('Đã thêm món được gợi ý vào giỏ', 'success', dish.name);
