@@ -316,6 +316,8 @@ export function CustomerOrderScreen() {
           <View style={styles.cartList}>
             {cart.map((entry) => {
               const unit = entry.menuItem.price + entry.extraPrice;
+              const isPerUnit = entry.menuItem.pricingType === "PER_UNIT";
+              const priceUnit = entry.menuItem.priceUnit || "lạng";
               return (
                 <View
                   key={entry.cartItemId}
@@ -347,7 +349,7 @@ export function CustomerOrderScreen() {
                         { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
                       ]}
                     >
-                      {formatVND(unit * entry.quantity)}
+                      {formatVND(unit)}{isPerUnit ? `/${priceUnit}` : ""} × {entry.quantity}{isPerUnit ? ` ${priceUnit}` : " phần"} = {formatVND(unit * entry.quantity)}
                     </Text>
                   </View>
 
@@ -680,6 +682,18 @@ export function CustomerOrderScreen() {
               <View style={styles.dishGrid}>
                 {items.map((dish) => {
                   const isOut = dish.status === 'OUT_OF_STOCK';
+                  const canOrder =
+                    dish.price > 0 &&
+                    dish.pricingType !== "MARKET_PRICE" &&
+                    dish.pricingType !== "UNSET";
+                  const isPerUnit = dish.pricingType === "PER_UNIT";
+                  const priceUnit = dish.priceUnit || "lạng";
+                  const displayPrice =
+                    dish.pricingType === "MARKET_PRICE"
+                      ? "Giá theo thời điểm"
+                      : dish.pricingType === "UNSET" || !canOrder
+                        ? "Liên hệ nhân viên"
+                        : `${formatVND(dish.price)}${isPerUnit ? `/${priceUnit}` : ""}`;
                   const inCartQty = cart
                     .filter((c) => c.menuItem.id === dish.id)
                     .reduce((s, c) => s + c.quantity, 0);
@@ -735,7 +749,7 @@ export function CustomerOrderScreen() {
                                   },
                                 ]}
                               >
-                                {formatVND(dish.price)}
+                                {displayPrice}
                               </Text>
                               <View style={styles.prepLine}>
                                 <Clock size={12} color={theme.colors.outline} />
@@ -747,6 +761,8 @@ export function CustomerOrderScreen() {
 
                             {isOut ? (
                               <Badge label="Không khả dụng" tone="neutral" />
+                            ) : !canOrder ? (
+                              <Badge label="Liên hệ nhân viên" tone="warning" />
                             ) : (
                               <View style={styles.dishBtnGroup}>
                                 <Button
@@ -759,7 +775,9 @@ export function CustomerOrderScreen() {
                                   onPress={() => setSelectedDish(dish)}
                                 />
                                 <Button
-                                  label={inCartQty > 0 ? `Thêm (${inCartQty})` : 'Thêm món'}
+                                  label={isPerUnit
+                                    ? (inCartQty > 0 ? `Thêm (${inCartQty} ${priceUnit})` : `Thêm 1 ${priceUnit}`)
+                                    : (inCartQty > 0 ? `Thêm (${inCartQty})` : 'Thêm món')}
                                   size="sm"
                                   variant="primary"
                                   leftIcon={<Plus size={14} color={theme.colors.onPrimary} />}
