@@ -13,9 +13,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'kg',
     currentStock: 0,
     minThreshold: 5,
-    costPerUnit: 1450000,
     status: 'OUT_OF_STOCK',
-    supplier: 'Nippon Meat Import VN',
     updatedAt: minsAgo(15),
   },
   {
@@ -27,9 +25,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'kg',
     currentStock: 3.4,
     minThreshold: 8,
-    costPerUnit: 320000,
     status: 'LOW_STOCK',
-    supplier: 'Hải Sản Cần Giờ',
     updatedAt: minsAgo(28),
   },
   {
@@ -41,9 +37,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'lít',
     currentStock: 42.5,
     minThreshold: 15,
-    costPerUnit: 45000,
     status: 'IN_STOCK',
-    supplier: 'Bếp Trung Tâm ResMan',
     updatedAt: minsAgo(55),
   },
   {
@@ -55,9 +49,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'kg',
     currentStock: 6.2,
     minThreshold: 10,
-    costPerUnit: 28000,
     status: 'LOW_STOCK',
-    supplier: 'Làng Nghề Cự Đà',
     updatedAt: minsAgo(75),
   },
   {
@@ -69,9 +61,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'kg',
     currentStock: 18.5,
     minThreshold: 4,
-    costPerUnit: 35000,
     status: 'IN_STOCK',
-    supplier: 'Nông Trại Đà Lạt GAP',
     updatedAt: minsAgo(110),
   },
   {
@@ -83,9 +73,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'kg',
     currentStock: 16.0,
     minThreshold: 6,
-    costPerUnit: 135000,
     status: 'IN_STOCK',
-    supplier: 'Vissan Food Supply',
     updatedAt: minsAgo(130),
   },
   {
@@ -97,9 +85,7 @@ export const mockIngredientsData: Ingredient[] = [
     unit: 'hộp',
     currentStock: 12,
     minThreshold: 3,
-    costPerUnit: 180000,
     status: 'IN_STOCK',
-    supplier: 'Barista Pro VN',
     updatedAt: minsAgo(180),
   },
 ];
