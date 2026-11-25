@@ -110,7 +110,7 @@ export class MenuCategoriesService {
         ...item,
         id: item.id.toString(),
         categoryId: item.categoryId.toString(),
-        price: item.price.toString(),
+        price: item.price?.toString() ?? null,
       })),
     };
   }
