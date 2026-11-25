@@ -11,6 +11,7 @@ import { resolveMenuImageUrl } from '@/src/constants/config';
 import type {
   CreateMenuItemInput,
   DishStatus,
+  MenuPricingType,
   MenuCategory,
   MenuItem,
   UploadMenuImageInput,
@@ -29,9 +30,18 @@ const dishSchema = z.object({
   sku: z.string().trim().min(2, 'Mã SKU tối thiểu 2 ký tự'),
   name: z.string().trim().min(2, 'Tên món ăn tối thiểu 2 ký tự'),
   description: z.string().trim().min(5, 'Mô tả ngắn tối thiểu 5 ký tự'),
-  price: z.number().min(1000, 'Giá bán phải từ 1.000đ trở lên'),
+  pricingType: z.enum(['FIXED', 'PER_UNIT', 'MARKET_PRICE', 'UNSET']),
+  price: z.number().min(1000, 'Giá bán phải từ 1.000đ trở lên').nullable(),
+  priceUnit: z.string().optional(),
   prepTimeMinutes: z.number().min(1, 'Thời gian chế biến tối thiểu 1 phút').max(120),
   categoryId: z.string().min(1, 'Vui lòng chọn danh mục'),
+}).superRefine((value, ctx) => {
+  if ((value.pricingType === 'FIXED' || value.pricingType === 'PER_UNIT') && value.price === null) {
+    ctx.addIssue({ code: 'custom', path: ['price'], message: 'Vui lòng nhập giá bán.' });
+  }
+  if (value.pricingType === 'PER_UNIT' && !value.priceUnit?.trim()) {
+    ctx.addIssue({ code: 'custom', path: ['priceUnit'], message: 'Vui lòng nhập đơn vị tính.' });
+  }
 });
 
 const STATUS_OPTIONS: Array<{ value: DishStatus; label: string }> = [
@@ -66,6 +76,8 @@ export function DishFormModal({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [priceText, setPriceText] = useState('');
+  const [pricingType, setPricingType] = useState<MenuPricingType>('FIXED');
+  const [priceUnit, setPriceUnit] = useState('lạng');
   const [prepText, setPrepText] = useState('10');
   const [categoryId, setCategoryId] = useState('');
   const [station, setStation] = useState<KitchenStation>('HOT_KITCHEN');
@@ -88,7 +100,9 @@ export function DishFormModal({
       setSku(editingItem.sku ?? '');
       setName(editingItem.name ?? '');
       setDescription(editingItem.description ?? '');
-      setPriceText(String(editingItem.price ?? 0));
+      setPriceText(String(editingItem.price ?? ''));
+      setPricingType(editingItem.pricingType ?? 'FIXED');
+      setPriceUnit(editingItem.priceUnit ?? 'lạng');
       setPrepText(String(editingItem.prepTimeMinutes ?? 10));
       setCategoryId(editingItem.categoryId ?? categories[0]?.id ?? '');
       setStation(editingItem.station ?? 'HOT_KITCHEN');
@@ -99,6 +113,8 @@ export function DishFormModal({
       setName('');
       setDescription('');
       setPriceText('65000');
+      setPricingType('FIXED');
+      setPriceUnit('lạng');
       setPrepText('10');
       setCategoryId(categories[0]?.id ?? '');
       setStation('HOT_KITCHEN');
@@ -163,7 +179,9 @@ export function DishFormModal({
   const handleSave = async () => {
     setFieldErrors({});
     setSubmitError(null);
-    const parsedPrice = Number(priceText.replace(/[^0-9]/g, ''));
+    const parsedPrice = pricingType === 'MARKET_PRICE' || pricingType === 'UNSET'
+      ? null
+      : Number(priceText.replace(/[^0-9]/g, ''));
     const parsedPrep = Number(prepText.replace(/[^0-9]/g, ''));
 
     const parsed = dishSchema.safeParse({
@@ -171,6 +189,8 @@ export function DishFormModal({
       name,
       description,
       price: parsedPrice,
+      pricingType,
+      priceUnit,
       prepTimeMinutes: parsedPrep,
       categoryId,
     });
@@ -192,6 +212,8 @@ export function DishFormModal({
           name: parsed.data.name,
           description: parsed.data.description,
           price: parsed.data.price,
+          pricingType: parsed.data.pricingType,
+          priceUnit: parsed.data.pricingType === 'PER_UNIT' ? parsed.data.priceUnit : null,
           categoryId: parsed.data.categoryId,
           station,
           // Existing URL is display state only; ApiMenuRepository never sends it in JSON.
@@ -241,15 +263,53 @@ export function DishFormModal({
           error={fieldErrors.sku}
           containerStyle={styles.flexOne}
         />
-        <Input
-          label="Giá bán (VNĐ) *"
-          value={priceText}
-          onChangeText={setPriceText}
-          keyboardType="numeric"
-          placeholder="85000"
-          error={fieldErrors.price}
-          containerStyle={styles.flexOne}
-        />
+        {pricingType === 'FIXED' || pricingType === 'PER_UNIT' ? (
+          <Input
+            label={pricingType === 'PER_UNIT' ? 'Đơn giá (VNĐ) *' : 'Giá bán (VNĐ) *'}
+            value={priceText}
+            onChangeText={setPriceText}
+            keyboardType="numeric"
+            placeholder="85000"
+            error={fieldErrors.price}
+            containerStyle={styles.flexOne}
+          />
+        ) : (
+          <View style={styles.flexOne}>
+            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12, paddingTop: 8 }}>
+              {pricingType === 'MARKET_PRICE' ? 'Giá theo thời điểm' : 'Chưa thiết lập giá'}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>Loại giá</Text>
+        <View style={styles.chipWrap}>
+          {([
+            ['FIXED', 'Giá cố định'],
+            ['PER_UNIT', 'Theo đơn vị'],
+            ['MARKET_PRICE', 'Giá thị trường'],
+            ['UNSET', 'Chưa có giá'],
+          ] as Array<[MenuPricingType, string]>).map(([value, label]) => (
+            <Pressable
+              key={value}
+              onPress={() => setPricingType(value)}
+              style={[styles.optionChip, {
+                backgroundColor: pricingType === value ? theme.colors.primary : theme.colors.surfaceLow,
+                borderColor: pricingType === value ? theme.colors.primary : theme.colors.border,
+                borderRadius: theme.radius.md,
+              }]}
+            >
+              <Text style={[styles.optionText, { color: pricingType === value ? theme.colors.onPrimary : theme.colors.onSurface }]}>
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        {pricingType === 'PER_UNIT' ? (
+          <Input label="Đơn vị tính *" value={priceUnit} onChangeText={setPriceUnit}
+            placeholder="lạng, kg, con..." error={fieldErrors.priceUnit} />
+        ) : null}
       </View>
 
       <Input
