@@ -3,6 +3,7 @@ import { apiClient } from '@/src/services/api/apiClient';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
+import { mealRecommendationService } from '@/src/features/customer-order/services/mealRecommendationService';
 import type {
   CartItem,
   CustomerOrderTracking,
@@ -39,6 +40,8 @@ export function useCustomerOrder() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
+  const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
+  const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý món ăn thông minh sẽ xuất hiện tại đây khi hệ thống được kết nối AI.');
 
   const loadCustomerData = useCallback(
     async (code?: string, silent = false, targetTable?: string) => {
@@ -130,6 +133,26 @@ export function useCustomerOrder() {
     }, 5000);
     return () => clearInterval(interval);
   }, [loadCustomerData, sessionCode]);
+
+  useEffect(() => {
+    let active = true;
+    void mealRecommendationService.getRecommendations({
+      menuItems: items,
+      selectedCategoryId: selectedCategoryId === 'ALL' ? null : selectedCategoryId,
+      searchKeyword: search.trim(),
+    }).then((result) => {
+      if (!active) return;
+      setMealSuggestions(result.items);
+      setSuggestionMessage(result.message);
+    }).catch(() => {
+      if (!active) return;
+      setMealSuggestions([]);
+      setSuggestionMessage('Chưa thể tải gợi ý món ăn. Bạn vẫn có thể chọn món trong thực đơn.');
+    });
+    return () => {
+      active = false;
+    };
+  }, [items, selectedCategoryId, search]);
 
   const connectTable = useCallback(async (tableId: string) => {
     const table = openTables.find((item) => item.id === tableId);
@@ -330,6 +353,8 @@ export function useCustomerOrder() {
     setSearch,
     selectedCategoryId,
     setSelectedCategoryId,
+    mealSuggestions,
+    suggestionMessage,
     addToCart,
     updateCartQuantity,
     removeFromCart,
