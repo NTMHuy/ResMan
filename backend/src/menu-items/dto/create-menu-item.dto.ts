@@ -1,14 +1,6 @@
 import { Transform, Type } from "class-transformer";
 import {
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
+  IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength,
 } from "class-validator";
 
 export const MENU_PRICING_TYPES = ["FIXED", "PER_UNIT", "MARKET_PRICE", "UNSET"] as const;
@@ -31,7 +23,7 @@ export class CreateMenuItemDto {
   categoryId!: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === null ? null : Number(value))
+  @Transform(({ value }) => value === undefined || value === null ? value : Number(value))
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price?: number | null;
