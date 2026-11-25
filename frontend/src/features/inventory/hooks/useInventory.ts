@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { repositories } from '@/src/repositories';
-import { useAuth } from '@/src/contexts/AuthContext';
 import type {
   CreateIngredientInput,
   Ingredient,
@@ -11,7 +10,6 @@ import type {
 } from '@/src/features/inventory/types/inventory.types';
 
 export function useInventory() {
-  const { user } = useAuth();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +20,6 @@ export function useInventory() {
   const [statusFilter, setStatusFilter] = useState<StockStatus | 'ALL'>('ALL');
   const [zoneFilter, setZoneFilter] = useState<StorageZone | 'ALL'>('ALL');
 
-  const actorName = user?.fullName || 'Nhân viên kho';
 
   const fetchInventory = useCallback(async (silent = false) => {
     if (!silent) {
@@ -109,7 +106,6 @@ export function useInventory() {
           ingredientId,
           quantity,
           reason,
-          actorName,
         });
         await fetchInventory(true);
         return updated;

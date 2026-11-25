@@ -28,7 +28,6 @@ export interface StockMovement {
   newStock: number;
   unit: string;
   reason: string;
-  actorName: string;
   createdAt: string;
 }
 
@@ -48,8 +47,6 @@ export interface UpdateIngredientInput {
   zone?: StorageZone;
   unit?: string;
   minThreshold?: number;
-  costPerUnit?: number;
-  supplier?: string;
 }
 
 export interface StockOperationInput {
