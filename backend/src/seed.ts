@@ -189,7 +189,7 @@ async function main(): Promise<void> {
     const menuResult = await seedMenu(prisma);
 
     console.log(
-      `Đã seed thực đơn: ${menuResult.categories} danh mục, ${menuResult.items} món (các món đã tồn tại được giữ nguyên).`,
+      `Đã seed thực đơn: ${menuResult.categories} danh mục, ${menuResult.items} món (dữ liệu danh mục, giá và loại giá được đồng bộ; trạng thái và ảnh được giữ nguyên).`,
     );
 
     console.log(
