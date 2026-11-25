@@ -167,30 +167,39 @@ export class ApiInventoryRepository implements InventoryRepository {
   }
 
   async getMovements(ingredientId?: string): Promise<StockMovement[]> {
-    const response = await apiClient.get<ApiResponse<ApiMovement[]> | ApiMovement[]>(
-      '/inventory/movements',
-      { params: ingredientId ? { ingredientId } : undefined },
-    );
-    return unwrap(response.data).map((movement) => ({
-      id: movement.id,
-      ingredientId: movement.ingredient.id,
-      ingredientSku: movement.ingredient.code,
-      ingredientName: movement.ingredient.name,
-      type: movement.movementType === 'IN'
-        ? 'IMPORT'
-        : movement.movementType === 'OUT'
-          ? 'EXPORT'
-          : movement.referenceCode?.startsWith('COUNT-')
-            ? 'AUDIT'
-            : 'ADJUST',
-      quantityDelta: Number(movement.quantityDelta),
-      previousStock: 0,
-      newStock: 0,
-      unit: movement.ingredient.unit,
-      reason: movement.reason,
-      actorName: movement.actor.fullName || movement.actor.username,
-      createdAt: movement.createdAt,
-    }));
+    const [movementResponse, ingredients] = await Promise.all([
+      apiClient.get<ApiResponse<ApiMovement[]> | ApiMovement[]>('/inventory/movements', {
+        params: ingredientId ? { ingredientId } : undefined,
+      }),
+      this.getIngredients(),
+    ]);
+    const balances = new Map(ingredients.map((item) => [item.id, item.currentStock]));
+    return unwrap(movementResponse.data).map((movement) => {
+      const delta = Number(movement.quantityDelta);
+      const current = balances.get(movement.ingredient.id) ?? 0;
+      const previous = current - delta;
+      balances.set(movement.ingredient.id, previous);
+      return {
+        id: movement.id,
+        ingredientId: movement.ingredient.id,
+        ingredientSku: movement.ingredient.code,
+        ingredientName: movement.ingredient.name,
+        type: movement.movementType === 'IN'
+          ? 'IMPORT'
+          : movement.movementType === 'OUT'
+            ? 'EXPORT'
+            : movement.referenceCode?.startsWith('COUNT-')
+              ? 'AUDIT'
+              : 'ADJUST',
+        quantityDelta: delta,
+        previousStock: previous,
+        newStock: current,
+        unit: movement.ingredient.unit,
+        reason: movement.reason,
+        actorName: movement.actor.fullName || movement.actor.username,
+        createdAt: movement.createdAt,
+      };
+    });
   }
 
   async getCounts(ingredientId?: string): Promise<InventoryCount[]> {
