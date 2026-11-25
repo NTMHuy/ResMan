@@ -33,7 +33,13 @@ export function MealSuggestionCard({ items, message, available, onAdd }: MealSug
       {items.length > 0 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
           {items.map((item) => {
-            const unavailable = item.status === 'OUT_OF_STOCK';
+            const unavailable =
+              item.status === 'OUT_OF_STOCK' ||
+              item.price <= 0 ||
+              item.pricingType === "MARKET_PRICE" ||
+              item.pricingType === "UNSET";
+            const isPerUnit = item.pricingType === "PER_UNIT";
+            const priceUnit = item.priceUnit || "lạng";
             return (
               <View
                 key={item.id}
@@ -51,10 +57,10 @@ export function MealSuggestionCard({ items, message, available, onAdd }: MealSug
                   {item.name}
                 </Text>
                 <Text style={[styles.price, { color: theme.colors.secondary, fontFamily: theme.typography.mono }]}>
-                  {formatVND(item.price)}
+                  {unavailable ? "Liên hệ nhân viên" : `${formatVND(item.price)}${isPerUnit ? `/${priceUnit}` : ""}`}
                 </Text>
                 <Button
-                  label={unavailable ? 'Hết món' : 'Thêm món'}
+                  label={item.status === 'OUT_OF_STOCK' ? 'Hết món' : unavailable ? 'Liên hệ nhân viên' : 'Thêm món'}
                   size="sm"
                   variant="primary"
                   disabled={unavailable}
