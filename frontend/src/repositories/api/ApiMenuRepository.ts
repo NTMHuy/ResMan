@@ -33,7 +33,7 @@ function toBackendStatus(status: DishStatus) {
 function mapMenuItem(item: any): MenuItem {
   let status: DishStatus = "AVAILABLE";
   if (item.isActive === false) status = "INACTIVE";
-  else if (item.availabilityStatus === "MANUAL_UNAVAILABLE" || item.availabilityStatus === "UNAVAILABLE") {
+  else if (item.availabilityStatus === "MANUAL_UNAVAILABLE" || item.availabilityStatus === "UNAVAILABLE" || item.availabilityStatus === "SOLD_OUT") {
     const reason = String(item.availabilityReason ?? "").toLocaleLowerCase("vi");
     status = reason.includes("hết món") || reason.includes("hết hàng") ? "OUT_OF_STOCK" : "INACTIVE";
   }
