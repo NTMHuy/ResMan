@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import * as bcrypt from "bcrypt";
+import { seedMenu } from "./menu-seed.js";
 
 const roleDefinitions = [
   { code: "MANAGER", name: "Quản lý" },
@@ -184,6 +185,12 @@ async function main(): Promise<void> {
         },
       });
     }
+
+    const menuResult = await seedMenu(prisma);
+
+    console.log(
+      `Đã seed thực đơn: ${menuResult.categories} danh mục, ${menuResult.items} món (các món đã tồn tại được giữ nguyên).`,
+    );
 
     console.log(
       "Đã khởi tạo roles, permissions và tài khoản quản lý đầu tiên.",
