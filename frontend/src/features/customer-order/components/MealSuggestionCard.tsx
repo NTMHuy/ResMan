@@ -39,7 +39,8 @@ export function MealSuggestionCard({ items, message, available, onAdd }: MealSug
               item.pricingType === "MARKET_PRICE" ||
               item.pricingType === "UNSET";
             const isPerUnit = item.pricingType === "PER_UNIT";
-            const priceUnit = item.priceUnit || "lạng";
+            const hasUnit = isPerUnit || Boolean(item.priceUnit);
+            const priceUnit = item.priceUnit || (isPerUnit ? "lạng" : "phần");
             return (
               <View
                 key={item.id}
@@ -57,7 +58,7 @@ export function MealSuggestionCard({ items, message, available, onAdd }: MealSug
                   {item.name}
                 </Text>
                 <Text style={[styles.price, { color: theme.colors.secondary, fontFamily: theme.typography.mono }]}>
-                  {unavailable ? "Liên hệ nhân viên" : `${formatVND(item.price)}${isPerUnit ? `/${priceUnit}` : ""}`}
+                  {unavailable ? "Liên hệ nhân viên" : `${formatVND(item.price)}${hasUnit ? `/${priceUnit}` : ""}`}
                 </Text>
                 <Button
                   label={item.status === 'OUT_OF_STOCK' ? 'Hết món' : unavailable ? 'Liên hệ nhân viên' : 'Thêm món'}
