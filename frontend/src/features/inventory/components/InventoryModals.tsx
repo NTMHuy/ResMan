@@ -279,7 +279,8 @@ export function StockOperationModal({
   if (!ingredient) return null;
 
   const isCount = mode === 'COUNT';
-  const countedQuantity = qtyText.trim() === '' ? null : Number(qtyText);
+  const parsedQuantity = qtyText.trim() === '' ? null : Number(qtyText);
+  const countedQuantity = parsedQuantity !== null && Number.isFinite(parsedQuantity) ? parsedQuantity : null;
   const difference = countedQuantity === null ? null : countedQuantity - ingredient.currentStock;
   const differenceLabel = difference === null
     ? 'Nhập số lượng thực tế để xem chênh lệch'
