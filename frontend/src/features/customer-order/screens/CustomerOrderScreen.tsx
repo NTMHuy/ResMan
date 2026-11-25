@@ -687,13 +687,14 @@ export function CustomerOrderScreen() {
                     dish.pricingType !== "MARKET_PRICE" &&
                     dish.pricingType !== "UNSET";
                   const isPerUnit = dish.pricingType === "PER_UNIT";
-                  const priceUnit = dish.priceUnit || "lạng";
+                  const hasUnit = isPerUnit || Boolean(dish.priceUnit);
+                  const priceUnit = dish.priceUnit || (isPerUnit ? "lạng" : "phần");
                   const displayPrice =
                     dish.pricingType === "MARKET_PRICE"
                       ? "Giá theo thời điểm"
                       : dish.pricingType === "UNSET" || !canOrder
                         ? "Liên hệ nhân viên"
-                        : `${formatVND(dish.price)}${isPerUnit ? `/${priceUnit}` : ""}`;
+                        : `${formatVND(dish.price)}${hasUnit ? `/${priceUnit}` : ""}`;
                   const inCartQty = cart
                     .filter((c) => c.menuItem.id === dish.id)
                     .reduce((s, c) => s + c.quantity, 0);
@@ -775,7 +776,7 @@ export function CustomerOrderScreen() {
                                   onPress={() => setSelectedDish(dish)}
                                 />
                                 <Button
-                                  label={isPerUnit
+                                  label={hasUnit
                                     ? (inCartQty > 0 ? `Thêm (${inCartQty} ${priceUnit})` : `Thêm 1 ${priceUnit}`)
                                     : (inCartQty > 0 ? `Thêm (${inCartQty})` : 'Thêm món')}
                                   size="sm"
