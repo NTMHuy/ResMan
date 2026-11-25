@@ -164,7 +164,23 @@ export class ApiOrderRepository implements OrderRepository {
   async recordPayment(id: string, method: PaymentMethod, _actorName: string, _actorRole: UserRole): Promise<Order> {
     const order = await this.getOrderById(id);
     if (!order.sessionId) throw new Error('Không tìm thấy phiên phục vụ của đơn hàng.');
-    await apiClient.post(`/payments/sessions/${order.sessionId}/confirm`, { paymentMethod: method });
-    return { ...order, paymentStatus: 'PAID' };
+    const response = await apiClient.post<ApiResponse<{
+      session: { id: string; status: string; table: { id: string; status: string } };
+      payment: { id: string; orderId: string; amount: string; status: string; paidAt: string };
+    }> | {
+      session: { id: string; status: string; table: { id: string; status: string } };
+      payment: { id: string; orderId: string; amount: string; status: string; paidAt: string };
+    }>(`/payments/sessions/${order.sessionId}/confirm`, { paymentMethod: method });
+    const result = unwrapData(response.data);
+    if (result.payment.status !== 'PAID' || result.session.status !== 'CLOSED') {
+      throw new Error('Backend chưa xác nhận thanh toán và đóng phiên thành công.');
+    }
+    return {
+      ...order,
+      paymentStatus: 'PAID',
+      totalAmount: Number(result.payment.amount),
+      subtotal: Number(result.payment.amount),
+      updatedAt: result.payment.paidAt,
+    };
   }
 }

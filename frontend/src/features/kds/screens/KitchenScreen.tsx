@@ -6,9 +6,7 @@ import {
   CheckCircle2,
   Clock,
   Flame,
-  Play,
   RefreshCw,
-  RotateCcw,
 } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -22,7 +20,6 @@ import { Card } from '@/src/components/common/Card';
 import { Badge } from '@/src/components/common/Badge';
 import { Button } from '@/src/components/common/Button';
 import { SegmentedTabs } from '@/src/components/common/SegmentedTabs';
-import { PermissionGate } from '@/src/components/common/PermissionGate';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 
 const ITEM_STATUS_META: Record<
@@ -64,8 +61,6 @@ export function KitchenScreen() {
     setAutoRefresh,
     reload,
     updateItemStatus,
-    bumpTicket,
-    recallLast,
   } = useKds();
 
   const advanceItem = async (item: KdsItem) => {
@@ -117,8 +112,6 @@ export function KitchenScreen() {
             options={[
               { key: 'ALL', label: 'Tất cả bếp', count: counts.ALL },
               { key: 'HOT_KITCHEN', label: 'Bếp Nóng', count: counts.HOT_KITCHEN },
-              { key: 'COLD_KITCHEN', label: 'Bếp Nguội', count: counts.COLD_KITCHEN },
-              { key: 'BAR', label: 'Quầy Bar', count: counts.BAR },
             ]}
           />
 
@@ -136,23 +129,6 @@ export function KitchenScreen() {
               leftIcon={<RefreshCw size={14} color={theme.colors.onSurface} />}
               onPress={() => void reload()}
             />
-            <PermissionGate permission="KDS_BUMP_TICKET">
-              <Button
-                label="Hoàn tác (Recall)"
-                variant="secondary"
-                size="sm"
-                loading={mutating}
-                leftIcon={<RotateCcw size={14} color={theme.colors.onSurface} />}
-                onPress={async () => {
-                  const recalled = await recallLast();
-                  if (recalled) {
-                    showToast('Đã gọi lại món vừa xong', 'info', recalled.menuItemName);
-                  } else {
-                    showToast('Không có món đã xong để hoàn tác', 'warning');
-                  }
-                }}
-              />
-            </PermissionGate>
           </View>
         </View>
 
@@ -405,24 +381,6 @@ export function KitchenScreen() {
                   })}
                 </View>
 
-                {/* Ticket Footer: Bump Ticket */}
-                {ticket.items.some((i) => i.status !== 'COMPLETED') ? (
-                  <PermissionGate permission="KDS_BUMP_TICKET">
-                    <View style={[styles.ticketFooter, { borderTopColor: theme.colors.border }]}>
-                      <Button
-                        label="Báo xong vé bếp (Bump)"
-                        variant="primary"
-                        fullWidth
-                        loading={mutating}
-                        leftIcon={<Play size={14} color={theme.colors.onPrimary} />}
-                        onPress={async () => {
-                          await bumpTicket(ticket.orderId);
-                          showToast('Đã hoàn tất vé bếp', 'success', ticket.orderNumber);
-                        }}
-                      />
-                    </View>
-                  </PermissionGate>
-                ) : null}
               </View>
             );
           })}

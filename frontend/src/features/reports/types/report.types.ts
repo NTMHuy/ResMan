@@ -7,50 +7,32 @@ export interface RevenuePoint {
 }
 
 export interface TopSellingDish {
-  menuItemId: string;
-  sku: string;
   name: string;
-  station: string;
   quantitySold: number;
   revenue: number;
-  avgCookMinutes: number;
-}
-
-export interface CategoryRevenueSlice {
-  categoryName: string;
-  revenue: number;
-  percentage: number;
-  color: string;
 }
 
 export interface InventoryHealthSummary {
-  totalIngredients: number;
-  inStockCount: number;
+  ingredientCount: number;
   lowStockCount: number;
-  outOfStockCount: number;
-}
-
-export interface CancelledOrderAudit {
-  orderNumber: string;
-  tableNumber: string;
-  amount: number;
-  reason: string;
-  cancelledAt: string;
+  lowStockItems: Array<{
+    id: string;
+    code: string;
+    name: string;
+    quantityOnHand: string;
+    lowStockThreshold: string | null;
+  }>;
 }
 
 export interface ReportSummary {
   period: ReportPeriod;
-  totalRevenue: number;
-  revenueGrowthPercent: number;
-  totalOrders: number;
-  completedOrders: number;
-  cancelledOrders: number;
-  averageOrderValue: number;
-  avgCookTimeMinutes: number;
-  slaDelayRatePercent: number;
+  from: string;
+  to: string;
+  revenue: number;
+  paidOrderCount: number;
+  itemsSold: number;
+  averagePaidOrderValue: number;
   revenueSeries: RevenuePoint[];
   topDishes: TopSellingDish[];
-  categoryBreakdown: CategoryRevenueSlice[];
-  inventoryHealth: InventoryHealthSummary;
-  cancellationAudits: CancelledOrderAudit[];
+  inventory: InventoryHealthSummary;
 }

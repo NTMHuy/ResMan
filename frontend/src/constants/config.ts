@@ -15,17 +15,17 @@ const API_URL = (
 ).replace(/\/+$/, "");
 
 const USE_MOCK_DATA =
-  (process.env.EXPO_PUBLIC_USE_MOCK_DATA ?? "true").toLowerCase() !== "false";
+  (process.env.EXPO_PUBLIC_USE_MOCK_DATA ?? "false").toLowerCase() === "true";
 
 const USE_MOCK_ORDERS =
   __DEV__ &&
   (process.env.EXPO_PUBLIC_USE_MOCK_ORDERS ?? "false").toLowerCase() === "true";
 
 const USE_MOCK_AUTH =
-  (process.env.EXPO_PUBLIC_USE_MOCK_AUTH ?? "false").toLowerCase() !== "false";
+  (process.env.EXPO_PUBLIC_USE_MOCK_AUTH ?? "false").toLowerCase() === "true";
 
 const USE_MOCK_MENU =
-  (process.env.EXPO_PUBLIC_USE_MOCK_MENU ?? "false").toLowerCase() !== "false";
+  (process.env.EXPO_PUBLIC_USE_MOCK_MENU ?? "false").toLowerCase() === "true";
 
 const USE_MOCK_CUSTOMER_ORDER =
   __DEV__ &&
