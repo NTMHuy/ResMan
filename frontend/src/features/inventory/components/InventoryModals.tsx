@@ -287,7 +287,7 @@ export function StockOperationModal({
     : difference > 0
       ? `Thừa +${difference} ${ingredient.unit}`
       : difference < 0
-        ? `Thiếu ${difference} ${ingredient.unit}`
+        ? `Thiếu ${Math.abs(difference)} ${ingredient.unit}`
         : 'Khớp với số lượng trên hệ thống';
 
   const handleConfirm = async () => {
