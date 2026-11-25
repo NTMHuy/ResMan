@@ -53,10 +53,7 @@ function unwrapData<T>(value: unknown): T {
   return value as T;
 }
 
-function mapMenu(source: GuestMenuCategory[]): {
-  categories: MenuCategory[];
-  items: MenuItem[];
-} {
+function mapMenu(source: GuestMenuCategory[]): { categories: MenuCategory[]; items: MenuItem[] } {
   const categories = source.map((category, index) => ({
     id: String(category.id),
     code: category.code,
@@ -75,34 +72,27 @@ function mapMenu(source: GuestMenuCategory[]): {
       description: item.description ?? '',
       price: item.price === null ? 0 : Number(item.price),
       pricingType: item.pricingType ?? (item.price === null ? "UNSET" : "FIXED"),
-      priceUnit: item.priceUnit ?? (item.pricingType === "PER_UNIT" ? "lạng" : null),
+      priceUnit: item.priceUnit,
       categoryId: String(category.id),
       station: 'HOT_KITCHEN' as const,
       imageUrl: resolveMenuImageUrl(item.imageUrl),
       status: 'AVAILABLE' as const,
-      // MVP does not support paid modifiers or item variants.
       modifiers: [],
       linkedIngredientIds: [],
       prepTimeMinutes: 0,
       updatedAt: new Date().toISOString(),
     })),
   );
-
   return { categories, items };
 }
 
 function mapItemStatus(status: string): OrderItem['kitchenStatus'] {
   switch (status) {
-    case 'ACCEPTED':
-      return 'ACCEPTED';
-    case 'IN_PREPARATION':
-      return 'COOKING';
-    case 'COMPLETED':
-      return 'COMPLETED';
-    case 'CANCELLED':
-      return 'VOIDED';
-    default:
-      return 'QUEUED';
+    case 'ACCEPTED': return 'ACCEPTED';
+    case 'IN_PREPARATION': return 'COOKING';
+    case 'COMPLETED': return 'COMPLETED';
+    case 'CANCELLED': return 'VOIDED';
+    default: return 'QUEUED';
   }
 }
 
@@ -127,11 +117,9 @@ function mapGuestOrder(data: GuestSessionResponse): CustomerOrderTracking {
     note: item.note ?? '',
     kitchenStatus: mapItemStatus(item.status),
   }));
-
   const totalAmount = data.items
     .filter((item) => item.status !== 'CANCELLED')
     .reduce((sum, item) => sum + Number(item.lineTotal), 0);
-
   return {
     id: String(data.order.id),
     orderNumber: data.order.orderCode,
@@ -163,10 +151,7 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
 
   private async getGuestSession(): Promise<GuestSessionResponse> {
     const sessionCode = await this.readSessionCode();
-    if (!sessionCode) {
-      throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
-    }
-
+    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
     const response = await apiClient.get('/guest/session', {
       headers: { 'X-Session-Code': sessionCode },
     });
@@ -174,37 +159,28 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
   }
 
   async getCustomerMenu(): Promise<{ categories: MenuCategory[]; items: MenuItem[] }> {
-    const response = await apiClient.get('/menu');
+    const response = await apiClient.get('/menu-items/customer');
     return mapMenu(unwrapData<GuestMenuCategory[]>(response.data) ?? []);
   }
 
   async submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking> {
     const sessionCode = input.sessionCode?.trim() || await this.readSessionCode();
-    if (!sessionCode) {
-      throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
-    }
-
+    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
     await storageService.setCustomerSessionCode(sessionCode);
     const items = input.items.map((item) => ({
       menuItemId: Number(item.menuItemId),
       quantity: item.quantity,
       note: [input.note?.trim(), item.note.trim()].filter(Boolean).join(' | ').slice(0, 500),
     }));
-
-    await apiClient.post(
-      '/guest/session/items',
-      { items },
-      { headers: { 'X-Session-Code': sessionCode } },
-    );
-
+    await apiClient.post('/guest/session/items', { items }, {
+      headers: { 'X-Session-Code': sessionCode },
+    });
     return mapGuestOrder(await this.getGuestSession());
   }
 
   async getOrderStatus(orderId: string): Promise<CustomerOrderTracking> {
     const order = mapGuestOrder(await this.getGuestSession());
-    if (order.id !== orderId) {
-      throw new Error('Không tìm thấy đơn hàng trong phiên bàn hiện tại.');
-    }
+    if (order.id !== orderId) throw new Error('Không tìm thấy đơn hàng trong phiên bàn hiện tại.');
     return order;
   }
 
@@ -215,9 +191,7 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
 
   async cancelGuestItem(itemId: string): Promise<void> {
     const sessionCode = await this.readSessionCode();
-    if (!sessionCode) {
-      throw new Error('Chưa kết nối phiên bàn.');
-    }
+    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn.');
     await apiClient.delete(`/guest/session/items/${encodeURIComponent(itemId)}`, {
       headers: { 'X-Session-Code': sessionCode },
     });
