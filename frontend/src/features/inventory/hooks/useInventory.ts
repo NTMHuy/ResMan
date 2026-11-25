@@ -123,7 +123,7 @@ export function useInventory() {
         setMutating(false);
       }
     },
-    [actorName, fetchInventory],
+    [fetchInventory],
   );
 
   const countStock = useCallback(
@@ -141,7 +141,7 @@ export function useInventory() {
         setMutating(false);
       }
     },
-    [actorName, fetchInventory],
+    [fetchInventory],
   );
 
   const auditStock = useCallback(
@@ -160,7 +160,7 @@ export function useInventory() {
         setMutating(false);
       }
     },
-    [actorName, fetchInventory],
+    [fetchInventory],
   );
 
   return {
