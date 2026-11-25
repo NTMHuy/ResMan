@@ -240,7 +240,7 @@ export function IngredientFormModal({
   );
 }
 
-export type StockModalMode = 'IMPORT' | 'ADJUST' | 'AUDIT';
+export type StockModalMode = 'IMPORT' | 'COUNT';
 
 interface StockOperationModalProps {
   visible: boolean;
@@ -268,50 +268,46 @@ export function StockOperationModal({
     if (!visible || !ingredient) return;
     setErrMsg(null);
     if (mode === 'IMPORT') {
-      setQtyText('5');
-      setReason('Nhập hàng bổ sung từ nhà cung cấp');
-    } else if (mode === 'ADJUST') {
-      setQtyText(String(ingredient.currentStock));
-      setReason('Điều chỉnh hao hụt sơ chế');
+      setQtyText('');
+      setReason('');
     } else {
       setQtyText(String(ingredient.currentStock));
-      setReason('Kiểm kê thực tế cuối ca');
+      setReason('');
     }
   }, [visible, mode, ingredient]);
 
   if (!ingredient) return null;
 
-  const title =
-    mode === 'IMPORT'
-      ? `Nhập kho · ${ingredient.name}`
-      : mode === 'ADJUST'
-        ? `Điều chỉnh tồn · ${ingredient.name}`
-        : `Kiểm kê kho · ${ingredient.name}`;
-
-  const qtyLabel =
-    mode === 'IMPORT'
-      ? `Số lượng nhập thêm (${ingredient.unit}) *`
-      : mode === 'ADJUST'
-        ? `Số lượng tồn mới (${ingredient.unit}) *`
-        : `Số lượng đếm thực tế (${ingredient.unit}) *`;
+  const isCount = mode === 'COUNT';
+  const countedQuantity = qtyText.trim() === '' ? null : Number(qtyText);
+  const difference = countedQuantity === null ? null : countedQuantity - ingredient.currentStock;
+  const differenceLabel = difference === null
+    ? 'Nhập số lượng thực tế để xem chênh lệch'
+    : difference > 0
+      ? `Thừa +${difference} ${ingredient.unit}`
+      : difference < 0
+        ? `Thiếu ${difference} ${ingredient.unit}`
+        : 'Khớp với số lượng trên hệ thống';
 
   const handleConfirm = async () => {
     setErrMsg(null);
     const num = Number(qtyText);
-    if (Number.isNaN(num)) {
-      setErrMsg('Vui lòng nhập số hợp lệ.');
+    if (!qtyText.trim() || !Number.isFinite(num)) {
+      setErrMsg('Vui lòng nhập số lượng hợp lệ.');
       return;
     }
-    if (mode === 'IMPORT' && num <= 0) {
-      setErrMsg('Số lượng nhập kho phải lớn hơn 0.');
+    if (num < 0) {
+      setErrMsg('Số lượng không được mang giá trị âm.');
       return;
     }
-    if (mode !== 'IMPORT' && num < 0) {
-      setErrMsg('Số lượng tồn kho không được mang giá trị âm.');
+    if (num.toString().split('.')[1]?.length > 3) {
+      setErrMsg('Chỉ được nhập tối đa 3 chữ số thập phân.');
       return;
     }
     if (reason.trim().length < 3) {
-      setErrMsg('Vui lòng nhập ghi chú lý do tối thiểu 3 ký tự.');
+      setErrMsg(isCount
+        ? 'Vui lòng ghi chú ca kiểm kê hoặc lý do chênh lệch (tối thiểu 3 ký tự).'
+        : 'Vui lòng nhập lý do nhập kho (tối thiểu 3 ký tự).');
       return;
     }
     try {
@@ -325,15 +321,17 @@ export function StockOperationModal({
   return (
     <ModalDialog
       visible={visible}
-      title={title}
-      subtitle={`Tồn hiện tại: ${ingredient.currentStock} ${ingredient.unit} · Định mức tối thiểu: ${ingredient.minThreshold} ${ingredient.unit}`}
+      title={isCount ? `Kiểm kê & cập nhật tồn · ${ingredient.name}` : `Nhập kho · ${ingredient.name}`}
+      subtitle={isCount
+        ? `Tồn hệ thống: ${ingredient.currentStock} ${ingredient.unit}. Nhập số đếm thực tế; hệ thống sẽ tính chênh lệch và cập nhật tồn sau khi xác nhận.`
+        : `Tồn hiện tại: ${ingredient.currentStock} ${ingredient.unit} · Định mức tối thiểu: ${ingredient.minThreshold} ${ingredient.unit}`}
       onClose={onClose}
-      maxWidth={440}
+      maxWidth={460}
       footer={
         <>
           <Button label="Hủy" variant="secondary" onPress={onClose} disabled={loading} />
           <Button
-            label="Xác nhận lưu kho"
+            label={isCount ? 'Xác nhận kiểm kê' : 'Xác nhận nhập kho'}
             variant="primary"
             loading={loading}
             onPress={() => void handleConfirm()}
@@ -342,16 +340,29 @@ export function StockOperationModal({
       }
     >
       <Input
-        label={qtyLabel}
+        label={isCount ? `Số lượng đếm thực tế (${ingredient.unit}) *` : `Số lượng nhập thêm (${ingredient.unit}) *`}
         value={qtyText}
         onChangeText={setQtyText}
         keyboardType="decimal-pad"
       />
+      {isCount ? (
+        <View style={[styles.differenceBox, { backgroundColor: theme.colors.surfaceLow, borderRadius: theme.radius.md }]}>
+          <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Chênh lệch dự kiến</Text>
+          <Text style={[styles.differenceText, {
+            color: difference === null || difference === 0
+              ? theme.colors.onSurface
+              : difference > 0 ? theme.colors.success : theme.colors.error,
+          }]}>
+            {differenceLabel}
+          </Text>
+        </View>
+      ) : null}
       <Input
-        label="Lý do / Chứng từ *"
+        label={isCount ? 'Ghi chú kiểm kê / lý do chênh lệch *' : 'Lý do nhập kho / chứng từ *'}
         value={reason}
         onChangeText={setReason}
         multiline
+        placeholder={isCount ? 'VD: Kiểm kê cuối ca, nguyên liệu hư hỏng...' : 'VD: Nhập hàng từ nhà cung cấp...'}
       />
       {errMsg ? <Text style={[styles.errText, { color: theme.colors.error }]}>{errMsg}</Text> : null}
     </ModalDialog>
@@ -388,6 +399,14 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  differenceBox: {
+    padding: 10,
+    gap: 4,
+  },
+  differenceText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   errText: {
     fontSize: 12,
