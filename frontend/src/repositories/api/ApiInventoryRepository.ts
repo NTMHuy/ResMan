@@ -2,6 +2,7 @@ import type { InventoryRepository } from '@/src/repositories/interfaces/Inventor
 import type {
   CreateIngredientInput,
   Ingredient,
+  InventoryCount,
   InventoryFilterParams,
   StockMovement,
   StockOperationInput,
@@ -24,6 +25,12 @@ type ApiIngredient = {
   updatedAt: string;
 };
 
+type ApiActor = {
+  id: string;
+  username: string;
+  fullName: string | null;
+};
+
 type ApiMovement = {
   id: string;
   ingredient: { id: string; code: string; name: string; unit: string };
@@ -32,7 +39,16 @@ type ApiMovement = {
   reason: string;
   referenceCode: string | null;
   createdAt: string;
-  actor: { id: string; username: string; fullName: string | null };
+  actor: ApiActor;
+};
+
+type ApiCount = {
+  id: string;
+  ingredient: { id: string; code: string; name: string; unit: string };
+  actualQuantity: string;
+  countedAt: string;
+  note: string | null;
+  actor: ApiActor;
 };
 
 function unwrap<T>(value: ApiResponse<T> | T): T {
@@ -133,16 +149,12 @@ export class ApiInventoryRepository implements InventoryRepository {
     return this.getIngredient(input.ingredientId);
   }
 
-  async adjustStock(input: StockOperationInput): Promise<Ingredient> {
+  async countStock(input: StockOperationInput): Promise<Ingredient> {
     await apiClient.post(`/inventory/ingredients/${input.ingredientId}/count`, {
       actualQuantity: String(input.quantity),
       note: input.reason,
     });
     return this.getIngredient(input.ingredientId);
-  }
-
-  async auditStock(input: StockOperationInput): Promise<Ingredient> {
-    return this.adjustStock(input);
   }
 
   private async getIngredient(id: string): Promise<Ingredient> {
@@ -155,35 +167,47 @@ export class ApiInventoryRepository implements InventoryRepository {
   }
 
   async getMovements(ingredientId?: string): Promise<StockMovement[]> {
-    const [movementResponse, ingredientResponse] = await Promise.all([
-      apiClient.get<ApiResponse<ApiMovement[]> | ApiMovement[]>('/inventory/movements', {
-        params: ingredientId ? { ingredientId } : undefined,
-      }),
-      apiClient.get<ApiResponse<ApiIngredient[]> | ApiIngredient[]>('/inventory/ingredients'),
-    ]);
-    const movements = unwrap(movementResponse.data);
-    const ingredients = unwrap(ingredientResponse.data);
-    const balances = new Map(ingredients.map((item) => [item.id, Number(item.quantityOnHand)]));
-    const calculated = movements.map((movement) => {
-      const delta = Number(movement.quantityDelta);
-      const current = balances.get(movement.ingredient.id) ?? 0;
-      const previous = current - delta;
-      balances.set(movement.ingredient.id, previous);
-      return {
-        id: movement.id,
-        ingredientId: movement.ingredient.id,
-        ingredientSku: movement.ingredient.code,
-        ingredientName: movement.ingredient.name,
-        type: movement.movementType === 'IN' ? 'IMPORT' : movement.movementType === 'OUT' ? 'EXPORT' : 'ADJUST',
-        quantityDelta: delta,
-        previousStock: previous,
-        newStock: current,
-        unit: movement.ingredient.unit,
-        reason: movement.reason,
-        actorName: movement.actor.fullName || movement.actor.username,
-        createdAt: movement.createdAt,
-      } satisfies StockMovement;
-    });
-    return calculated;
+    const response = await apiClient.get<ApiResponse<ApiMovement[]> | ApiMovement[]>(
+      '/inventory/movements',
+      { params: ingredientId ? { ingredientId } : undefined },
+    );
+    return unwrap(response.data).map((movement) => ({
+      id: movement.id,
+      ingredientId: movement.ingredient.id,
+      ingredientSku: movement.ingredient.code,
+      ingredientName: movement.ingredient.name,
+      type: movement.movementType === 'IN'
+        ? 'IMPORT'
+        : movement.movementType === 'OUT'
+          ? 'EXPORT'
+          : movement.referenceCode?.startsWith('COUNT-')
+            ? 'AUDIT'
+            : 'ADJUST',
+      quantityDelta: Number(movement.quantityDelta),
+      previousStock: 0,
+      newStock: 0,
+      unit: movement.ingredient.unit,
+      reason: movement.reason,
+      actorName: movement.actor.fullName || movement.actor.username,
+      createdAt: movement.createdAt,
+    }));
+  }
+
+  async getCounts(ingredientId?: string): Promise<InventoryCount[]> {
+    const response = await apiClient.get<ApiResponse<ApiCount[]> | ApiCount[]>(
+      '/inventory/counts',
+      { params: ingredientId ? { ingredientId } : undefined },
+    );
+    return unwrap(response.data).map((record) => ({
+      id: record.id,
+      ingredientId: record.ingredient.id,
+      ingredientSku: record.ingredient.code,
+      ingredientName: record.ingredient.name,
+      actualQuantity: Number(record.actualQuantity),
+      unit: record.ingredient.unit,
+      note: record.note ?? '',
+      countedBy: record.actor.fullName || record.actor.username,
+      countedAt: record.countedAt,
+    }));
   }
 }
