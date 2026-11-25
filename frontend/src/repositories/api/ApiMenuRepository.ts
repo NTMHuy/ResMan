@@ -118,6 +118,11 @@ export class ApiMenuRepository implements MenuRepository {
     return (Array.isArray(result) ? result : []).map(mapCategory);
   }
 
+  async getCategoryById(id: string): Promise<MenuCategory> {
+    const response = await apiClient.get(`/menu-categories/${id}`);
+    return mapCategory(unwrapData<any>(response.data));
+  }
+
   async createCategory(input: CreateCategoryInput): Promise<MenuCategory> {
     const response = await apiClient.post("/menu-categories", toCategoryPayload(input));
     return mapCategory(unwrapData<any>(response.data));
@@ -140,7 +145,7 @@ export class ApiMenuRepository implements MenuRepository {
     if (params?.status === "OUT_OF_STOCK") query.status = "MANUAL_UNAVAILABLE";
     if (params?.status === "INACTIVE") query.isActive = false;
 
-    const response = await apiClient.get("/menu-items", { params: query });
+    const response = await apiClient.get("/menu-items", { params: { ...query, page: 1, limit: 1000 } });
     const result = unwrapData<any>(response.data);
     const items = Array.isArray(result) ? result : Array.isArray(result?.data) ? result.data : [];
     return items.map(mapMenuItem);
