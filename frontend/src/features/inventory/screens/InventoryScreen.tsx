@@ -13,7 +13,7 @@ import {
 import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { useToast } from '@/src/contexts/ToastContext';
-import { formatDateTime, formatVND } from '@/src/utils/formatters';
+import { formatDateTime } from '@/src/utils/formatters';
 import { useInventory } from '@/src/features/inventory/hooks/useInventory';
 import type {
   Ingredient,
@@ -137,12 +137,6 @@ export function InventoryScreen() {
           iconBg={theme.colors.warningContainer}
           style={styles.kpiCard}
         />
-        <StatCard
-          label="Giá trị tồn kho ước tính"
-          value={formatVND(summary.totalValuation)}
-          accentColor={theme.colors.primary}
-          style={styles.kpiCard}
-        />
       </View>
 
       {/* Alert Banner if any item is low or out */}
@@ -159,8 +153,7 @@ export function InventoryScreen() {
         >
           <AlertTriangle size={18} color={theme.colors.onWarningContainer} />
           <Text style={[styles.alertBannerText, { color: theme.colors.onWarningContainer }]}>
-            Có {summary.outOfStock} nguyên liệu đã hết hàng (món ăn liên kết tự động chuyển sang Hết
-            hàng 86) và {summary.lowStock} nguyên liệu dưới định mức tối thiểu.
+            Có {summary.outOfStock} nguyên liệu đã hết hàng và {summary.lowStock} nguyên liệu dưới định mức tối thiểu.
           </Text>
         </View>
       ) : null}
@@ -197,7 +190,7 @@ export function InventoryScreen() {
               <Input
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Tìm tên nguyên liệu, mã SKU hoặc nhà cung cấp..."
+                placeholder="Tìm tên hoặc mã nguyên liệu..."
                 leftIcon={<Search size={16} color={theme.colors.outline} />}
                 containerStyle={styles.searchBox}
               />
@@ -260,7 +253,7 @@ export function InventoryScreen() {
                         <Badge label={badge.label} tone={badge.tone} />
                       </View>
                       <Text style={[styles.ingMeta, { color: theme.colors.onSurfaceVariant }]}>
-                        {ing.sku} · {ZONE_LABELS[ing.zone]} · NCC: {ing.supplier}
+                        {ing.sku} · {ZONE_LABELS[ing.zone]}
                       </Text>
                     </View>
 
@@ -288,15 +281,6 @@ export function InventoryScreen() {
                   </View>
 
                   <View style={[styles.ingFoot, { borderTopColor: theme.colors.border }]}>
-                    <Text
-                      style={[
-                        styles.costText,
-                        { color: theme.colors.onSurfaceVariant, fontFamily: theme.typography.mono },
-                      ]}
-                    >
-                      Đơn giá: {formatVND(ing.costPerUnit)}/{ing.unit}
-                    </Text>
-
                     <View style={styles.actionRow}>
                       <PermissionGate permission="INVENTORY_STOCK_IN">
                         <Button
@@ -543,10 +527,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 10,
     flexWrap: 'wrap',
-  },
-  costText: {
-    fontSize: 12,
-    fontWeight: '600',
   },
   actionRow: {
     flexDirection: 'row',

@@ -9,9 +9,17 @@ type BestSellerApi = Array<{ itemName: string; quantitySold: number; revenue: st
 type InventoryApi = { ingredientCount: number; lowStockCount: number; lowStockItems: Array<{ id: string; code: string; name: string; quantityOnHand: string; lowStockThreshold: string | null }> };
 
 function unwrap<T>(value: ApiResponse<T> | T): T {
-  return value && typeof value === 'object' && 'data' in value
-    ? (value as ApiResponse<T>).data
-    : (value as T);
+  if (
+    value &&
+    typeof value === 'object' &&
+    'success' in value &&
+    'data' in value
+  ) {
+    return (value as ApiResponse<T>).data;
+  }
+  // ReportsService.revenue returns { period, from, to, data: [...] }.
+  // Do not mistake that business field for the HTTP response envelope.
+  return value as T;
 }
 
 function localDate(date: Date): string {

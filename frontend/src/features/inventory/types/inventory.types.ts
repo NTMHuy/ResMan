@@ -13,9 +13,7 @@ export interface Ingredient {
   unit: string;
   currentStock: number;
   minThreshold: number;
-  costPerUnit: number;
   status: StockStatus;
-  supplier: string;
   updatedAt: string;
 }
 
@@ -42,8 +40,6 @@ export interface CreateIngredientInput {
   unit: string;
   currentStock: number;
   minThreshold: number;
-  costPerUnit: number;
-  supplier: string;
 }
 
 export interface UpdateIngredientInput {

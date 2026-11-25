@@ -25,8 +25,6 @@ const ingredientSchema = z.object({
   unit: z.string().trim().min(1, 'Đơn vị tính không được trống'),
   currentStock: z.number().min(0, 'Tồn kho không được âm'),
   minThreshold: z.number().min(0, 'Định mức tối thiểu không được âm'),
-  costPerUnit: z.number().min(0, 'Đơn giá nhập không được âm'),
-  supplier: z.string().trim().min(2, 'Vui lòng nhập nhà cung cấp'),
 });
 
 interface IngredientFormModalProps {
@@ -54,8 +52,6 @@ export function IngredientFormModal({
   const [unit, setUnit] = useState('kg');
   const [currentStock, setCurrentStock] = useState('0');
   const [minThreshold, setMinThreshold] = useState('5');
-  const [costPerUnit, setCostPerUnit] = useState('120000');
-  const [supplier, setSupplier] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
@@ -71,8 +67,6 @@ export function IngredientFormModal({
       setUnit(editingItem.unit);
       setCurrentStock(String(editingItem.currentStock));
       setMinThreshold(String(editingItem.minThreshold));
-      setCostPerUnit(String(editingItem.costPerUnit));
-      setSupplier(editingItem.supplier);
     } else {
       setSku(`ING-${Math.floor(100 + Math.random() * 899)}`);
       setName('');
@@ -81,8 +75,6 @@ export function IngredientFormModal({
       setUnit('kg');
       setCurrentStock('10');
       setMinThreshold('3');
-      setCostPerUnit('100000');
-      setSupplier('Thực phẩm Sạch Việt');
     }
   }, [visible, editingItem]);
 
@@ -97,8 +89,6 @@ export function IngredientFormModal({
       unit,
       currentStock: Number(currentStock),
       minThreshold: Number(minThreshold),
-      costPerUnit: Number(costPerUnit),
-      supplier,
     });
 
     if (!parsed.success) {
@@ -119,8 +109,6 @@ export function IngredientFormModal({
           zone,
           unit: parsed.data.unit,
           minThreshold: parsed.data.minThreshold,
-          costPerUnit: parsed.data.costPerUnit,
-          supplier: parsed.data.supplier,
         });
       } else {
         await onCreate({
@@ -131,8 +119,6 @@ export function IngredientFormModal({
           unit: parsed.data.unit,
           currentStock: parsed.data.currentStock,
           minThreshold: parsed.data.minThreshold,
-          costPerUnit: parsed.data.costPerUnit,
-          supplier: parsed.data.supplier,
         });
       }
       onClose();
@@ -145,7 +131,7 @@ export function IngredientFormModal({
     <ModalDialog
       visible={visible}
       title={editingItem ? `Cập nhật: ${editingItem.name}` : 'Thêm nguyên liệu mới'}
-      subtitle="Quản lý định mức tồn kho tối thiểu và nhà cung cấp"
+      subtitle="Thông tin nguyên liệu và định mức tồn kho"
       onClose={onClose}
       maxWidth={540}
       footer={
@@ -247,22 +233,7 @@ export function IngredientFormModal({
           error={fieldErrors.minThreshold}
           containerStyle={styles.flexOne}
         />
-        <Input
-          label="Giá nhập / ĐVT (VNĐ) *"
-          value={costPerUnit}
-          onChangeText={setCostPerUnit}
-          keyboardType="numeric"
-          error={fieldErrors.costPerUnit}
-          containerStyle={styles.flexOne}
-        />
       </View>
-
-      <Input
-        label="Nhà cung cấp *"
-        value={supplier}
-        onChangeText={setSupplier}
-        error={fieldErrors.supplier}
-      />
 
       {errMsg ? <Text style={[styles.errText, { color: theme.colors.error }]}>{errMsg}</Text> : null}
     </ModalDialog>

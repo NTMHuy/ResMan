@@ -56,9 +56,7 @@ function toIngredient(source: ApiIngredient): Ingredient {
     unit: source.unit,
     currentStock,
     minThreshold,
-    costPerUnit: 0,
-    status: source.isLowStock ? 'LOW_STOCK' : 'IN_STOCK',
-    supplier: '',
+    status: currentStock <= 0 ? 'OUT_OF_STOCK' : source.isLowStock ? 'LOW_STOCK' : 'IN_STOCK',
     updatedAt: source.updatedAt,
   };
 }

@@ -51,17 +51,12 @@ export function useInventory() {
     const inStock = ingredients.filter((i) => i.status === 'IN_STOCK').length;
     const lowStock = ingredients.filter((i) => i.status === 'LOW_STOCK').length;
     const outOfStock = ingredients.filter((i) => i.status === 'OUT_OF_STOCK').length;
-    const totalValuation = ingredients.reduce(
-      (sum, i) => sum + i.currentStock * i.costPerUnit,
-      0
-    );
     return {
       total: ingredients.length,
       inStock,
       lowStock,
       outOfStock,
       alertCount: lowStock + outOfStock,
-      totalValuation,
     };
   }, [ingredients]);
 
@@ -71,8 +66,7 @@ export function useInventory() {
       const matchSearch =
         !q ||
         ing.name.toLowerCase().includes(q) ||
-        ing.sku.toLowerCase().includes(q) ||
-        ing.supplier.toLowerCase().includes(q);
+        ing.sku.toLowerCase().includes(q);
       const matchStatus = statusFilter === 'ALL' || ing.status === statusFilter;
       const matchZone = zoneFilter === 'ALL' || ing.zone === zoneFilter;
       return matchSearch && matchStatus && matchZone;

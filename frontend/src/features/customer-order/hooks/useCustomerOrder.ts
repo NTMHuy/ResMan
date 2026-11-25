@@ -69,10 +69,19 @@ export function useCustomerOrder() {
             const recentOrders = await repositories.customerOrder.getRecentTableOrders('');
             setTableOrders(recentOrders);
             if (recentOrders[0]) setTableNumber(recentOrders[0].tableNumber);
-          } catch {
-            // Keep the saved capability on transient network failures so the tablet can retry.
+          } catch (sessionError) {
+            const statusCode = sessionError && typeof sessionError === 'object' && 'statusCode' in sessionError
+              ? Number((sessionError as { statusCode?: number }).statusCode)
+              : 0;
             setTableOrders([]);
             setTableNumber('Chưa kết nối');
+
+            // A closed/deleted session code is no longer usable. Remove it so the
+            // customer screen does not keep retrying /guest/session with a stale code.
+            if (statusCode === 401 || statusCode === 404) {
+              await storageService.removeCustomerSessionCode();
+              setSessionCode('');
+            }
           }
         } else {
           setTableOrders([]);
