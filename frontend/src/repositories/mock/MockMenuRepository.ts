@@ -162,7 +162,9 @@ export class MockMenuRepository implements MenuRepository {
       sku: input.sku.trim().toUpperCase(),
       name: input.name.trim(),
       description: input.description.trim(),
-      price: input.price,
+      price: input.price ?? 0,
+      pricingType: input.pricingType ?? "FIXED",
+      priceUnit: input.priceUnit ?? null,
       categoryId: input.categoryId,
       station: input.station,
       imageUrl: input.imageUrl,
@@ -205,10 +207,10 @@ export class MockMenuRepository implements MenuRepository {
     }
 
     if (input.price !== undefined) {
-      target.price = input.price;
+      target.price = input.price ?? 0;
     }
 
-    if (input.categoryId !== undefined) {
+    if (input.pricingType !== undefined) {\n      target.pricingType = input.pricingType;\n    }\n\n    if (input.priceUnit !== undefined) {\n      target.priceUnit = input.priceUnit;\n    }\n\n    if (input.categoryId !== undefined) {
       target.categoryId = input.categoryId;
     }
 
