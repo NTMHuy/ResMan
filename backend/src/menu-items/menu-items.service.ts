@@ -37,7 +37,7 @@ export class MenuItemsService {
     }
 
     const rawUnit = input.priceUnit !== undefined ? input.priceUnit : current?.priceUnit;
-    const priceUnit = pricingType === "PER_UNIT" ? rawUnit?.trim() || null : null;
+    const priceUnit = pricingType === "FIXED" || pricingType === "PER_UNIT" ? rawUnit?.trim() || null : null;
     if (pricingType === "PER_UNIT" && !priceUnit) {
       throw new BadRequestException("Loại giá PER_UNIT bắt buộc có priceUnit");
     }
