@@ -297,7 +297,7 @@ export function InventoryScreen() {
                           size="sm"
                           variant="secondary"
                           leftIcon={<ClipboardCheck size={14} color={theme.colors.secondary} />}
-                          onPress={() => setOpModal({ mode: 'AUDIT', ing })}
+                          onPress={() => setOpModal({ mode: 'COUNT', ing })}
                         />
                       </PermissionGate>
                       <PermissionGate permission="INVENTORY_UPDATE">
@@ -438,7 +438,7 @@ export function InventoryScreen() {
           if (opModal.mode === 'IMPORT') {
             await stockIn(opModal.ing.id, qty, reason);
             showToast('Đã nhập kho thành công', 'success', `+${qty} ${opModal.ing.unit}`);
-          } else if (opModal.mode === 'ADJUST') {
+          } else {
             await countStock(opModal.ing.id, qty, reason);
             showToast('Đã kiểm kê và cập nhật tồn kho', 'success', `${qty} ${opModal.ing.unit}`);
           }
