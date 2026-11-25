@@ -143,7 +143,11 @@ export function useCustomerOrder() {
       searchKeyword: search.trim(),
     }).then((result) => {
       if (!active) return;
-      setMealSuggestions(result.items);
+      setMealSuggestions(result.items.filter((item) =>
+        item.price > 0 &&
+        item.pricingType !== "MARKET_PRICE" &&
+        item.pricingType !== "UNSET"
+      ));
       setSuggestionMessage(result.message);
       setRecommendationAvailable(result.available);
     }).catch(() => {
@@ -199,6 +203,11 @@ export function useCustomerOrder() {
   const addToCart = useCallback(
     (menuItem: MenuItem, quantity: number, selectedModifiers: string[], note: string) => {
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
+      if (
+        menuItem.price <= 0 ||
+        menuItem.pricingType === "MARKET_PRICE" ||
+        menuItem.pricingType === "UNSET"
+      ) return;
       const extraPrice = menuItem.modifiers
         .filter((modifier) => selectedModifiers.includes(modifier.label))
         .reduce((sum, modifier) => sum + modifier.extraPrice, 0);
