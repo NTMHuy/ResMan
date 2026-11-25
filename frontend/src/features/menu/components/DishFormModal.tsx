@@ -213,7 +213,7 @@ export function DishFormModal({
           description: parsed.data.description,
           price: parsed.data.price,
           pricingType: parsed.data.pricingType,
-          priceUnit: parsed.data.pricingType === 'PER_UNIT' ? parsed.data.priceUnit : null,
+          priceUnit: parsed.data.pricingType === 'FIXED' || parsed.data.pricingType === 'PER_UNIT' ? (parsed.data.priceUnit?.trim() || null) : null,
           categoryId: parsed.data.categoryId,
           station,
           // Existing URL is display state only; ApiMenuRepository never sends it in JSON.
@@ -306,9 +306,9 @@ export function DishFormModal({
             </Pressable>
           ))}
         </View>
-        {pricingType === 'PER_UNIT' ? (
-          <Input label="Đơn vị tính *" value={priceUnit} onChangeText={setPriceUnit}
-            placeholder="lạng, kg, con..." error={fieldErrors.priceUnit} />
+        {pricingType === 'PER_UNIT' || pricingType === 'FIXED' ? (
+          <Input label={pricingType === 'PER_UNIT' ? 'Đơn vị tính *' : 'Đơn vị hiển thị (tùy chọn)'} value={priceUnit} onChangeText={setPriceUnit}
+            placeholder="lạng, kg, con, nồi..." error={fieldErrors.priceUnit} />
         ) : null}
       </View>
 
