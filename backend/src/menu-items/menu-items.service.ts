@@ -177,7 +177,7 @@ export class MenuItemsService {
         ...(dto.categoryId !== undefined ? { categoryId: BigInt(dto.categoryId) } : {}),
         ...(dto.description !== undefined ? { description: dto.description?.trim() || null } : {}),
         ...pricing,
-        ...(dto.imageUrl !== undefined ? { imageUrl: dto.imageUrl?.trim() || null } : {}),
+        ...(dto.imageUrl !== undefined ? { imageUrl: dto.imageUrl?.trim() || null, imagePublicId: null } : {}),
         ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
         ...(dto.availabilityStatus !== undefined ? {
           availabilityStatus: dto.availabilityStatus,
@@ -219,16 +219,28 @@ export class MenuItemsService {
     return this.formatItem(item);
   }
 
-  async updateImage(id: bigint, imageUrl: string) {
+  async updateImage(id: bigint, imageUrl: string, imagePublicId: string) {
     await this.ensureExists(id);
-    const item = await this.prisma.menuItem.update({ where: { id }, data: { imageUrl }, include: { category: true } });
+    const item = await this.prisma.menuItem.update({
+      where: { id },
+      data: { imageUrl, imagePublicId },
+      include: { category: true },
+    });
     return this.formatItem(item);
   }
 
   async deleteImage(id: bigint) {
     await this.ensureExists(id);
-    const item = await this.prisma.menuItem.update({ where: { id }, data: { imageUrl: null } });
-    return { id: item.id.toString(), imageUrl: null, message: "Đã xóa ảnh món ăn" };
+    const item = await this.prisma.menuItem.update({
+      where: { id },
+      data: { imageUrl: null, imagePublicId: null },
+    });
+    return {
+      id: item.id.toString(),
+      imageUrl: null,
+      imagePublicId: null,
+      message: "Đã xóa ảnh món ăn",
+    };
   }
 
   private async ensureExists(id: bigint) {

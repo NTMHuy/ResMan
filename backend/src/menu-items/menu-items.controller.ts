@@ -14,20 +14,16 @@ import {
   ParseBoolPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { extname } from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 import { MenuItemsService } from './menu-items.service.js';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto.js';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto.js';
 import { QueryMenuItemDto } from './dto/query-menu-item.dto.js';
 import { ParseBigIntPipe } from '../common/pipes/parse-bigint.pipe.js';
-import {
-  ensureMenuItemsUploadDirectory,
-  MENU_ITEMS_UPLOAD_DIRECTORY,
-  removeMenuImageFile,
-} from '../common/utils/menu-image-storage.js';
+import { removeMenuImageFile } from '../common/utils/menu-image-storage.js';
+import { CloudinaryService } from '../cloudinary/cloudinary.service.js';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { PermissionsGuard } from '../auth/guards/permissions.guard.js';
@@ -44,7 +40,10 @@ const ALLOWED_IMAGE_TYPES: Record<string, string> = {
 @Controller('menu-items')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MenuItemsController {
-  constructor(private readonly service: MenuItemsService) {}
+  constructor(
+    private readonly service: MenuItemsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   @Permissions('menu.item.create')
@@ -78,7 +77,17 @@ export class MenuItemsController {
   async remove(@Param('id', ParseBigIntPipe) id: bigint) {
     const existingItem = await this.service.findOne(id);
     const result = await this.service.remove(id);
-    await removeMenuImageFile(existingItem.imageUrl).catch(() => undefined);
+
+    if (existingItem.imagePublicId) {
+      await this.cloudinaryService.deleteImage(existingItem.imagePublicId).catch((error) => {
+        console.error('Cannot delete Cloudinary image after menu item removal:', error);
+      });
+    } else {
+      await removeMenuImageFile(existingItem.imageUrl).catch((error) => {
+        console.error('Cannot remove legacy local image:', error);
+      });
+    }
+
     return result;
   }
 
@@ -103,16 +112,7 @@ export class MenuItemsController {
   @Permissions('menu.item.update')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (_req, _file, callback) => {
-          ensureMenuItemsUploadDirectory();
-          callback(null, MENU_ITEMS_UPLOAD_DIRECTORY);
-        },
-        filename: (_req, file, callback) => {
-          const extension = extname(file.originalname).toLowerCase();
-          callback(null, `${randomUUID()}${extension}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: MAX_IMAGE_SIZE, files: 1 },
       fileFilter: (_req, file, callback) => {
         const extension = extname(file.originalname).toLowerCase();
@@ -137,21 +137,40 @@ export class MenuItemsController {
       throw new BadRequestException('Image file is required');
     }
 
-    const imageUrl = `/uploads/menu-items/${file.filename}`;
+    // Confirm the menu item exists before creating a Cloudinary asset.
+    const previousItem = await this.service.findOne(id);
 
+    // Upload first, then persist both URL and public_id.
+    const uploaded = await this.cloudinaryService.uploadImage(file.buffer);
+
+    let updated: unknown;
     try {
-      const previousItem = await this.service.findOne(id);
-      const updated = await this.service.updateImage(id, imageUrl);
-
-      if (previousItem.imageUrl && previousItem.imageUrl !== imageUrl) {
-        await removeMenuImageFile(previousItem.imageUrl).catch(() => undefined);
-      }
-
-      return updated;
+      updated = await this.service.updateImage(
+        id,
+        uploaded.imageUrl,
+        uploaded.imagePublicId,
+      );
     } catch (error) {
-      await removeMenuImageFile(imageUrl).catch(() => undefined);
+      // Avoid orphaning the newly uploaded asset if PostgreSQL update fails.
+      await this.cloudinaryService.deleteImage(uploaded.imagePublicId).catch((cleanupError) => {
+        console.error('Cannot clean up newly uploaded Cloudinary image:', cleanupError);
+      });
       throw error;
     }
+
+    // Delete the previous asset only after the database points to the new image.
+    if (previousItem.imagePublicId) {
+      await this.cloudinaryService.deleteImage(previousItem.imagePublicId).catch((error) => {
+        console.error('Cannot delete previous Cloudinary image:', error);
+      });
+    } else if (previousItem.imageUrl) {
+      // Backward compatibility for images uploaded before Cloudinary migration.
+      await removeMenuImageFile(previousItem.imageUrl).catch((error) => {
+        console.error('Cannot remove previous local image:', error);
+      });
+    }
+
+    return updated;
   }
 
   @Delete(':id/image')
@@ -159,7 +178,17 @@ export class MenuItemsController {
   async deleteImage(@Param('id', ParseBigIntPipe) id: bigint) {
     const previousItem = await this.service.findOne(id);
     const result = await this.service.deleteImage(id);
-    await removeMenuImageFile(previousItem.imageUrl);
+
+    if (previousItem.imagePublicId) {
+      await this.cloudinaryService.deleteImage(previousItem.imagePublicId).catch((error) => {
+        console.error('Cannot delete Cloudinary image:', error);
+      });
+    } else {
+      await removeMenuImageFile(previousItem.imageUrl).catch((error) => {
+        console.error('Cannot remove legacy local image:', error);
+      });
+    }
+
     return result;
   }
 }
