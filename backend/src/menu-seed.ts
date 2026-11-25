@@ -179,7 +179,7 @@ export async function seedMenu(prisma: PrismaClient): Promise<{ categories: numb
   for (const categorySeed of categories) {
     const category = await prisma.menuCategory.upsert({
       where: { code: categorySeed.code },
-      update: {},
+      update: { name: categorySeed.name },
       create: { code: categorySeed.code, name: categorySeed.name },
     });
 
@@ -187,7 +187,13 @@ export async function seedMenu(prisma: PrismaClient): Promise<{ categories: numb
       const code = `MENU_${categorySeed.code}_${String(index + 1).padStart(3, "0")}`;
       await prisma.menuItem.upsert({
         where: { code },
-        update: {},
+        update: {
+          categoryId: category.id,
+          name: dish.name,
+          price: dish.price === null ? null : new Prisma.Decimal(dish.price),
+          pricingType: dish.pricingType,
+          priceUnit: dish.priceUnit ?? null,
+        },
         create: {
           code,
           categoryId: category.id,
