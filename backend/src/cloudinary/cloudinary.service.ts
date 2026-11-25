@@ -53,7 +53,8 @@ export class CloudinaryService {
     const timestamp = Math.floor(Date.now() / 1000);
     const publicId = randomUUID();
     const folder = "resman/menu-items";
-    const params = { folder, public_id: publicId, timestamp };
+    const transformation = "c_limit,w_1200,h_1200,q_auto,f_auto";
+    const params = { folder, public_id: publicId, timestamp, transformation };
 
     const form = new FormData();
     form.append("file", new Blob([new Uint8Array(buffer)]));
@@ -62,7 +63,7 @@ export class CloudinaryService {
     form.append("folder", folder);
     form.append("public_id", publicId);
     form.append("signature", this.signature(params));
-    form.append("transformation", "c_limit,w_1200,h_1200,q_auto,f_auto");
+    form.append("transformation", transformation);
 
     try {
       const response = await fetch(
