@@ -259,7 +259,7 @@ export function DashboardScreen() {
             <View style={styles.listStack}>
               {summary.topDishes.slice(0, 4).map((dish, idx) => (
                 <View
-                  key={dish.menuItemId}
+                  key={dish.name}
                   style={[styles.dishRow, { borderBottomColor: theme.colors.border }]}
                 >
                   <Text

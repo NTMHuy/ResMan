@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { repositories } from "@/src/repositories";
-import { mockStoreEvents } from "@/src/data/mock/mockStore";
 import { DISH_IMAGE_PRESETS } from "@/src/data/mock/mockMenu";
 
 import type {
@@ -100,14 +99,6 @@ export function useMenu() {
 
   useEffect(() => {
     void fetchMenu();
-
-    // Mock repository phát sự kiện sau khi dữ liệu thay đổi.
-    // API repository không phụ thuộc sự kiện này.
-    const unsubscribe = mockStoreEvents.subscribe(() => {
-      void fetchMenu(true);
-    });
-
-    return unsubscribe;
   }, [fetchMenu]);
 
   const filteredItems = useMemo(() => {
@@ -121,10 +112,10 @@ export function useMenu() {
           .includes(query) ||
         String(item.sku ?? "")
           .toLowerCase()
-          .includes(q) ||
+          .includes(query) ||
         String(item.description ?? "")
           .toLowerCase()
-          .includes(q);
+          .includes(query);
       const matchCategory =
         selectedCategoryId === "ALL" || item.categoryId === selectedCategoryId;
 
