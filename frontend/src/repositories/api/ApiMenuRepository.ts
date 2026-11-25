@@ -11,6 +11,7 @@ import type {
   UploadMenuImageInput,
 } from "@/src/features/menu/types/menu.types";
 import { apiClient } from "@/src/services/api/apiClient";
+import { resolveMenuImageUrl } from "@/src/constants/config";
 
 function unwrapData<T>(value: unknown): T {
   if (value !== null && typeof value === "object" && "data" in value) {
@@ -50,7 +51,7 @@ function mapMenuItem(item: any): MenuItem {
     prepTimeMinutes: Number(item.prepTimeMinutes ?? 10),
     modifiers: Array.isArray(item.modifiers) ? item.modifiers : [],
     linkedIngredientIds: Array.isArray(item.linkedIngredientIds) ? item.linkedIngredientIds : [],
-    imageUrl: String(item.imageUrl ?? ""),
+    imageUrl: resolveMenuImageUrl(item.imageUrl),
     status,
     isBestseller: Boolean(item.isBestseller ?? false),
     updatedAt: item.updatedAt ?? item.createdAt ?? new Date().toISOString(),
