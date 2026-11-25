@@ -102,7 +102,7 @@ export function DishFormModal({
       setDescription(editingItem.description ?? '');
       setPriceText(String(editingItem.price ?? ''));
       setPricingType(editingItem.pricingType ?? 'FIXED');
-      setPriceUnit(editingItem.priceUnit ?? 'lạng');
+      setPriceUnit(editingItem.priceUnit ?? (editingItem.pricingType === 'PER_UNIT' ? 'lạng' : ''));
       setPrepText(String(editingItem.prepTimeMinutes ?? 10));
       setCategoryId(editingItem.categoryId ?? categories[0]?.id ?? '');
       setStation(editingItem.station ?? 'HOT_KITCHEN');
@@ -114,7 +114,7 @@ export function DishFormModal({
       setDescription('');
       setPriceText('65000');
       setPricingType('FIXED');
-      setPriceUnit('lạng');
+      setPriceUnit('');
       setPrepText('10');
       setCategoryId(categories[0]?.id ?? '');
       setStation('HOT_KITCHEN');
