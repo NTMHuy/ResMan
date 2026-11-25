@@ -44,15 +44,16 @@ export function DishCustomizerModal({
     dish.pricingType !== "MARKET_PRICE" &&
     dish.pricingType !== "UNSET";
   const isPerUnit = dish.pricingType === "PER_UNIT";
-  const priceUnit = dish.priceUnit || "lạng";
-  const quantityLabel = isPerUnit ? `Số ${priceUnit}` : "Số lượng phần";
+  const hasUnit = isPerUnit || Boolean(dish.priceUnit);
+  const priceUnit = dish.priceUnit || (isPerUnit ? "lạng" : "phần");
+  const quantityLabel = hasUnit ? `Số ${priceUnit}` : "Số lượng phần";
   const lineTotal = isOrderable ? (dish.price + extraPrice) * quantity : 0;
   const priceLabel =
     dish.pricingType === "MARKET_PRICE"
       ? "Giá theo thời điểm"
       : dish.pricingType === "UNSET" || !isOrderable
         ? "Liên hệ nhân viên để báo giá"
-        : `${formatVND(dish.price)}${isPerUnit ? `/${priceUnit}` : ""}`;
+        : `${formatVND(dish.price)}${hasUnit ? `/${priceUnit}` : ""}`;
 
   const toggleModifier = (label: string) => {
     setSelectedMods((prev) =>
