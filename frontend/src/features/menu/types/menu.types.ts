@@ -24,8 +24,8 @@ export interface MenuItem {
   sku: string;
   name: string;
   description: string;
+  /** Customer cart uses zero for non-orderable MARKET_PRICE/UNSET items. */
   price: number;
-  /** FIXED: giá theo phần; PER_UNIT: giá theo đơn vị như lạng/kg. */
   pricingType?: MenuPricingType;
   priceUnit?: string | null;
   categoryId: string;
@@ -40,6 +40,7 @@ export interface MenuItem {
 }
 
 export interface CreateCategoryInput {
+  code?: string;
   name: string;
   description?: string;
   sortOrder?: number;
@@ -47,6 +48,7 @@ export interface CreateCategoryInput {
 }
 
 export interface UpdateCategoryInput {
+  code?: string;
   name?: string;
   description?: string;
   sortOrder?: number;
@@ -57,7 +59,9 @@ export interface CreateMenuItemInput {
   sku: string;
   name: string;
   description: string;
-  price: number;
+  price?: number | null;
+  pricingType?: MenuPricingType;
+  priceUnit?: string | null;
   categoryId: string;
   station: KitchenStation;
   imageUrl: string;
@@ -71,7 +75,9 @@ export interface UpdateMenuItemInput {
   sku?: string;
   name?: string;
   description?: string;
-  price?: number;
+  price?: number | null;
+  pricingType?: MenuPricingType;
+  priceUnit?: string | null;
   categoryId?: string;
   station?: KitchenStation;
   imageUrl?: string;
@@ -117,10 +123,10 @@ export interface BackendMenuItem {
   categoryId: string;
   description: string | null;
   price: string | number | null;
-  pricingType?: MenuPricingType;
-  priceUnit?: string | null;
+  pricingType: MenuPricingType;
+  priceUnit: string | null;
   imageUrl: string | null;
-  availabilityStatus: "AVAILABLE" | "UNAVAILABLE" | "SOLD_OUT" | string;
+  availabilityStatus: "AVAILABLE" | "MANUAL_UNAVAILABLE" | string;
   availabilityReason?: string | null;
   isActive: boolean;
   createdAt?: string;
@@ -138,6 +144,5 @@ export interface UploadMenuImageInput {
   name: string;
   type: string;
   size?: number;
-  /** Available on web; native platforms upload the URI descriptor. */
   file?: Blob;
 }
