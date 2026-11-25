@@ -159,7 +159,7 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
   }
 
   async getCustomerMenu(): Promise<{ categories: MenuCategory[]; items: MenuItem[] }> {
-    const response = await apiClient.get('/menu-items/customer');
+    const response = await apiClient.get('/menu-items/customer/menu');
     return mapMenu(unwrapData<GuestMenuCategory[]>(response.data) ?? []);
   }
 
