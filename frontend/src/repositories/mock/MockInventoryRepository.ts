@@ -2,6 +2,7 @@ import type { InventoryRepository } from '@/src/repositories/interfaces/Inventor
 import type {
   CreateIngredientInput,
   Ingredient,
+  InventoryCount,
   InventoryFilterParams,
   StockMovement,
   StockOperationInput,
@@ -50,9 +51,7 @@ export class MockInventoryRepository implements InventoryRepository {
       unit: input.unit.trim(),
       currentStock: input.currentStock,
       minThreshold: input.minThreshold,
-      costPerUnit: input.costPerUnit,
       status: computeStockStatus(input.currentStock, input.minThreshold),
-      supplier: input.supplier.trim(),
       updatedAt: new Date().toISOString(),
     };
     mockIngredientsData.unshift(created);
@@ -85,8 +84,6 @@ export class MockInventoryRepository implements InventoryRepository {
     if (input.zone !== undefined) target.zone = input.zone;
     if (input.unit !== undefined) target.unit = input.unit.trim();
     if (input.minThreshold !== undefined) target.minThreshold = input.minThreshold;
-    if (input.costPerUnit !== undefined) target.costPerUnit = input.costPerUnit;
-    if (input.supplier !== undefined) target.supplier = input.supplier.trim();
     target.status = computeStockStatus(target.currentStock, target.minThreshold);
     target.updatedAt = new Date().toISOString();
     mockStoreEvents.emit();
@@ -118,7 +115,7 @@ export class MockInventoryRepository implements InventoryRepository {
       newStock: next,
       unit: target.unit,
       reason: input.reason.trim() || 'Nhập hàng bổ sung',
-      actorName: input.actorName,
+      actorName: 'Nhân viên kho',
       createdAt: target.updatedAt,
     });
 
@@ -127,42 +124,7 @@ export class MockInventoryRepository implements InventoryRepository {
     return { ...target };
   }
 
-  async adjustStock(input: StockOperationInput): Promise<Ingredient> {
-    await simulateMockNetwork();
-    if (input.quantity < 0) {
-      throw new Error('Tồn kho sau điều chỉnh không được mang giá trị âm.');
-    }
-    const target = mockIngredientsData.find((i) => i.id === input.ingredientId);
-    if (!target) throw new Error('Không tìm thấy nguyên liệu.');
-
-    const previous = target.currentStock;
-    const next = Number(input.quantity.toFixed(2));
-    const delta = Number((next - previous).toFixed(2));
-    target.currentStock = next;
-    target.status = computeStockStatus(next, target.minThreshold);
-    target.updatedAt = new Date().toISOString();
-
-    mockStockMovementsData.unshift({
-      id: `mov-${Date.now()}`,
-      ingredientId: target.id,
-      ingredientSku: target.sku,
-      ingredientName: target.name,
-      type: 'ADJUST',
-      quantityDelta: delta,
-      previousStock: previous,
-      newStock: next,
-      unit: target.unit,
-      reason: input.reason.trim() || 'Điều chỉnh tồn kho',
-      actorName: input.actorName,
-      createdAt: target.updatedAt,
-    });
-
-    syncMenuAvailabilityFromInventory(target.id);
-    mockStoreEvents.emit();
-    return { ...target };
-  }
-
-  async auditStock(input: StockOperationInput): Promise<Ingredient> {
+  async countStock(input: StockOperationInput): Promise<Ingredient> {
     await simulateMockNetwork();
     if (input.quantity < 0) {
       throw new Error('Số lượng kiểm kê thực tế không được âm.');
@@ -171,8 +133,8 @@ export class MockInventoryRepository implements InventoryRepository {
     if (!target) throw new Error('Không tìm thấy nguyên liệu.');
 
     const previous = target.currentStock;
-    const next = Number(input.quantity.toFixed(2));
-    const delta = Number((next - previous).toFixed(2));
+    const next = Number(input.quantity.toFixed(3));
+    const delta = Number((next - previous).toFixed(3));
     target.currentStock = next;
     target.status = computeStockStatus(next, target.minThreshold);
     target.updatedAt = new Date().toISOString();
@@ -187,8 +149,8 @@ export class MockInventoryRepository implements InventoryRepository {
       previousStock: previous,
       newStock: next,
       unit: target.unit,
-      reason: input.reason.trim() || 'Kiểm kê kho định kỳ',
-      actorName: input.actorName,
+      reason: input.reason.trim() || 'Kiểm kê kho',
+      actorName: 'Nhân viên kho',
       createdAt: target.updatedAt,
     });
 
@@ -202,5 +164,22 @@ export class MockInventoryRepository implements InventoryRepository {
     return mockStockMovementsData
       .filter((m) => !ingredientId || m.ingredientId === ingredientId)
       .map((m) => ({ ...m }));
+  }
+
+  async getCounts(ingredientId?: string): Promise<InventoryCount[]> {
+    await simulateMockNetwork();
+    return mockStockMovementsData
+      .filter((movement) => movement.type === 'AUDIT' && (!ingredientId || movement.ingredientId === ingredientId))
+      .map((movement) => ({
+        id: movement.id,
+        ingredientId: movement.ingredientId,
+        ingredientSku: movement.ingredientSku,
+        ingredientName: movement.ingredientName,
+        actualQuantity: movement.newStock,
+        unit: movement.unit,
+        note: movement.reason,
+        countedBy: movement.actorName,
+        countedAt: movement.createdAt,
+      }));
   }
 }
