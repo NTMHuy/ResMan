@@ -1,6 +1,7 @@
 import type { KitchenStation } from "@/src/types/common";
 
 export type DishStatus = "AVAILABLE" | "OUT_OF_STOCK" | "INACTIVE";
+export type MenuPricingType = "FIXED" | "PER_UNIT" | "MARKET_PRICE" | "UNSET";
 
 export interface MenuCategory {
   id: string;
@@ -24,6 +25,9 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
+  /** FIXED: giá theo phần; PER_UNIT: giá theo đơn vị như lạng/kg. */
+  pricingType?: MenuPricingType;
+  priceUnit?: string | null;
   categoryId: string;
   station: KitchenStation;
   imageUrl: string;
@@ -112,7 +116,9 @@ export interface BackendMenuItem {
   name: string;
   categoryId: string;
   description: string | null;
-  price: string | number;
+  price: string | number | null;
+  pricingType?: MenuPricingType;
+  priceUnit?: string | null;
   imageUrl: string | null;
   availabilityStatus: "AVAILABLE" | "UNAVAILABLE" | "SOLD_OUT" | string;
   availabilityReason?: string | null;
