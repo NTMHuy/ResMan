@@ -1,13 +1,6 @@
 import { Transform, Type } from "class-transformer";
 import {
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  MaxLength,
-  Min,
-  MinLength,
+  IsBoolean, IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength,
 } from "class-validator";
 import { MENU_PRICING_TYPES, type MenuPricingType } from "./create-menu-item.dto.js";
 
@@ -31,7 +24,7 @@ export class UpdateMenuItemDto {
   categoryId?: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === null ? null : Number(value))
+  @Transform(({ value }) => value === undefined || value === null ? value : Number(value))
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price?: number | null;
@@ -54,11 +47,13 @@ export class UpdateMenuItemDto {
   imageUrl?: string | null;
 
   @IsOptional()
+  @Transform(({ value }) => value === "true" ? true : value === "false" ? false : value)
+  @IsBoolean()
   isActive?: boolean;
 
   @IsOptional()
-  @IsString()
-  availabilityStatus?: string;
+  @IsIn(["AVAILABLE", "MANUAL_UNAVAILABLE"])
+  availabilityStatus?: "AVAILABLE" | "MANUAL_UNAVAILABLE";
 
   @IsOptional()
   @IsString()
