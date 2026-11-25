@@ -82,11 +82,11 @@ function makeCategoryCode(name: string): string {
     .replace(/^_+|_+$/g, "").slice(0, 40);
 }
 
-function toCategoryPayload(input: CreateCategoryInput | UpdateCategoryInput) {
+function toCategoryPayload(input: CreateCategoryInput | UpdateCategoryInput, generateCode = false) {
   const payload: Record<string, unknown> = {};
   if (input.name !== undefined) payload.name = input.name.trim();
   if (input.code !== undefined) payload.code = input.code.trim().toUpperCase();
-  else if ("name" in input && input.name) payload.code = makeCategoryCode(input.name);
+  else if (generateCode && input.name) payload.code = makeCategoryCode(input.name);
   if (input.description !== undefined) payload.description = input.description;
   if (input.isActive !== undefined) payload.isActive = input.isActive;
   return payload;
