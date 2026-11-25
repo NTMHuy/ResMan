@@ -1,5 +1,5 @@
 import type { AuthUser } from "@/src/types/common";
-
+import axios from "axios";
 import type {
   BackendAuthUser,
   BackendLoginResponse,
@@ -52,26 +52,56 @@ function mapBackendUser(
 
 export class ApiAuthRepository implements AuthRepository {
   async login(payload: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<BackendLoginResponse>(
-      "/auth/login",
-      payload,
-    );
+    try {
+      console.log("[LOGIN] API URL:", apiClient.defaults.baseURL);
+      console.log("[LOGIN] Sending request: POST /auth/login");
 
-    const result = response.data;
+      const response = await apiClient.post<BackendLoginResponse>(
+        "/auth/login",
+        payload,
+      );
 
-    if (!result.accessToken || !result.user) {
-      throw new Error("Backend trả về dữ liệu đăng nhập không hợp lệ.");
+      const result = response.data;
+
+      console.log("[LOGIN] Response status:", response.status);
+      console.log("[LOGIN] Response data:", {
+        hasAccessToken: Boolean(result?.accessToken),
+        hasUser: Boolean(result?.user),
+        userId: result?.user?.id,
+        username: result?.user?.username,
+      });
+
+      if (!result.accessToken || !result.user) {
+        throw new Error("Backend trả về dữ liệu đăng nhập không hợp lệ.");
+      }
+
+      const user = mapBackendUser(result.user);
+
+      await storageService.setToken(result.accessToken);
+      await storageService.setUser(user);
+
+      console.log("[LOGIN] Login successful");
+
+      return {
+        accessToken: result.accessToken,
+        user,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("[LOGIN ERROR]", {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          data: error.response?.data,
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+        });
+      } else {
+        console.error("[LOGIN ERROR]", error);
+      }
+
+      throw error;
     }
-
-    const user = mapBackendUser(result.user);
-
-    await storageService.setToken(result.accessToken);
-    await storageService.setUser(user);
-
-    return {
-      accessToken: result.accessToken,
-      user,
-    };
   }
 
   async getCurrentUser(): Promise<AuthUser> {

@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 import type { AuthUser } from "@/src/types/common";
 
+// Keys dành cho AsyncStorage: được phép chứa @ và /
 const KEYS = {
   AUTH_TOKEN: "@resman/auth_token",
   AUTH_USER: "@resman/auth_user",
@@ -13,12 +14,18 @@ const KEYS = {
   CUSTOMER_SESSION_CODE: "@resman/customer_session_code",
 } as const;
 
+// Keys dành riêng cho SecureStore: chỉ dùng chữ, số, ., -, _
+const SECURE_KEYS = {
+  AUTH_TOKEN: "resman_auth_token",
+  CUSTOMER_SESSION_CODE: "resman_customer_session_code",
+} as const;
+
 async function readToken(): Promise<string | null> {
   if (Platform.OS === "web") {
     return AsyncStorage.getItem(KEYS.AUTH_TOKEN);
   }
 
-  return SecureStore.getItemAsync(KEYS.AUTH_TOKEN);
+  return SecureStore.getItemAsync(SECURE_KEYS.AUTH_TOKEN);
 }
 
 async function writeToken(token: string): Promise<void> {
@@ -27,7 +34,7 @@ async function writeToken(token: string): Promise<void> {
     return;
   }
 
-  await SecureStore.setItemAsync(KEYS.AUTH_TOKEN, token);
+  await SecureStore.setItemAsync(SECURE_KEYS.AUTH_TOKEN, token);
 }
 
 async function deleteToken(): Promise<void> {
@@ -36,7 +43,7 @@ async function deleteToken(): Promise<void> {
     return;
   }
 
-  await SecureStore.deleteItemAsync(KEYS.AUTH_TOKEN);
+  await SecureStore.deleteItemAsync(SECURE_KEYS.AUTH_TOKEN);
 }
 
 export const storageService = {
@@ -61,7 +68,8 @@ export const storageService = {
       if (Platform.OS === "web") {
         return await AsyncStorage.getItem(KEYS.CUSTOMER_SESSION_CODE);
       }
-      return await SecureStore.getItemAsync(KEYS.CUSTOMER_SESSION_CODE);
+
+      return await SecureStore.getItemAsync(SECURE_KEYS.CUSTOMER_SESSION_CODE);
     } catch {
       return null;
     }
@@ -69,11 +77,13 @@ export const storageService = {
 
   async setCustomerSessionCode(code: string): Promise<void> {
     const value = code.trim();
+
     if (Platform.OS === "web") {
       await AsyncStorage.setItem(KEYS.CUSTOMER_SESSION_CODE, value);
       return;
     }
-    await SecureStore.setItemAsync(KEYS.CUSTOMER_SESSION_CODE, value);
+
+    await SecureStore.setItemAsync(SECURE_KEYS.CUSTOMER_SESSION_CODE, value);
   },
 
   async removeCustomerSessionCode(): Promise<void> {
@@ -81,7 +91,8 @@ export const storageService = {
       await AsyncStorage.removeItem(KEYS.CUSTOMER_SESSION_CODE);
       return;
     }
-    await SecureStore.deleteItemAsync(KEYS.CUSTOMER_SESSION_CODE);
+
+    await SecureStore.deleteItemAsync(SECURE_KEYS.CUSTOMER_SESSION_CODE);
   },
 
   async getUser(): Promise<AuthUser | null> {
