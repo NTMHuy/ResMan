@@ -124,7 +124,7 @@ export class ApiMenuRepository implements MenuRepository {
   }
 
   async createCategory(input: CreateCategoryInput): Promise<MenuCategory> {
-    const response = await apiClient.post("/menu-categories", toCategoryPayload(input));
+    const response = await apiClient.post("/menu-categories", toCategoryPayload(input, true));
     return mapCategory(unwrapData<any>(response.data));
   }
 
