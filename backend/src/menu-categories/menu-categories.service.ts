@@ -17,10 +17,10 @@ export class MenuCategoriesService {
 
   // CREATE
   async create(dto: CreateMenuCategoryDto) {
+    const code = dto.code.trim().toUpperCase();
+    const name = dto.name.trim();
     const existing = await this.prisma.menuCategory.findFirst({
-      where: {
-        OR: [{ code: dto.code }, { name: dto.name }],
-      },
+      where: { OR: [{ code }, { name }] },
     });
 
     if (existing) {
@@ -29,8 +29,8 @@ export class MenuCategoriesService {
 
     const category = await this.prisma.menuCategory.create({
       data: {
-        code: dto.code.trim(),
-        name: dto.name.trim(),
+        code,
+        name,
         description: dto.description,
         isActive: dto.isActive ?? true,
       },
@@ -119,13 +119,15 @@ export class MenuCategoriesService {
   async update(id: bigint, dto: UpdateMenuCategoryDto) {
     await this.ensureExists(id);
 
-    if (dto.code || dto.name) {
+    const code = dto.code?.trim().toUpperCase();
+    const name = dto.name?.trim();
+    if (code || name) {
       const duplicate = await this.prisma.menuCategory.findFirst({
         where: {
           id: { not: id },
           OR: [
-            ...(dto.code ? [{ code: dto.code }] : []),
-            ...(dto.name ? [{ name: dto.name }] : []),
+            ...(code ? [{ code }] : []),
+            ...(name ? [{ name }] : []),
           ],
         },
       });
@@ -137,7 +139,12 @@ export class MenuCategoriesService {
 
     const category = await this.prisma.menuCategory.update({
       where: { id },
-      data: dto,
+      data: {
+        ...(code !== undefined ? { code } : {}),
+        ...(name !== undefined ? { name } : {}),
+        ...(dto.description !== undefined ? { description: dto.description?.trim() || null } : {}),
+        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+      },
     });
 
     return this.formatCategory(category);
