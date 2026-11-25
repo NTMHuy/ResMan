@@ -10,195 +10,120 @@ import type {
   UpdateMenuItemInput,
   UploadMenuImageInput,
 } from "@/src/features/menu/types/menu.types";
-
 import { apiClient } from "@/src/services/api/apiClient";
 
-/**
- * Backend có thể trả về:
- * - Dữ liệu trực tiếp
- * - { data: ... }
- */
-function unwrapData<T>(responseData: unknown): T {
-  if (
-    responseData !== null &&
-    typeof responseData === "object" &&
-    "data" in responseData
-  ) {
-    return (responseData as { data: T }).data;
+function unwrapData<T>(value: unknown): T {
+  if (value !== null && typeof value === "object" && "data" in value) {
+    return (value as { data: T }).data;
   }
-
-  return responseData as T;
+  return value as T;
 }
 
-/**
- * Chuyển trạng thái Frontend sang Backend.
- *
- * Frontend:
- * AVAILABLE
- * OUT_OF_STOCK
- * INACTIVE
- *
- * Backend/PostgreSQL:
- * AVAILABLE
- * MANUAL_UNAVAILABLE
- *
- * isActive được quản lý riêng.
- */
 function toBackendStatus(status: DishStatus) {
-  switch (status) {
-    case "AVAILABLE":
-      return {
-        isActive: true,
-        availabilityStatus: "AVAILABLE",
-        availabilityReason: null,
-      };
-
-    case "OUT_OF_STOCK":
-      return {
-        isActive: true,
-        availabilityStatus: "MANUAL_UNAVAILABLE",
-        availabilityReason: "Hết món",
-      };
-
-    case "INACTIVE":
-      return {
-        isActive: false,
-        availabilityStatus: "MANUAL_UNAVAILABLE",
-        availabilityReason: "Ngừng kinh doanh",
-      };
-
-    default:
-      return {
-        isActive: true,
-        availabilityStatus: "AVAILABLE",
-        availabilityReason: null,
-      };
+  if (status === "AVAILABLE") {
+    return { isActive: true, availabilityStatus: "AVAILABLE", availabilityReason: null };
   }
+  if (status === "OUT_OF_STOCK") {
+    return { isActive: true, availabilityStatus: "MANUAL_UNAVAILABLE", availabilityReason: "Hết món" };
+  }
+  return { isActive: false, availabilityStatus: "MANUAL_UNAVAILABLE", availabilityReason: "Ngừng kinh doanh" };
 }
 
-/**
- * Chuyển dữ liệu món ăn từ Backend sang Frontend.
- */
 function mapMenuItem(item: any): MenuItem {
   let status: DishStatus = "AVAILABLE";
-
-  if (item.isActive === false) {
-    status = "INACTIVE";
-  } else if (item.availabilityStatus === "MANUAL_UNAVAILABLE") {
-    const reason = String(item.availabilityReason ?? "").toLowerCase();
-
-    status =
-      reason.includes("hết món") || reason.includes("hết hàng")
-        ? "OUT_OF_STOCK"
-        : "INACTIVE";
+  if (item.isActive === false) status = "INACTIVE";
+  else if (item.availabilityStatus === "MANUAL_UNAVAILABLE" || item.availabilityStatus === "UNAVAILABLE") {
+    const reason = String(item.availabilityReason ?? "").toLocaleLowerCase("vi");
+    status = reason.includes("hết món") || reason.includes("hết hàng") ? "OUT_OF_STOCK" : "INACTIVE";
   }
 
   return {
-    ...item,
-
     id: String(item.id ?? ""),
     categoryId: String(item.categoryId ?? ""),
-
-    sku: String(item.sku ?? item.code ?? ""),
+    sku: String(item.code ?? item.sku ?? ""),
     name: String(item.name ?? ""),
     description: String(item.description ?? ""),
-    price: Number(item.price ?? 0),
-
+    price: item.price === null || item.price === undefined ? 0 : Number(item.price),
+    pricingType: item.pricingType ?? (item.price == null ? "UNSET" : "FIXED"),
+    priceUnit: item.priceUnit ?? null,
     station: item.station ?? "HOT_KITCHEN",
     prepTimeMinutes: Number(item.prepTimeMinutes ?? 10),
     modifiers: Array.isArray(item.modifiers) ? item.modifiers : [],
-    linkedIngredientIds: Array.isArray(item.linkedIngredientIds)
-      ? item.linkedIngredientIds
-      : [],
-
+    linkedIngredientIds: Array.isArray(item.linkedIngredientIds) ? item.linkedIngredientIds : [],
     imageUrl: String(item.imageUrl ?? ""),
-
     status,
-
     isBestseller: Boolean(item.isBestseller ?? false),
     updatedAt: item.updatedAt ?? item.createdAt ?? new Date().toISOString(),
-  } as MenuItem;
+  };
 }
 
-/**
- * Chuyển dữ liệu danh mục từ Backend sang Frontend.
- */
 function mapCategory(category: any): MenuCategory {
   return {
-    ...category,
     id: String(category.id),
-  } as MenuCategory;
+    code: category.code,
+    name: category.name,
+    description: category.description ?? "",
+    sortOrder: Number(category.sortOrder ?? 0),
+    isActive: category.isActive ?? true,
+    itemCount: category.itemCount,
+  };
 }
 
-/**
- * Chuyển ID danh mục từ string sang number.
- */
 function toCategoryId(categoryId: string | number): number {
   const id = Number(categoryId);
-
-  if (!Number.isSafeInteger(id) || id <= 0) {
-    throw new Error(`Category ID không hợp lệ: ${categoryId}`);
-  }
-
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`Category ID không hợp lệ: ${categoryId}`);
   return id;
 }
 
-/**
- * Chuyển dữ liệu tạo/cập nhật món ăn sang DTO Backend.
- */
-function toBackendMenuItemPayload(
-  input: CreateMenuItemInput | UpdateMenuItemInput,
-): Record<string, unknown> {
+function makeCategoryCode(name: string): string {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "D").toUpperCase().replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "").slice(0, 40);
+}
+
+function toCategoryPayload(input: CreateCategoryInput | UpdateCategoryInput) {
+  const payload: Record<string, unknown> = {};
+  if (input.name !== undefined) payload.name = input.name.trim();
+  if (input.code !== undefined) payload.code = input.code.trim().toUpperCase();
+  else if ("name" in input && input.name) payload.code = makeCategoryCode(input.name);
+  if (input.description !== undefined) payload.description = input.description;
+  if (input.isActive !== undefined) payload.isActive = input.isActive;
+  return payload;
+}
+
+function toBackendMenuItemPayload(input: CreateMenuItemInput | UpdateMenuItemInput): Record<string, unknown> {
   const source = input as Record<string, unknown>;
   const payload: Record<string, unknown> = {};
-
-  if (source.sku !== undefined || source.code !== undefined) {
-    payload.code = source.code ?? source.sku;
+  if (source.sku !== undefined) payload.code = source.sku;
+  if (source.name !== undefined) payload.name = source.name;
+  if (source.categoryId !== undefined) payload.categoryId = toCategoryId(source.categoryId as string | number);
+  if (source.description !== undefined) payload.description = source.description;
+  if (source.pricingType !== undefined) payload.pricingType = source.pricingType;
+  if (source.priceUnit !== undefined) payload.priceUnit = source.priceUnit;
+  if (source.price !== undefined) payload.price = source.price;
+  if (source.pricingType === "MARKET_PRICE" || source.pricingType === "UNSET") {
+    payload.price = null;
+    payload.priceUnit = null;
   }
-
-  if (source.name !== undefined) {
-    payload.name = source.name;
-  }
-
-  if (source.categoryId !== undefined) {
-    payload.categoryId = toCategoryId(source.categoryId as string | number);
-  }
-
-  if (source.price !== undefined) {
-    payload.price = Number(source.price);
-  }
-
-  if (source.description !== undefined) {
-    payload.description = source.description;
-  }
-
+  if (source.status !== undefined) Object.assign(payload, toBackendStatus(source.status as DishStatus));
+  if (source.imageUrl !== undefined) payload.imageUrl = source.imageUrl || null;
   return payload;
 }
 
 export class ApiMenuRepository implements MenuRepository {
-  // =====================================================
-  // CATEGORY MANAGEMENT
-  // =====================================================
-
   async getCategories(): Promise<MenuCategory[]> {
     const response = await apiClient.get("/menu-categories");
-    const categories = unwrapData<any[]>(response.data);
-
-    return (categories ?? []).map(mapCategory);
+    const result = unwrapData<any>(response.data);
+    return (Array.isArray(result) ? result : []).map(mapCategory);
   }
 
   async createCategory(input: CreateCategoryInput): Promise<MenuCategory> {
-    const response = await apiClient.post("/menu-categories", input);
-
+    const response = await apiClient.post("/menu-categories", toCategoryPayload(input));
     return mapCategory(unwrapData<any>(response.data));
   }
 
-  async updateCategory(
-    id: string,
-    input: UpdateCategoryInput,
-  ): Promise<MenuCategory> {
-    const response = await apiClient.patch(`/menu-categories/${id}`, input);
-
+  async updateCategory(id: string, input: UpdateCategoryInput): Promise<MenuCategory> {
+    const response = await apiClient.patch(`/menu-categories/${id}`, toCategoryPayload(input));
     return mapCategory(unwrapData<any>(response.data));
   }
 
@@ -206,40 +131,32 @@ export class ApiMenuRepository implements MenuRepository {
     await apiClient.delete(`/menu-categories/${id}`);
   }
 
-  // =====================================================
-  // MENU ITEM MANAGEMENT
-  // =====================================================
-
   async getMenuItems(params?: MenuFilterParams): Promise<MenuItem[]> {
-    const response = await apiClient.get("/menu-items", {
-      params,
-    });
+    const query: Record<string, unknown> = {};
+    if (params?.search) query.search = params.search;
+    if (params?.categoryId && params.categoryId !== "ALL") query.categoryId = toCategoryId(params.categoryId);
+    if (params?.status === "AVAILABLE") query.status = "AVAILABLE";
+    if (params?.status === "OUT_OF_STOCK") query.status = "MANUAL_UNAVAILABLE";
+    if (params?.status === "INACTIVE") query.isActive = false;
 
-    const items = unwrapData<any[]>(response.data);
-
-    return (items ?? []).map(mapMenuItem);
+    const response = await apiClient.get("/menu-items", { params: query });
+    const result = unwrapData<any>(response.data);
+    const items = Array.isArray(result) ? result : Array.isArray(result?.data) ? result.data : [];
+    return items.map(mapMenuItem);
   }
 
   async getMenuItemById(id: string): Promise<MenuItem> {
     const response = await apiClient.get(`/menu-items/${id}`);
-
     return mapMenuItem(unwrapData<any>(response.data));
   }
 
   async createMenuItem(input: CreateMenuItemInput): Promise<MenuItem> {
-    const payload = toBackendMenuItemPayload(input);
-    const response = await apiClient.post("/menu-items", payload);
-
+    const response = await apiClient.post("/menu-items", toBackendMenuItemPayload(input));
     return mapMenuItem(unwrapData<any>(response.data));
   }
 
-  async updateMenuItem(
-    id: string,
-    input: UpdateMenuItemInput,
-  ): Promise<MenuItem> {
-    const payload = toBackendMenuItemPayload(input);
-    const response = await apiClient.patch(`/menu-items/${id}`, payload);
-
+  async updateMenuItem(id: string, input: UpdateMenuItemInput): Promise<MenuItem> {
+    const response = await apiClient.patch(`/menu-items/${id}`, toBackendMenuItemPayload(input));
     return mapMenuItem(unwrapData<any>(response.data));
   }
 
@@ -247,45 +164,19 @@ export class ApiMenuRepository implements MenuRepository {
     await apiClient.delete(`/menu-items/${id}`);
   }
 
-  // =====================================================
-  // TOGGLE MENU ITEM STATUS
-  // =====================================================
-
-  async toggleMenuItemStatus(
-    id: string,
-    nextStatus: DishStatus,
-  ): Promise<MenuItem> {
-    const payload = toBackendStatus(nextStatus);
-
-    const response = await apiClient.patch(`/menu-items/${id}/status`, payload);
-
+  async toggleMenuItemStatus(id: string, nextStatus: DishStatus): Promise<MenuItem> {
+    const response = await apiClient.patch(`/menu-items/${id}/status`, toBackendStatus(nextStatus));
     return mapMenuItem(unwrapData<any>(response.data));
   }
 
-  // =====================================================
-  // MENU ITEM IMAGE
-  // =====================================================
-
-  async uploadMenuItemImage(
-    id: string,
-    file: UploadMenuImageInput,
-  ): Promise<MenuItem> {
+  async uploadMenuItemImage(id: string, file: UploadMenuImageInput): Promise<MenuItem> {
     const formData = new FormData();
-
-    if (file.file) {
-      formData.append("file", file.file, file.name);
-    } else {
-      formData.append("file", {
-        uri: file.uri,
-        name: file.name,
-        type: file.type,
-      } as unknown as Blob);
-    }
+    if (file.file) formData.append("file", file.file, file.name);
+    else formData.append("file", { uri: file.uri, name: file.name, type: file.type } as unknown as Blob);
 
     const response = await apiClient.post(`/menu-items/${id}/image`, formData, {
       headers: { "Content-Type": undefined },
     });
-
     return mapMenuItem(unwrapData<any>(response.data));
   }
 
