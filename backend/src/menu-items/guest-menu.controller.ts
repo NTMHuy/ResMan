@@ -9,7 +9,7 @@ import { MenuItemsService } from "./menu-items.service.js";
 export class GuestMenuController {
   constructor(private readonly menuItems: MenuItemsService) {}
 
-  @Get()
+  @Get("menu")
   findCustomerMenu(@Query("categoryId") categoryId?: string) {
     return this.menuItems.findCustomerMenu(categoryId);
   }
