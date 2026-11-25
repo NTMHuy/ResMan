@@ -1,14 +1,5 @@
-import { Type, Transform } from "class-transformer";
-
-import {
-  IsOptional,
-  IsString,
-  IsInt,
-  Min,
-  IsNumber,
-  IsIn,
-  IsBoolean,
-} from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsBoolean, IsIn, IsInt, IsNumber, IsOptional, IsString, Min } from "class-validator";
 
 export class QueryMenuItemDto {
   @IsOptional()
@@ -22,15 +13,11 @@ export class QueryMenuItemDto {
   categoryId?: number;
 
   @IsOptional()
-  @IsIn(["AVAILABLE", "UNAVAILABLE"])
+  @IsIn(["AVAILABLE", "UNAVAILABLE", "MANUAL_UNAVAILABLE", "SOLD_OUT"])
   status?: string;
 
   @IsOptional()
-  @Transform(({ value }) => {
-    if (value === "true") return true;
-    if (value === "false") return false;
-    return value;
-  })
+  @Transform(({ value }) => value === "true" ? true : value === "false" ? false : value)
   @IsBoolean()
   isActive?: boolean;
 
