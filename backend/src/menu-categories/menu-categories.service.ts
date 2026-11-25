@@ -3,13 +3,13 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
-import { PrismaService } from '../database/prisma.service.js';
+import { PrismaService } from "../database/prisma.service.js";
 
-import { CreateMenuCategoryDto } from './dto/create-menu-category.dto.js';
-import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto.js';
-import { QueryMenuCategoryDto } from './dto/query-menu-category.dto.js';
+import { CreateMenuCategoryDto } from "./dto/create-menu-category.dto.js";
+import { UpdateMenuCategoryDto } from "./dto/update-menu-category.dto.js";
+import { QueryMenuCategoryDto } from "./dto/query-menu-category.dto.js";
 
 @Injectable()
 export class MenuCategoriesService {
@@ -24,7 +24,7 @@ export class MenuCategoriesService {
     });
 
     if (existing) {
-      throw new ConflictException('Category code or name already exists');
+      throw new ConflictException("Category code or name already exists");
     }
 
     const category = await this.prisma.menuCategory.create({
@@ -48,13 +48,13 @@ export class MenuCategoriesService {
             {
               name: {
                 contains: query.search,
-                mode: 'insensitive',
+                mode: "insensitive",
               },
             },
             {
               code: {
                 contains: query.search,
-                mode: 'insensitive',
+                mode: "insensitive",
               },
             },
           ],
@@ -74,7 +74,7 @@ export class MenuCategoriesService {
       },
 
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -93,14 +93,14 @@ export class MenuCategoriesService {
       include: {
         items: {
           orderBy: {
-            createdAt: 'desc',
+            createdAt: "desc",
           },
         },
       },
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException("Category not found");
     }
 
     return {
@@ -131,7 +131,7 @@ export class MenuCategoriesService {
       });
 
       if (duplicate) {
-        throw new ConflictException('Category code or name already exists');
+        throw new ConflictException("Category code or name already exists");
       }
     }
 
@@ -153,7 +153,7 @@ export class MenuCategoriesService {
 
     if (itemCount > 0) {
       throw new ConflictException(
-        'Cannot delete category because it contains menu items',
+        "Cannot delete category because it contains menu items",
       );
     }
 
@@ -162,7 +162,7 @@ export class MenuCategoriesService {
     });
 
     return {
-      message: 'Category deleted successfully',
+      message: "Category deleted successfully",
     };
   }
 
@@ -172,7 +172,7 @@ export class MenuCategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException("Category not found");
     }
 
     return category;

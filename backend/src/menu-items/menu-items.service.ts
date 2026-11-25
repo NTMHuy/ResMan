@@ -3,15 +3,15 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
-import { PrismaService } from '../database/prisma.service.js';
+import { PrismaService } from "../database/prisma.service.js";
 
-import { CreateMenuItemDto } from './dto/create-menu-item.dto.js';
-import { UpdateMenuItemDto } from './dto/update-menu-item.dto.js';
-import { QueryMenuItemDto } from './dto/query-menu-item.dto.js';
+import { CreateMenuItemDto } from "./dto/create-menu-item.dto.js";
+import { UpdateMenuItemDto } from "./dto/update-menu-item.dto.js";
+import { QueryMenuItemDto } from "./dto/query-menu-item.dto.js";
 
-import { Prisma } from '../generated/prisma/client.js';
+import { Prisma } from "../generated/prisma/client.js";
 
 @Injectable()
 export class MenuItemsService {
@@ -26,11 +26,11 @@ export class MenuItemsService {
     });
 
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException("Category not found");
     }
 
     if (!category.isActive) {
-      throw new BadRequestException('Cannot create item in inactive category');
+      throw new BadRequestException("Cannot create item in inactive category");
     }
 
     const existing = await this.prisma.menuItem.findUnique({
@@ -38,7 +38,7 @@ export class MenuItemsService {
     });
 
     if (existing) {
-      throw new ConflictException('Menu item code already exists');
+      throw new ConflictException("Menu item code already exists");
     }
 
     const item = await this.prisma.menuItem.create({
@@ -69,8 +69,8 @@ export class MenuItemsService {
       maxPrice,
       page = 1,
       limit = 10,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
+      sortBy = "createdAt",
+      sortOrder = "desc",
     } = query;
 
     if (
@@ -78,7 +78,7 @@ export class MenuItemsService {
       maxPrice !== undefined &&
       minPrice > maxPrice
     ) {
-      throw new BadRequestException('minPrice cannot be greater than maxPrice');
+      throw new BadRequestException("minPrice cannot be greater than maxPrice");
     }
 
     const where: Prisma.MenuItemWhereInput = {
@@ -87,19 +87,19 @@ export class MenuItemsService {
           {
             name: {
               contains: search,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
           },
           {
             code: {
               contains: search,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
           },
           {
             description: {
               contains: search,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
           },
         ],
@@ -170,7 +170,7 @@ export class MenuItemsService {
     });
 
     if (!item) {
-      throw new NotFoundException('Menu item not found');
+      throw new NotFoundException("Menu item not found");
     }
 
     return this.formatItem(item);
@@ -189,7 +189,7 @@ export class MenuItemsService {
       });
 
       if (duplicate) {
-        throw new ConflictException('Menu item code already exists');
+        throw new ConflictException("Menu item code already exists");
       }
     }
 
@@ -201,11 +201,11 @@ export class MenuItemsService {
       });
 
       if (!category) {
-        throw new NotFoundException('Category not found');
+        throw new NotFoundException("Category not found");
       }
 
       if (!category.isActive) {
-        throw new BadRequestException('Category is inactive');
+        throw new BadRequestException("Category is inactive");
       }
     }
 
@@ -247,7 +247,7 @@ export class MenuItemsService {
 
     if (orderCount > 0) {
       throw new ConflictException(
-        'Cannot delete menu item because it is used in orders. Deactivate it instead.',
+        "Cannot delete menu item because it is used in orders. Deactivate it instead.",
       );
     }
 
@@ -256,11 +256,12 @@ export class MenuItemsService {
     });
 
     return {
-      message: 'Menu item deleted successfully',
+      message: "Menu item deleted successfully",
     };
   }
 
   // CHANGE BUSINESS STATUS
+
   async updateStatus(
     id: bigint,
     isActive: boolean,
@@ -269,11 +270,13 @@ export class MenuItemsService {
   ) {
     await this.ensureExists(id);
 
+    const allowedStatuses = ["AVAILABLE", "MANUAL_UNAVAILABLE"];
+
     if (
       availabilityStatus !== undefined &&
-      !['AVAILABLE', 'UNAVAILABLE', 'SOLD_OUT'].includes(availabilityStatus)
+      !allowedStatuses.includes(availabilityStatus)
     ) {
-      throw new BadRequestException('Invalid availability status');
+      throw new BadRequestException("Invalid availability status");
     }
 
     const item = await this.prisma.menuItem.update({
@@ -326,7 +329,7 @@ export class MenuItemsService {
     return {
       id: item.id.toString(),
       imageUrl: null,
-      message: 'Image removed successfully',
+      message: "Image removed successfully",
     };
   }
 
@@ -336,7 +339,7 @@ export class MenuItemsService {
     });
 
     if (!item) {
-      throw new NotFoundException('Menu item not found');
+      throw new NotFoundException("Menu item not found");
     }
 
     return item;

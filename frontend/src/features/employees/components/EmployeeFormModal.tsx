@@ -81,59 +81,92 @@ export function EmployeeFormModal({
     }
   }, [visible, editingEmployee]);
 
-  const handleSave = async () => {
-    setFieldErrors({});
-    setErrMsg(null);
 
-    if (editingEmployee) {
-      if (!parsed.success) {
-        const next: Record<string, string> = {};
-        for (const issue of parsed.error.issues) {
-          const k = String(issue.path[0] ?? 'form');
-          if (!next[k]) next[k] = issue.message;
-        }
-        setFieldErrors(next);
-        return;
-      }
-      try {
-        await onUpdate(editingEmployee.id, {
-          ...parsed.data,
-          role: canAssignRole ? role : editingEmployee.role,
-        });
-        onClose();
-      } catch (err) {
-        setErrMsg(err instanceof Error ? err.message : 'Không thể cập nhật nhân viên.');
-      }
-      return;
-    }
+const handleSave = async () => {
+  setFieldErrors({});
+  setErrMsg(null);
 
-    const parsed = createSchema.safeParse({
-      code,
+  // Cập nhật nhân viên
+  if (editingEmployee) {
+    const parsed = updateSchema.safeParse({
       fullName,
       email,
       phone,
-      password,
+      station: editingEmployee.station ?? '',
+      shift: editingEmployee.shift ?? '',
     });
+
     if (!parsed.success) {
       const next: Record<string, string> = {};
+
       for (const issue of parsed.error.issues) {
-        const k = String(issue.path[0] ?? 'form');
-        if (!next[k]) next[k] = issue.message;
+        const key = String(issue.path[0] ?? 'form');
+        if (!next[key]) {
+          next[key] = issue.message;
+        }
       }
+
       setFieldErrors(next);
       return;
     }
 
     try {
-      await onCreate({
+      await onUpdate(editingEmployee.id, {
         ...parsed.data,
-        role,
+        role: canAssignRole ? role : editingEmployee.role,
       });
+
       onClose();
     } catch (err) {
-      setErrMsg(err instanceof Error ? err.message : 'Không thể tạo nhân viên.');
+      setErrMsg(
+        err instanceof Error
+          ? err.message
+          : 'Không thể cập nhật nhân viên.'
+      );
     }
-  };
+
+    return;
+  }
+
+  // Tạo nhân viên mới
+  const parsed = createSchema.safeParse({
+    code,
+    fullName,
+    email,
+    phone,
+    password,
+  });
+
+  if (!parsed.success) {
+    const next: Record<string, string> = {};
+
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? 'form');
+      if (!next[key]) {
+        next[key] = issue.message;
+      }
+    }
+
+    setFieldErrors(next);
+    return;
+  }
+
+  try {
+    await onCreate({
+      ...parsed.data,
+      role,
+    });
+
+    onClose();
+  } catch (err) {
+    setErrMsg(
+      err instanceof Error
+        ? err.message
+        : 'Không thể tạo nhân viên.'
+    );
+  }
+};
+
 
   return (
     <ModalDialog

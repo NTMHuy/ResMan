@@ -99,21 +99,21 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id                 BigInt       @id @default(autoincrement())
-  categoryId         BigInt       @map("category_id")
-  code               String       @unique @db.VarChar(40)
-  name               String       @db.VarChar(150)
+  id                 BigInt          @id @default(autoincrement())
+  categoryId         BigInt          @map("category_id")
+  code               String          @unique @db.VarChar(40)
+  name               String          @db.VarChar(150)
   description        String?
-  price              Decimal?         @db.Decimal(14, 2)
-  pricingType        MenuPricingType   @default(FIXED) @map("pricing_type")
-  priceUnit          String?           @map("price_unit") @db.VarChar(30)
-  imageUrl           String?      @map("image_url") @db.VarChar(1000)
-  availabilityStatus String       @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
-  availabilityReason String?      @map("availability_reason")
-  isActive           Boolean      @default(true) @map("is_active")
-  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-  category           MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  price              Decimal?        @db.Decimal(14, 2)
+  pricingType        MenuPricingType @default(FIXED) @map("pricing_type")
+  priceUnit          String?         @map("price_unit") @db.VarChar(30)
+  imageUrl           String?         @map("image_url") @db.VarChar(1000)
+  availabilityStatus String          @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
+  availabilityReason String?         @map("availability_reason")
+  isActive           Boolean         @default(true) @map("is_active")
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  category           MenuCategory    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   orderItems         OrderItem[]
 
   @@index([availabilityStatus, categoryId])

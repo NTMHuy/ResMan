@@ -17,8 +17,6 @@ import { apiClient } from "@/src/services/api/apiClient";
  * Backend có thể trả về:
  * - Dữ liệu trực tiếp
  * - { data: ... }
- *
- * Hàm này hỗ trợ cả hai trường hợp.
  */
 function unwrapData<T>(responseData: unknown): T {
   if (
@@ -40,10 +38,11 @@ function unwrapData<T>(responseData: unknown): T {
  * OUT_OF_STOCK
  * INACTIVE
  *
- * Backend:
+ * Backend/PostgreSQL:
  * AVAILABLE
- * SOLD_OUT
- * UNAVAILABLE
+ * MANUAL_UNAVAILABLE
+ *
+ * isActive được quản lý riêng.
  */
 function toBackendStatus(status: DishStatus) {
   switch (status) {
@@ -51,24 +50,28 @@ function toBackendStatus(status: DishStatus) {
       return {
         isActive: true,
         availabilityStatus: "AVAILABLE",
+        availabilityReason: null,
       };
 
     case "OUT_OF_STOCK":
       return {
         isActive: true,
-        availabilityStatus: "SOLD_OUT",
+        availabilityStatus: "MANUAL_UNAVAILABLE",
+        availabilityReason: "Hết món",
       };
 
     case "INACTIVE":
       return {
         isActive: false,
-        availabilityStatus: "UNAVAILABLE",
+        availabilityStatus: "MANUAL_UNAVAILABLE",
+        availabilityReason: "Ngừng kinh doanh",
       };
 
     default:
       return {
         isActive: true,
         availabilityStatus: "AVAILABLE",
+        availabilityReason: null,
       };
   }
 }
@@ -81,29 +84,26 @@ function mapMenuItem(item: any): MenuItem {
 
   if (item.isActive === false) {
     status = "INACTIVE";
-  } else if (
-    item.availabilityStatus === "SOLD_OUT" ||
-    item.availabilityStatus === "OUT_OF_STOCK"
-  ) {
-    status = "OUT_OF_STOCK";
-  } else if (item.availabilityStatus === "UNAVAILABLE") {
-    status = "INACTIVE";
+  } else if (item.availabilityStatus === "MANUAL_UNAVAILABLE") {
+    const reason = String(item.availabilityReason ?? "").toLowerCase();
+
+    status =
+      reason.includes("hết món") || reason.includes("hết hàng")
+        ? "OUT_OF_STOCK"
+        : "INACTIVE";
   }
 
   return {
     ...item,
 
-    // ID
     id: String(item.id ?? ""),
     categoryId: String(item.categoryId ?? ""),
 
-    // Thông tin món ăn
     sku: String(item.sku ?? item.code ?? ""),
     name: String(item.name ?? ""),
     description: String(item.description ?? ""),
     price: Number(item.price ?? 0),
 
-    // Các trường Backend chưa quản lý
     station: item.station ?? "HOT_KITCHEN",
     prepTimeMinutes: Number(item.prepTimeMinutes ?? 10),
     modifiers: Array.isArray(item.modifiers) ? item.modifiers : [],
@@ -111,17 +111,15 @@ function mapMenuItem(item: any): MenuItem {
       ? item.linkedIngredientIds
       : [],
 
-    // Hình ảnh
     imageUrl: String(item.imageUrl ?? ""),
 
-    // Trạng thái
     status,
 
-    // Thông tin bổ sung
     isBestseller: Boolean(item.isBestseller ?? false),
     updatedAt: item.updatedAt ?? item.createdAt ?? new Date().toISOString(),
   } as MenuItem;
 }
+
 /**
  * Chuyển dữ liệu danh mục từ Backend sang Frontend.
  */
@@ -134,7 +132,6 @@ function mapCategory(category: any): MenuCategory {
 
 /**
  * Chuyển ID danh mục từ string sang number.
- * Backend Prisma sử dụng ID dạng số.
  */
 function toCategoryId(categoryId: string | number): number {
   const id = Number(categoryId);
@@ -148,13 +145,11 @@ function toCategoryId(categoryId: string | number): number {
 
 /**
  * Chuyển dữ liệu tạo/cập nhật món ăn sang DTO Backend.
- * Không gửi các trường chỉ phục vụ giao diện Frontend.
  */
 function toBackendMenuItemPayload(
   input: CreateMenuItemInput | UpdateMenuItemInput,
 ): Record<string, unknown> {
   const source = input as Record<string, unknown>;
-
   const payload: Record<string, unknown> = {};
 
   if (source.sku !== undefined || source.code !== undefined) {
@@ -187,7 +182,6 @@ export class ApiMenuRepository implements MenuRepository {
 
   async getCategories(): Promise<MenuCategory[]> {
     const response = await apiClient.get("/menu-categories");
-
     const categories = unwrapData<any[]>(response.data);
 
     return (categories ?? []).map(mapCategory);
@@ -221,15 +215,6 @@ export class ApiMenuRepository implements MenuRepository {
       params,
     });
 
-    /**
-     * Backend trả về:
-     * {
-     *   data: [...],
-     *   pagination: {...}
-     * }
-     *
-     * unwrapData sẽ lấy mảng data.
-     */
     const items = unwrapData<any[]>(response.data);
 
     return (items ?? []).map(mapMenuItem);
@@ -243,7 +228,6 @@ export class ApiMenuRepository implements MenuRepository {
 
   async createMenuItem(input: CreateMenuItemInput): Promise<MenuItem> {
     const payload = toBackendMenuItemPayload(input);
-
     const response = await apiClient.post("/menu-items", payload);
 
     return mapMenuItem(unwrapData<any>(response.data));
@@ -254,7 +238,6 @@ export class ApiMenuRepository implements MenuRepository {
     input: UpdateMenuItemInput,
   ): Promise<MenuItem> {
     const payload = toBackendMenuItemPayload(input);
-
     const response = await apiClient.patch(`/menu-items/${id}`, payload);
 
     return mapMenuItem(unwrapData<any>(response.data));
@@ -292,25 +275,16 @@ export class ApiMenuRepository implements MenuRepository {
     if (file.file) {
       formData.append("file", file.file, file.name);
     } else {
-      // React Native FormData accepts this URI descriptor and streams the local file.
-      formData.append(
-        "file",
-        {
-          uri: file.uri,
-          name: file.name,
-          type: file.type,
-        } as unknown as Blob,
-      );
+      formData.append("file", {
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      } as unknown as Blob);
     }
 
-    const response = await apiClient.post(
-      `/menu-items/${id}/image`,
-      formData,
-      {
-        // Let Axios/the platform create the multipart boundary.
-        headers: { "Content-Type": undefined },
-      },
-    );
+    const response = await apiClient.post(`/menu-items/${id}/image`, formData, {
+      headers: { "Content-Type": undefined },
+    });
 
     return mapMenuItem(unwrapData<any>(response.data));
   }
@@ -318,5 +292,4 @@ export class ApiMenuRepository implements MenuRepository {
   async deleteMenuItemImage(id: string): Promise<void> {
     await apiClient.delete(`/menu-items/${id}/image`);
   }
-
 }

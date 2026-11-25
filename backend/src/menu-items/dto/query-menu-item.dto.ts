@@ -1,4 +1,4 @@
-import { Type, Transform } from 'class-transformer';
+import { Type, Transform } from "class-transformer";
 
 import {
   IsOptional,
@@ -8,7 +8,7 @@ import {
   IsNumber,
   IsIn,
   IsBoolean,
-} from 'class-validator';
+} from "class-validator";
 
 export class QueryMenuItemDto {
   @IsOptional()
@@ -22,13 +22,13 @@ export class QueryMenuItemDto {
   categoryId?: number;
 
   @IsOptional()
-  @IsIn(['AVAILABLE', 'UNAVAILABLE', 'SOLD_OUT'])
+  @IsIn(["AVAILABLE", "UNAVAILABLE"])
   status?: string;
 
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
+    if (value === "true") return true;
+    if (value === "false") return false;
     return value;
   })
   @IsBoolean()
@@ -59,10 +59,10 @@ export class QueryMenuItemDto {
   limit: number = 10;
 
   @IsOptional()
-  @IsIn(['name', 'price', 'createdAt'])
-  sortBy: string = 'createdAt';
+  @IsIn(["name", "price", "createdAt"])
+  sortBy: string = "createdAt";
 
   @IsOptional()
-  @IsIn(['asc', 'desc'])
-  sortOrder: 'asc' | 'desc' = 'desc';
+  @IsIn(["asc", "desc"])
+  sortOrder: "asc" | "desc" = "desc";
 }
