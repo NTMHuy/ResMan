@@ -13,7 +13,7 @@ import type {
   UpdateEmployeeInput,
 } from '@/src/features/employees/types/employee.types';
 
-const STAFF_ROLES: UserRole[] = ['MANAGER', 'ORDER_STAFF', 'KITCHEN_STAFF', 'INVENTORY_STAFF'];
+const STAFF_ROLES: UserRole[] = ['ORDER_STAFF', 'KITCHEN_STAFF', 'INVENTORY_STAFF'];
 
 const createSchema = z.object({
   code: z.string().trim().min(3, 'Mã nhân viên tối thiểu 3 ký tự'),
@@ -22,7 +22,7 @@ const createSchema = z.object({
   phone: z.string().trim().min(9, 'Số điện thoại không hợp lệ'),
   station: z.string().trim().min(2, 'Vui lòng nhập bộ phận trực'),
   shift: z.string().trim().min(2, 'Vui lòng nhập ca làm việc'),
-  password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự'),
+  password: z.string().min(12, 'Mật khẩu tối thiểu 12 ký tự'),
 });
 
 const updateSchema = z.object({
@@ -85,7 +85,7 @@ export function EmployeeFormModal({
       setRole('ORDER_STAFF');
       setStation('Sảnh tầng 1');
       setShift('Ca chiều (14:00 - 22:00)');
-      setPassword('ResMan@2026');
+      setPassword('ResMan@2026!');
     }
   }, [visible, editingEmployee]);
 
