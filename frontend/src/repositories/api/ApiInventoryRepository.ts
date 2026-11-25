@@ -184,13 +184,13 @@ export class ApiInventoryRepository implements InventoryRepository {
         ingredientId: movement.ingredient.id,
         ingredientSku: movement.ingredient.code,
         ingredientName: movement.ingredient.name,
-        type: movement.movementType === 'IN'
+        type: (movement.movementType === 'IN'
           ? 'IMPORT'
           : movement.movementType === 'OUT'
             ? 'EXPORT'
             : movement.referenceCode?.startsWith('COUNT-')
               ? 'AUDIT'
-              : 'ADJUST',
+              : 'ADJUST') as StockMovement['type'],
         quantityDelta: delta,
         previousStock: previous,
         newStock: current,
