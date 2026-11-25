@@ -15,7 +15,9 @@ interface GuestMenuItem {
   code: string;
   name: string;
   description: string | null;
-  price: string;
+  price: string | null;
+  pricingType: "FIXED" | "PER_UNIT" | "MARKET_PRICE" | "UNSET";
+  priceUnit: string | null;
   imageUrl: string | null;
 }
 
@@ -71,7 +73,9 @@ function mapMenu(source: GuestMenuCategory[]): {
       sku: item.code,
       name: item.name,
       description: item.description ?? '',
-      price: Number(item.price),
+      price: item.price === null ? 0 : Number(item.price),
+      pricingType: item.pricingType ?? (item.price === null ? "UNSET" : "FIXED"),
+      priceUnit: item.priceUnit ?? (item.pricingType === "PER_UNIT" ? "lạng" : null),
       categoryId: String(category.id),
       station: 'HOT_KITCHEN' as const,
       imageUrl: resolveMenuImageUrl(item.imageUrl),
