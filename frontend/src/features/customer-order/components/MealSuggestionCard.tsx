@@ -11,10 +11,11 @@ import type { MenuItem } from '@/src/features/menu/types/menu.types';
 interface MealSuggestionCardProps {
   items: MenuItem[];
   message: string;
+  available: boolean;
   onAdd: (item: MenuItem) => void;
 }
 
-export function MealSuggestionCard({ items, message, onAdd }: MealSuggestionCardProps) {
+export function MealSuggestionCard({ items, message, available, onAdd }: MealSuggestionCardProps) {
   const { theme } = useTheme();
 
   return (
@@ -26,7 +27,7 @@ export function MealSuggestionCard({ items, message, onAdd }: MealSuggestionCard
             Gợi ý món ăn dành cho bạn
           </Text>
         </View>
-        <Badge label={items.length > 0 ? 'Đề xuất' : 'Chưa kết nối AI'} tone="info" />
+        <Badge label={items.length > 0 ? 'Đề xuất' : available ? 'AI đã kết nối' : 'Chưa kết nối AI'} tone="info" />
       </View>
 
       {items.length > 0 ? (
