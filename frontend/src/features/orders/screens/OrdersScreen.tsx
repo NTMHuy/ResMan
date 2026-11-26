@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import {
   CreditCard,
   History,
+  Plus,
   Search,
 } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
