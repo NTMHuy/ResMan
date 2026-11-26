@@ -171,20 +171,8 @@ async function main(): Promise<void> {
       create: { userId, fullName, employeeCode },
     });
 
-    // Tạo sẵn 20 bàn cố định; upsert giúp chạy seed nhiều lần không tạo trùng.
-    for (let number = 1; number <= 20; number += 1) {
-      const code = `T${String(number).padStart(2, "0")}`;
-      await prisma.diningTable.upsert({
-        where: { code },
-        update: { name: `Bàn ${String(number).padStart(2, "0")}` },
-        create: {
-          code,
-          name: `Bàn ${String(number).padStart(2, "0")}`,
-          capacity: 4,
-          status: "AVAILABLE",
-        },
-      });
-    }
+    // Bàn ăn được quản lý tạo và cấu hình qua chức năng quản lý bàn.
+    // Seed chỉ khởi tạo dữ liệu nền, không tự tạo bàn cố định.
 
     const menuResult = await seedMenu(prisma);
 
