@@ -84,6 +84,9 @@ export function CustomerOrderScreen() {
     tableOrders,
     loading,
     submitting,
+    startingSession,
+    activeSessionId,
+    startCustomerSession,
     error,
     search,
     setSearch,
@@ -191,7 +194,7 @@ export function CustomerOrderScreen() {
           </ScrollView>
         ) : (
           <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
-            Tablet đã được gán cố định với {tableNumber}. Khi mở chức năng gọi món, hệ thống tự kích hoạt hoặc tiếp tục phiên của bàn này.
+            Tablet đã được gán cố định với {tableNumber}. Khách cần mở phiên gọi món trước khi chọn và gửi món.
           </Text>
         )}
 
@@ -233,6 +236,32 @@ export function CustomerOrderScreen() {
             </View>
           </View>
         ) : null}
+        {!activeSessionId ? (
+          <View style={{ gap: 8, marginTop: 12 }}>
+            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+              Chưa có phiên gọi món đang mở tại bàn này.
+            </Text>
+            <Button
+              label="Mở phiên gọi món"
+              variant="primary"
+              loading={startingSession}
+              disabled={startingSession}
+              fullWidth
+              onPress={async () => {
+                try {
+                  await startCustomerSession();
+                  showToast('Đã mở phiên gọi món', 'success', tableNumber);
+                } catch (err) {
+                  showToast('Không thể mở phiên', 'error', getErrorMessage(err, 'Vui lòng thử lại.'));
+                }
+              }}
+            />
+          </View>
+        ) : (
+          <Text style={{ color: theme.colors.success, fontSize: 12, marginTop: 8 }}>
+            Phiên gọi món đang hoạt động. Bạn có thể chọn món.
+          </Text>
+        )}
       </Card>
 
       {/* Cart */}
@@ -387,7 +416,7 @@ export function CustomerOrderScreen() {
               size="lg"
               fullWidth
               loading={submitting}
-              disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && tableNumber === 'Chưa kết nối'}
+              disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && (!activeSessionId || tableNumber === 'Chưa kết nối')}
               leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
               onPress={() => void handleSubmitOrder()}
             />
