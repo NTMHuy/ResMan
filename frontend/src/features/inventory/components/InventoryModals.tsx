@@ -248,7 +248,7 @@ interface StockOperationModalProps {
   ingredient: Ingredient | null;
   loading: boolean;
   onClose: () => void;
-  onSubmit: (quantity: number, reason: string) => Promise<void>;
+  onSubmit: (quantity: number, reason: string, countType?: 'OPENING' | 'CLOSING') => Promise<void>;
 }
 
 export function StockOperationModal({
@@ -262,6 +262,7 @@ export function StockOperationModal({
   const { theme } = useTheme();
   const [qtyText, setQtyText] = useState('');
   const [reason, setReason] = useState('');
+  const [countType, setCountType] = useState<'OPENING' | 'CLOSING'>('CLOSING');
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -270,6 +271,7 @@ export function StockOperationModal({
     if (mode === 'IMPORT') {
       setQtyText('');
       setReason('');
+      setCountType('CLOSING');
     } else {
       setQtyText(String(ingredient.currentStock));
       setReason('');
@@ -312,7 +314,7 @@ export function StockOperationModal({
       return;
     }
     try {
-      await onSubmit(num, reason.trim());
+      await onSubmit(num, reason.trim(), isCount ? countType : undefined);
       onClose();
     } catch (err) {
       setErrMsg(err instanceof Error ? err.message : 'Không thể cập nhật tồn kho.');
@@ -346,6 +348,22 @@ export function StockOperationModal({
         onChangeText={setQtyText}
         keyboardType="decimal-pad"
       />
+      {isCount ? (
+        <View style={styles.section}>
+          <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Loại kiểm kê</Text>
+          <View style={styles.chipWrap}>
+            {([{ value: 'OPENING', label: 'Đầu ca' }, { value: 'CLOSING', label: 'Cuối ca' }] as const).map((option) => {
+              const active = countType === option.value;
+              return (
+                <Pressable key={option.value} onPress={() => setCountType(option.value)}
+                  style={[styles.chip, { backgroundColor: active ? theme.colors.primary : theme.colors.surfaceLow, borderColor: active ? theme.colors.primary : theme.colors.border, borderRadius: theme.radius.md }]}>
+                  <Text style={[styles.chipText, { color: active ? theme.colors.onPrimary : theme.colors.onSurface }]}>{option.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
       {isCount ? (
         <View style={[styles.differenceBox, { backgroundColor: theme.colors.surfaceLow, borderRadius: theme.radius.md }]}>
           <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Chênh lệch dự kiến</Text>
