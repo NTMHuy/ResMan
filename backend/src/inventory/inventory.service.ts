@@ -320,6 +320,7 @@ export class InventoryService {
       id: record.id.toString(),
       ingredient: { ...record.ingredient, id: record.ingredient.id.toString() },
       actualQuantity: record.actualQuantity.toString(),
+      countType: record.countType,
       countedAt: record.countedAt,
       note: record.note,
       actor: {
