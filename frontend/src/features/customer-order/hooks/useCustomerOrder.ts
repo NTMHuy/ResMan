@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
@@ -23,6 +23,7 @@ export const TABLE_OPTIONS = [
 const USE_MOCK_CUSTOMER_ORDER = false;
 
 export function useCustomerOrder() {
+  const sessionStarted = useRef(false);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -46,6 +47,10 @@ export function useCustomerOrder() {
         setError(null);
       }
       try {
+        if (!USE_MOCK_CUSTOMER_ORDER && !sessionStarted.current) {
+          await repositories.customerOrder.startSession();
+          sessionStarted.current = true;
+        }
         const menu = await repositories.customerOrder.getCustomerMenu();
         setCategories(menu.categories);
         setItems(menu.items);
@@ -63,7 +68,7 @@ export function useCustomerOrder() {
         if (!silent) setLoading(false);
       }
     },
-    [tableNumber],
+    [],
   );
 
   useEffect(() => {
