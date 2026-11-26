@@ -95,6 +95,7 @@ export function KitchenScreen() {
   }
 
   return (
+    <>
     <ScrollView
       style={[styles.scroll, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.container}
@@ -422,9 +423,11 @@ export function KitchenScreen() {
           onChangeText={(value) => { setCancelReason(value); setCancelError(null); }}
           placeholder="VD: Hết nguyên liệu, khách đổi món..."
           multiline
+          maxLength={500}
           error={cancelError ?? undefined}
         />
       </ModalDialog>
+    </>
   );
 }
 
