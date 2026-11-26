@@ -76,6 +76,7 @@ export function CustomerOrderScreen() {
     cart,
     cartSummary,
     tableNumber,
+    changeTable,
     guestName,
     setGuestName,
     guestCount,
