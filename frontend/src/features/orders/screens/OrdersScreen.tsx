@@ -86,7 +86,7 @@ export function OrdersScreen() {
     if (previousItemStatuses.current) {
       for (const [itemId, item] of current) {
         const previous = previousItemStatuses.current.get(itemId);
-        if (item.status === 'COMPLETED' && previous?.status !== 'COMPLETED') {
+        if (item.status === 'COMPLETED' && previous !== 'COMPLETED') {
           Alert.alert(
             'Món đã hoàn thành',
             `${item.tableNumber} · ${item.itemName}\nVui lòng đến bếp nhận món và phục vụ khách.`,
