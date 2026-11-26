@@ -120,9 +120,9 @@ export const ROLE_ALLOWED_ROUTES: Record<UserRole, AppRoute[]> = {
     "employees",
     "reports",
   ],
-  ORDER_STAFF: ["customer-order", "tables", "orders", "menu"],
-  KITCHEN_STAFF: ["kitchen", "menu", "inventory"],
-  INVENTORY_STAFF: ["inventory", "menu"],
+  ORDER_STAFF: ["tables", "orders", "menu"],
+  KITCHEN_STAFF: ["kitchen"],
+  INVENTORY_STAFF: ["inventory"],
   GUEST: ["customer-order"],
 };
 
@@ -190,18 +190,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, ReadonlySet<Permission>> = {
   ]),
 
   KITCHEN_STAFF: new Set<Permission>([
-    "MENU_VIEW",
-    "MENU_TOGGLE_STATUS",
     "KDS_VIEW",
     "KDS_ACCEPT_ITEM",
     "KDS_START_COOKING",
     "KDS_COMPLETE_ITEM",
-    "KDS_BUMP_TICKET",
-    "INVENTORY_VIEW",
   ]),
 
   INVENTORY_STAFF: new Set<Permission>([
-    "MENU_VIEW",
     "INVENTORY_VIEW",
     "INVENTORY_CREATE",
     "INVENTORY_UPDATE",
