@@ -6,7 +6,6 @@ import {
   ChefHat,
   CreditCard,
   History,
-  Plus,
   Search,
   UtensilsCrossed,
   X,
@@ -28,7 +27,6 @@ import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/St
 import { OrderStatusBadge } from '@/src/features/orders/components/OrderStatusBadge';
 import {
   AddOrderItemModal,
-  CreateOrderModal,
   OrderReasonModal,
   PaymentModal,
 } from '@/src/features/orders/components/OrderModals';
@@ -66,14 +64,12 @@ export function OrdersScreen() {
     addOrderItem,
     cancelOrder,
     recordPayment,
-    createOrder,
   } = useOrders();
 
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [reasonModal, setReasonModal] = useState<'REJECT' | 'CANCEL' | null>(null);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const selectedOrder = useMemo(() => {
     if (orders.length === 0) return null;
@@ -144,15 +140,6 @@ export function OrdersScreen() {
             leftIcon={<Search size={16} color={theme.colors.outline} />}
             containerStyle={styles.searchBox}
           />
-          <PermissionGate permission="ORDER_CREATE">
-            <Button
-              label="Tạo đơn mới"
-              variant="primary"
-              size="md"
-              leftIcon={<Plus size={16} color={theme.colors.onPrimary} />}
-              onPress={() => setCreateOpen(true)}
-            />
-          </PermissionGate>
         </View>
 
         <SegmentedTabs<OrderStatus | 'ALL'>
@@ -608,17 +595,6 @@ export function OrdersScreen() {
         </>
       ) : null}
 
-      <CreateOrderModal
-        visible={createOpen}
-        availableItems={availableMenuItems}
-        loading={mutating}
-        onClose={() => setCreateOpen(false)}
-        onSubmit={async (input) => {
-          const created = await createOrder(input);
-          setSelectedOrderId(created.id);
-          showToast('Đã tạo đơn hàng mới', 'success', created.orderNumber);
-        }}
-      />
     </ScrollView>
   );
 }
