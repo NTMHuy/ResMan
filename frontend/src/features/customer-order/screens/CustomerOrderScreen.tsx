@@ -76,10 +76,6 @@ export function CustomerOrderScreen() {
     cart,
     cartSummary,
     tableNumber,
-    changeTable,
-    openTables,
-    connectTable,
-    disconnectSession,
     guestName,
     setGuestName,
     guestCount,
@@ -193,58 +189,9 @@ export function CustomerOrderScreen() {
             })}
           </ScrollView>
         ) : (
-          <View style={{ gap: 8 }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
-              Chọn một bàn đang mở để bắt đầu gọi món. Bạn không cần nhập mã phiên.
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tableChips}>
-              {openTables.filter((table) => table.status === 'OPEN').map((table) => {
-                const active = tableNumber === (table.name || table.code);
-                return (
-                  <Pressable
-                    key={table.id}
-                    onPress={async () => {
-                      try {
-                        await connectTable(table.id);
-                        showToast('Đã kết nối bàn', 'success', 'Bạn có thể bắt đầu gọi món.');
-                      } catch (err) {
-                        showToast('Không thể kết nối', 'error', getErrorMessage(err, 'Bàn chưa có phiên hoạt động.'));
-                      }
-                    }}
-                    style={[
-                      styles.tableChip,
-                      {
-                        backgroundColor: active ? theme.colors.primary : theme.colors.surfaceLow,
-                        borderColor: active ? theme.colors.primary : theme.colors.border,
-                        borderRadius: theme.radius.md,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.tableChipText, { color: active ? theme.colors.onPrimary : theme.colors.onSurface }]}>
-                      {table.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-            {openTables.every((table) => table.status !== 'OPEN') ? (
-              <Text style={{ color: theme.colors.error, fontSize: 12 }}>
-                Hiện chưa có bàn nào được mở. Vui lòng đợi nhân viên mở bàn.
-              </Text>
-            ) : null}
-            <View style={styles.dishBtnGroup}>
-              <Button
-                label="Ngắt kết nối"
-                size="sm"
-                variant="secondary"
-                disabled={tableNumber === 'Chưa kết nối'}
-                onPress={() => {
-                  void disconnectSession();
-                  showToast('Đã ngắt kết nối phiên bàn', 'success');
-                }}
-              />
-            </View>
-          </View>
+          <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+            Tablet đã được gán cố định với {tableNumber}. Khi mở chức năng gọi món, hệ thống tự kích hoạt hoặc tiếp tục phiên của bàn này.
+          </Text>
         )}
 
         {APP_CONFIG.USE_MOCK_CUSTOMER_ORDER ? (
