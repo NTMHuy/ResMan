@@ -17,6 +17,12 @@ export class SessionsController {
     return this.sessions.open(dto.tableId, BigInt(user.id));
   }
 
+  @Post("customer/open")
+  @Permissions("customer:session:start")
+  openForCustomer(@CurrentUser() user: { id: string }) {
+    return this.sessions.openForCustomer(BigInt(user.id));
+  }
+
   @Get("table/:tableId/active")
   @Permissions("tables:read")
   findActiveByTable(@Param("tableId", ParseIntPipe) tableId: number) {
