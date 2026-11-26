@@ -67,6 +67,34 @@ export function OrdersScreen() {
     return orders.find((o) => o.id === selectedOrderId) ?? orders[0];
   }, [orders, selectedOrderId]);
 
+  const previousItemStatuses = useRef<Map<string, string> | null>(null);
+  useEffect(() => {
+    const current = new Map<string, { status: string; itemName: string; tableNumber: string }>();
+    for (const order of orders) {
+      for (const item of order.items) {
+        current.set(item.id, {
+          status: item.kitchenStatus,
+          itemName: item.menuItemName,
+          tableNumber: order.tableNumber,
+        });
+      }
+    }
+    if (previousItemStatuses.current) {
+      for (const [itemId, item] of current) {
+        const previous = previousItemStatuses.current.get(itemId);
+        if (item.status === 'COMPLETED' && previous?.status !== 'COMPLETED') {
+          Alert.alert(
+            'Món đã hoàn thành',
+            `${item.tableNumber} · ${item.itemName}\nVui lòng đến bếp nhận món và phục vụ khách.`,
+          );
+        }
+      }
+    }
+    previousItemStatuses.current = new Map(
+      [...current].map(([id, item]) => [id, item.status]),
+    );
+  }, [orders]);
+
   const notifiedPaymentRequests = useRef<Set<string>>(new Set());
   useEffect(() => {
     for (const request of paymentRequests) {
