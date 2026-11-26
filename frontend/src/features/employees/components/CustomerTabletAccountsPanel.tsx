@@ -32,7 +32,9 @@ type CreateForm = {
   deviceName: string;
 };
 function unwrap<T>(value: unknown): T {
-  if (value && typeof value === "object" && "data" in value) return (value as { data: T }).data;
+  if (value && typeof value === "object" && "success" in value && "data" in value) {
+    return (value as { data: T }).data;
+  }
   return value as T;
 }
 
@@ -57,8 +59,8 @@ export function CustomerTabletAccountsPanel() {
         apiClient.get("/users", { params: { page: 1, limit: 100 } }),
         apiClient.get("/tables"),
       ]);
-      const users = unwrap<Array<CustomerAccount & { role: { code: string } }>>(usersResponse.data);
-      setAccounts((users ?? []).filter((user) => user.role.code === "CUSTOMER"));
+      const usersPayload = unwrap<{ data: Array<CustomerAccount & { role: { code: string } }> }>(usersResponse.data);
+      setAccounts((usersPayload.data ?? []).filter((user) => user.role.code === "CUSTOMER"));
       setTables(unwrap<DiningTable[]>(tablesResponse.data) ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải tài khoản tablet.");
