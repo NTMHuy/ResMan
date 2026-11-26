@@ -127,13 +127,14 @@ export function useInventory() {
   );
 
   const countStock = useCallback(
-    async (ingredientId: string, quantity: number, reason: string) => {
+    async (ingredientId: string, quantity: number, reason: string, countType: 'OPENING' | 'CLOSING') => {
       setMutating(true);
       try {
         const updated = await repositories.inventory.countStock({
           ingredientId,
           quantity,
           reason,
+          countType,
         });
         await fetchInventory(true);
         return updated;
