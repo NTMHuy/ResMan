@@ -278,7 +278,7 @@ export function DashboardScreen() {
                       {dish.name}
                     </Text>
                     <Text style={[styles.dishSub, { color: theme.colors.onSurfaceVariant }]}>
-                      {dish.station} · {dish.quantitySold} phần
+                      {dish.quantitySold} phần
                     </Text>
                   </View>
                   <Text
