@@ -19,7 +19,7 @@ export class StaffOrdersController {
   }
 
   @Patch(":orderId/items/status")
-  @Permissions("orders:manage-item")
+  @Permissions("kitchen:update-item")
   updateOrderItemsStatus(
     @Param("orderId", ParseIntPipe) orderId: number,
     @Body() dto: UpdateOrderItemsStatusDto,
