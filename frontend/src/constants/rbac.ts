@@ -33,7 +33,8 @@ export type Permission =
   | "EMPLOYEE_UPDATE"
   | "EMPLOYEE_ASSIGN_ROLE"
   | "EMPLOYEE_TOGGLE_ACTIVE"
-  | "REPORT_VIEW";
+  | "REPORT_VIEW"
+  | "TABLES_MANAGE";
 
 export interface RouteMeta {
   route: AppRoute;
@@ -172,6 +173,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ReadonlySet<Permission>> = {
     "EMPLOYEE_ASSIGN_ROLE",
     "EMPLOYEE_TOGGLE_ACTIVE",
     "REPORT_VIEW",
+    "TABLES_MANAGE",
   ]),
 
   ORDER_STAFF: new Set<Permission>([
@@ -255,6 +257,7 @@ export const BACKEND_PERMISSION_MAP: Partial<Record<Permission, string[]>> = {
   EMPLOYEE_TOGGLE_ACTIVE: ["users:update"],
 
   REPORT_VIEW: ["reports:read"],
+  TABLES_MANAGE: ["tables:manage"],
 };
 
 function normalizeRole(role: unknown): UserRole | null {
