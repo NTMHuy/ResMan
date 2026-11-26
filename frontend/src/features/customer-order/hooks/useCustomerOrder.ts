@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
@@ -67,8 +66,7 @@ export function useCustomerOrder() {
     [],
   );
 
-  useFocusEffect(
-    useCallback(() => {
+  useEffect(() => {
       let mounted = true;
       const activateCustomerOrdering = async () => {
         try {
@@ -93,8 +91,7 @@ export function useCustomerOrder() {
       return () => {
         mounted = false;
       };
-    }, [loadCustomerData]),
-  );
+  }, [loadCustomerData]);
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
