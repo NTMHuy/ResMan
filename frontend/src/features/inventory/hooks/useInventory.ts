@@ -153,6 +153,7 @@ export function useInventory() {
           ingredientId,
           quantity,
           reason,
+          countType: 'CLOSING',
         });
         await fetchInventory(true);
         return updated;
