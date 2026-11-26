@@ -75,6 +75,21 @@ export class SessionsService {
     }
   }
 
+  async getActiveForCustomer(userId: bigint) {
+    const device = await this.prisma.tableDevice.findUnique({
+      where: { userId },
+      select: { diningTableId: true, isActive: true, table: { select: { code: true } } },
+    });
+    if (!device || !device.isActive) {
+      throw new NotFoundException("Tài khoản khách hàng chưa được gán với tablet và bàn hoạt động");
+    }
+    const session = await this.prisma.diningSession.findFirst({
+      where: { tableId: device.diningTableId, status: "OPEN" },
+      select: { id: true, table: { select: { code: true } } },
+    });
+    return session ? { id: session.id.toString(), tableNumber: session.table.code } : null;
+  }
+
   async openForCustomer(userId: bigint) {
     const device = await this.prisma.tableDevice.findUnique({
       where: { userId },
