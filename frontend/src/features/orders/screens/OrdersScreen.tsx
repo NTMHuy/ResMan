@@ -1,14 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
-  Ban,
-  Check,
-  ChefHat,
   CreditCard,
   History,
   Search,
-  UtensilsCrossed,
-  X,
 } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -59,16 +54,11 @@ export function OrdersScreen() {
     search,
     setSearch,
     reload,
-    acceptOrder,
-    rejectOrder,
-    updateOrderStatus,
     addOrderItem,
-    cancelOrder,
     recordPayment,
   } = useOrders();
 
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [reasonModal, setReasonModal] = useState<'REJECT' | 'CANCEL' | null>(null);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
 
@@ -294,41 +284,6 @@ export function OrdersScreen() {
 
               {/* Action Toolbar gated by RBAC */}
               <View style={styles.actionBar}>
-                {selectedOrder.status === 'PENDING' ? (
-                  <>
-                    <PermissionGate permission="ORDER_ACCEPT">
-                      <Button
-                        label="Tiếp nhận đơn"
-                        variant="primary"
-                        size="sm"
-                        loading={mutating}
-                        leftIcon={<Check size={15} color={theme.colors.onPrimary} />}
-                        onPress={async () => {
-                          try {
-                            await acceptOrder(selectedOrder.id);
-                            showToast('Đã tiếp nhận & chuyển bếp KDS', 'success');
-                          } catch (err) {
-                            showToast(
-                              'Không thể tiếp nhận',
-                              'error',
-                              err instanceof Error ? err.message : undefined
-                            );
-                          }
-                        }}
-                      />
-                    </PermissionGate>
-                    <PermissionGate permission="ORDER_REJECT">
-                      <Button
-                        label="Từ chối"
-                        variant="danger"
-                        size="sm"
-                        leftIcon={<X size={15} color={theme.colors.onErrorContainer} />}
-                        onPress={() => setReasonModal('REJECT')}
-                      />
-                    </PermissionGate>
-                  </>
-                ) : null}
-
                 {!isTerminal ? (
                   <>
                     <PermissionGate permission="ORDER_ADD_ITEM">
@@ -575,23 +530,6 @@ export function OrdersScreen() {
 
       {selectedOrder ? (
         <>
-          <OrderReasonModal
-            visible={reasonModal !== null}
-            mode={reasonModal || 'CANCEL'}
-            orderNumber={selectedOrder.orderNumber}
-            loading={mutating}
-            onClose={() => setReasonModal(null)}
-            onConfirm={async (reason) => {
-              if (reasonModal === 'REJECT') {
-                await rejectOrder(selectedOrder.id, reason);
-                showToast('Đã từ chối đơn hàng', 'warning', selectedOrder.orderNumber);
-              } else {
-                await cancelOrder(selectedOrder.id, reason);
-                showToast('Đã hủy đơn hàng', 'warning', selectedOrder.orderNumber);
-              }
-            }}
-          />
-
           <AddOrderItemModal
             visible={addItemOpen}
             orderNumber={selectedOrder.orderNumber}
