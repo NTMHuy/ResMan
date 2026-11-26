@@ -5,6 +5,7 @@ import type {
 } from '@/src/features/customer-order/types/customerOrder.types';
 
 export interface CustomerOrderRepository {
+  getActiveSession(): Promise<{ id: string; tableNumber: string } | null>;
   startSession(): Promise<string>;
   getCustomerMenu(): Promise<{ categories: MenuCategory[]; items: MenuItem[] }>;
   submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking>;
