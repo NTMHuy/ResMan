@@ -250,6 +250,9 @@ declare module 'react-native' {
   export const Modal: React.ComponentType<ModalProps>;
   export const Switch: React.ComponentType<SwitchProps>;
   export const ActivityIndicator: React.ComponentType<ActivityIndicatorProps>;
+  export const Alert: {
+    alert: (title: string, message?: string, buttons?: Array<{ text?: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive' }>) => void;
+  };
   export function FlatList<ItemT>(props: FlatListProps<ItemT>): React.ReactElement | null;
 
   export const Platform: {
@@ -294,6 +297,7 @@ declare module 'expo-router' {
     back: () => void;
   };
   export function usePathname(): string;
+  export function useFocusEffect(callback: () => void | (() => void)): void;
 }
 
 declare module 'react-native-web' {
