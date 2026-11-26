@@ -10,6 +10,8 @@ import { mockOrdersData } from '@/src/data/mock/mockOrders';
 import { mockStoreEvents, simulateMockNetwork, syncOrderItemsToKds } from '@/src/data/mock/mockStore';
 
 export class MockCustomerOrderRepository implements CustomerOrderRepository {
+  async startSession(): Promise<void> {}
+
   async getCustomerMenu(): Promise<{ categories: MenuCategory[]; items: MenuItem[] }> {
     await simulateMockNetwork();
     const categories = mockCategoriesData
