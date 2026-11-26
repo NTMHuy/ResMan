@@ -100,6 +100,7 @@ export function CustomerOrderScreen() {
     removeFromCart,
     clearCart,
     submitOrder,
+    requestPayment,
     cancelGuestItem,
     reload,
   } = useCustomerOrder();
@@ -107,6 +108,7 @@ export function CustomerOrderScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('MENU');
   const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
   const [orderNote, setOrderNote] = useState('');
+  const [requestingPayment, setRequestingPayment] = useState(false);
 
   const handleSubmitOrder = async () => {
     try {
@@ -440,6 +442,28 @@ export function CustomerOrderScreen() {
           </View>
           <Badge label={`${tableOrders.length} đơn`} tone="neutral" mono />
         </View>
+
+        {activeSessionId ? (
+          <Button
+            label="Yêu cầu thanh toán"
+            variant="secondary"
+            size="md"
+            fullWidth
+            loading={requestingPayment}
+            disabled={requestingPayment}
+            onPress={async () => {
+              setRequestingPayment(true);
+              try {
+                await requestPayment();
+                showToast('Đã gửi yêu cầu thanh toán', 'success', 'Nhân viên Order sẽ đến bàn hỗ trợ.');
+              } catch (err) {
+                showToast('Không thể gửi yêu cầu', 'error', getErrorMessage(err, 'Vui lòng thử lại.'));
+              } finally {
+                setRequestingPayment(false);
+              }
+            }}
+          />
+        ) : null}
 
         {tableOrders.length === 0 ? (
           <Text style={[styles.emptyCartText, { color: theme.colors.onSurfaceVariant }]}>
