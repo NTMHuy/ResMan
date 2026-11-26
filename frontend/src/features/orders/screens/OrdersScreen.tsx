@@ -67,6 +67,10 @@ export function OrdersScreen() {
     return orders.find((o) => o.id === selectedOrderId) ?? orders[0];
   }, [orders, selectedOrderId]);
 
+  const canConfirmPayment = Boolean(
+    selectedOrder && selectedOrder.items.every((item) => item.kitchenStatus !== 'QUEUED'),
+  );
+
   const previousItemStatuses = useRef<Map<string, string> | null>(null);
   useEffect(() => {
     const current = new Map<string, { status: string; itemName: string; tableNumber: string }>();
@@ -321,7 +325,7 @@ export function OrdersScreen() {
                 </>
               </View>
 
-              {selectedOrder.paymentStatus === 'UNPAID' ? (
+              {selectedOrder.paymentStatus === 'UNPAID' && canConfirmPayment ? (
                 <PermissionGate permission="ORDER_PAYMENT">
                   <Button
                     label="Thu tiền & Hoàn tất"
