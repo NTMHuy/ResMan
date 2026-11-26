@@ -3,6 +3,7 @@ name: Frontend validation
 on:
   push:
     branches:
+      - member/minhhuy
       - member/quocthang
     paths:
       - "frontend/**"
