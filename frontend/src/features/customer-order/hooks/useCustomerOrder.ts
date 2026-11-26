@@ -256,6 +256,11 @@ export function useCustomerOrder() {
     [tableNumber],
   );
 
+  const requestPayment = useCallback(async () => {
+    if (!activeSessionId) throw new Error('Chưa có phiên gọi món đang hoạt động.');
+    await repositories.customerOrder.requestPayment();
+  }, [activeSessionId]);
+
   const submitOrder = useCallback(
     async (orderNote?: string) => {
       if (!activeSessionId) throw new Error('Vui lòng mở phiên gọi món trước.');
@@ -347,6 +352,7 @@ export function useCustomerOrder() {
     removeFromCart,
     clearCart,
     submitOrder,
+    requestPayment,
     cancelGuestItem,
     reload: () => loadCustomerData(false),
   };
