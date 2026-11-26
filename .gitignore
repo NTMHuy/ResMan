@@ -88,3 +88,6 @@ ENV/
 
 # Prisma Client generated source
 /backend/src/generated/prisma/
+
+# Uploaded menu item images are runtime data
+/backend/uploads/

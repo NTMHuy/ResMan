@@ -1,0 +1,225 @@
+---
+name: ResMan Operational Core
+colors:
+  surface: '#f8f9ff'
+  surface-dim: '#cbdbf5'
+  surface-bright: '#f8f9ff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#eff4ff'
+  surface-container: '#e5eeff'
+  surface-container-high: '#dce9ff'
+  surface-container-highest: '#d3e4fe'
+  on-surface: '#0b1c30'
+  on-surface-variant: '#45464d'
+  inverse-surface: '#213145'
+  inverse-on-surface: '#eaf1ff'
+  outline: '#76777d'
+  outline-variant: '#c6c6cd'
+  surface-tint: '#565e74'
+  primary: '#000000'
+  on-primary: '#ffffff'
+  primary-container: '#131b2e'
+  on-primary-container: '#7c839b'
+  inverse-primary: '#bec6e0'
+  secondary: '#0051d5'
+  on-secondary: '#ffffff'
+  secondary-container: '#316bf3'
+  on-secondary-container: '#fefcff'
+  tertiary: '#000000'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#2f1500'
+  on-tertiary-container: '#c76c00'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#dae2fd'
+  primary-fixed-dim: '#bec6e0'
+  on-primary-fixed: '#131b2e'
+  on-primary-fixed-variant: '#3f465c'
+  secondary-fixed: '#dbe1ff'
+  secondary-fixed-dim: '#b4c5ff'
+  on-secondary-fixed: '#00174b'
+  on-secondary-fixed-variant: '#003ea8'
+  tertiary-fixed: '#ffdcc3'
+  tertiary-fixed-dim: '#ffb77d'
+  on-tertiary-fixed: '#2f1500'
+  on-tertiary-fixed-variant: '#6e3900'
+  background: '#f8f9ff'
+  on-background: '#0b1c30'
+  surface-variant: '#d3e4fe'
+typography:
+  headline-xl:
+    fontFamily: Inter
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.02em
+  headline-xl-mobile:
+    fontFamily: Inter
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.02em
+  headline-lg:
+    fontFamily: Inter
+    fontSize: 24px
+    fontWeight: '600'
+    lineHeight: 32px
+    letterSpacing: -0.015em
+  headline-md:
+    fontFamily: Inter
+    fontSize: 20px
+    fontWeight: '600'
+    lineHeight: 28px
+    letterSpacing: -0.01em
+  headline-sm:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: '600'
+    lineHeight: 24px
+    letterSpacing: 0em
+  body-lg:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 24px
+    letterSpacing: 0em
+  body-md:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: '400'
+    lineHeight: 20px
+    letterSpacing: 0em
+  body-sm:
+    fontFamily: Inter
+    fontSize: 12px
+    fontWeight: '400'
+    lineHeight: 16px
+    letterSpacing: 0em
+  label-lg:
+    fontFamily: JetBrains Mono
+    fontSize: 14px
+    fontWeight: '600'
+    lineHeight: 20px
+    letterSpacing: -0.01em
+  label-md:
+    fontFamily: JetBrains Mono
+    fontSize: 12px
+    fontWeight: '500'
+    lineHeight: 16px
+    letterSpacing: 0em
+  label-sm:
+    fontFamily: JetBrains Mono
+    fontSize: 11px
+    fontWeight: '500'
+    lineHeight: 14px
+    letterSpacing: 0.02em
+  tabular-data:
+    fontFamily: JetBrains Mono
+    fontSize: 13px
+    fontWeight: '500'
+    lineHeight: 18px
+    letterSpacing: -0.02em
+rounded:
+  sm: 0.125rem
+  DEFAULT: 0.25rem
+  md: 0.375rem
+  lg: 0.5rem
+  xl: 0.75rem
+  full: 9999px
+spacing:
+  gutter: 1rem
+  margin: 1rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 0.75rem
+  space-lg: 1rem
+  space-xl: 1.5rem
+---
+
+## Brand & Style
+
+This design system is engineered specifically for high-velocity, high-stress restaurant operations. The operational landscape spans five key user personas: the **Customer** (ordering & payments), **Order Staff** (table management & POS entry), **Kitchen Staff** (KDS touchscreens under grease, steam, and distance viewing), **Inventory Staff** (rapid barcode scanning & low-stock audits), and the **Manager** (real-time telemetry, shift approvals, and P&L reporting).
+
+The aesthetic is strictly **Utilitarian & Compact Systematic**. It rejects decorative embellishments, unnecessary gradients, and gratuitous motion in favor of structural clarity, visual ergonomics, and maximum data density. Key attributes include:
+- **Instant Optical Legibility:** Information hierarchy is parsed through structural borders, clear status badges, and deterministic color encoding.
+- **Glanceability Under Pressure:** Critical operational states (such as cooking timers, 86'd items, and order escalation) are visible across wide angles and harsh lighting.
+- **Physical Reliability:** Target sizes, touch targets, and contrast ratios strictly observe WCAG 2.1 AA (minimum 4.5:1 for normal text, 3:1 for large UI components) to accommodate industrial tablets, wall-mounted KDS monitors, and mobile handhelds.
+
+## Colors
+
+The color architecture relies on a slate/zinc foundation paired with precise, semantic status tokens to govern the end-to-end food service lifecycle. The default system operates in `light` mode for POS and back-office managerial workflows, while KDS surfaces inherit inverted surface tokens mapped to dark viewing conditions.
+
+### Base Palette
+- **Primary (`#0F172A` - Slate 900):** Grounding neutral for primary actions, structural strokes, and high-emphasis typography.
+- **Secondary (`#2563EB` - Blue 600):** System interaction color used for active states, link selections, and order dispatch triggers.
+- **Tertiary (`#D97706` - Amber 600):** Prep & cooking indicators, warning flags, and active kitchen timers.
+- **Neutral (`#64748B` - Slate 500):** Secondary metadata, inactive borders, and structural dividers.
+
+### Operational Lifecycle Tokens
+- **Pending (`#F1F5F9` surface / `#475569` text / `#CBD5E1` border):** Unacknowledged orders waiting for kitchen/register intake.
+- **Confirmed (`#EFF6FF` surface / `#1D4ED8` text / `#BFDBFE` border):** Order acknowledged, ticket printed/queued.
+- **Cooking / In-Progress (`#FFFBEB` surface / `#B45309` text / `#FDE68A` border):** Kitchen production active; displays running elapsed timer.
+- **Ready / Expedite (`#F0FDF4` surface / `#15803D` text / `#BBF7D0` border):** Plated, staged at pass, awaiting runner.
+- **Completed (`#F8FAFC` surface / `#64748B` text / `#E2E8F0` border):** Settled, paid, and archived.
+- **Cancelled / Void (`#FEF2F2` surface / `#B91C1C` text / `#FECACA` border):** Rejected or voided item/ticket.
+- **Urgent / Delayed (`#DC2626` base / `#FFFFFF` text):** Flashing alert state for tickets exceeding target preparation SLA.
+- **Low-Stock / 86'd (`#EA580C` base / `#FFF7ED` surface):** Real-time ingredient exhaustion warnings across POS and Menu Builder.
+
+## Typography
+
+Typography in this design system prioritizes high vertical density, tabular data alignment, and unambiguous numeral recognition. 
+
+- **Primary Interface Font (`Inter`):** Handles all navigation, system controls, order lists, and managerial dashboard headers. Tuned with tightened tracking on larger variants to prevent wrapping in tight table cells.
+- **Operational Data Font (`JetBrains Mono`):** Applied to all ticket numbers (e.g., `#T-104`), elapsed prep times (`14:22`), table numbers (`TBL-04`), stock quantities (`SKU-2094`), and currency formats (`$1,429.50`). Monospaced alignment prevents layout jitter during real-time number increments.
+
+## Layout & Spacing
+
+The layout is built upon an 8px base rhythm with a strict 4px sub-grid for compact controls. Workspaces maximize operational viewport efficiency across three distinct device profiles:
+
+- **Desktop & POS Terminals (1024px+):** 12-column adaptive grid, fixed side rail (64px collapsed, 240px expanded), multi-pane split view for order builder (60% catalog/floor map, 40% active ticket lane). Gutters set at `1rem`.
+- **Kitchen Display Displays (KDS / Wall Units):** Dynamic multi-column Kanban flex layout (3 to 6 fixed 280px ticket columns depending on screen width) with locked vertical scrolling and sticky header status bands.
+- **Mobile & Handheld Terminals (<768px):** Single-column stacked layout with persistent bottom order drawers, 48px minimum vertical touch bands, and edge margins set to `1rem`.
+
+## Elevation & Depth
+
+This system avoids ambient drop shadows, soft blurred elevations, and decorative layering. Depth is communicated strictly through **structural borders, container tiering, and surface fills**:
+
+- **Ground (Level 0):** `#F8FAFC` (Slate 50) for canvas backgrounds and layout frames.
+- **Base Surface (Level 1):** `#FFFFFF` (Solid White) for cards, data tables, POS menus, and ticket bodies, encapsulated by a crisp 1px border (`#E2E8F0`).
+- **Interactive Active/Hover (Level 2):** Subtle boundary transition (`#CBD5E1`) paired with an interior background shift to `#F1F5F9`. No positional shifting (`transform: translateY`) is permitted.
+- **Overlays, Drawers & Modals (Level 3):** Solid `#FFFFFF` container with a defined 1px `#94A3B8` border and a flat 20% `#0F172A` backdrop scrim to isolate critical operational prompts (e.g., Void Approval, Cash Drawer Reconcile).
+
+## Shapes
+
+The design uses a restrained, industrial radius scale (`0.25rem` / `4px` base) to project efficiency, machine-grade precision, and maximum spatial economy. 
+
+- **Inputs, Buttons, and Table Cells:** Standard `0.25rem` (`rounded-sm`) to ensure maximum interior area for text and touch.
+- **Cards and Modal Panels:** Standard `0.5rem` (`rounded-lg`) for structural modules.
+- **Pills and Status Dots:** Restricted strictly to operational status badges and counter tags to contrast against rectangular table rows and ticket blocks.
+
+## Components
+
+### Buttons & Action Triggers
+- **Primary:** Background `#0F172A`, text `#FFFFFF`, 1px solid `#0F172A`. Height: 36px (desktop/POS compact) or 48px (KDS/Handheld). Minimum touch target: 44px x 44px.
+- **Secondary:** Background `#FFFFFF`, text `#0F172A`, 1px solid `#CBD5E1`. Hover: `#F1F5F9`.
+- **Destructive / Void:** Background `#FEF2F2`, text `#B91C1C`, 1px solid `#FECACA`. Hover: `#DC2626` with `#FFFFFF` text.
+- **Operational KDS Bump:** High-visibility green (`#15803D`) full-width action bar located at the bottom of the kitchen ticket card.
+
+### Chips & Status Badges
+- **Format:** Height 22px, padding `2px 8px`, border radius `9999px`, font `label-sm` (`JetBrains Mono`).
+- **State Fill Rule:** Never use raw hex borders without paired background tints. Pending, Cooking, Ready, and Low-Stock must strictly map to their designated operational lifecycle color pairs.
+
+### Data Tables & Ticket Lists
+- **Rows:** Alternating rows prohibited. Strict 1px bottom border (`#E2E8F0`). Row density: `36px` default compact; `48px` comfortable touch.
+- **Numeric Alignment:** All quantities, prices, and timestamps must right-align using `tabular-data` (`JetBrains Mono`).
+
+### Form Inputs & Adjusters
+- **Text Inputs:** White background, 1px border `#CBD5E1`, text `body-md`. Focus state uses 2px ring `#2563EB` with 0px offset.
+- **Quantity Stepper:** Heavy segmented control with distinct minus/plus touch blocks (36px minimum) flanking the numeric readout.
+
+### Kitchen & POS Order Cards
+- **Structure:** Card header features Ticket ID, Table Number, and live Monospaced Timer.
+- **Urgency Thresholds:** Under 10 mins: border `#E2E8F0`. 10-20 mins: border `#FDE68A`, background `#FFFBEB`. 20+ mins: border `#DC2626`, header flashing `#DC2626` with `#FFFFFF` text.
+- **Item Modifiers:** Prefixed with a clear right-angle indent indicator (`↳ NO ONIONS`), styled in bold `#B45309` to prevent kitchen prep errors.

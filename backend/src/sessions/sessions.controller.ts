@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Post, Body, Patch, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { Permissions } from "../auth/decorators/permissions.decorator.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
@@ -21,6 +21,12 @@ export class SessionsController {
   @Permissions("tables:read")
   findActiveByTable(@Param("tableId", ParseIntPipe) tableId: number) {
     return this.sessions.findActiveByTable(BigInt(tableId));
+  }
+
+  @Patch(":id/close")
+  @Permissions("sessions:close")
+  close(@Param("id", ParseIntPipe) id: number, @CurrentUser() user: { id: string }) {
+    return this.sessions.close(BigInt(id), BigInt(user.id));
   }
 
   @Get(":id")

@@ -1,46 +1,112 @@
-
 @baseUrl = http://localhost:3000/api/v1
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJtYW5hZ2VyIiwiaWF0IjoxNzk0OTczMDg3LCJleHAiOjE3OTUwNTk0ODd9.uCkqWXiBTI9G5Hl7p37gxApgYBFIqFQYTy-2GZbbRYg
+@token = {{accessToken}}
 
-### 2.1 Lấy danh sách menu quản lý
-GET {{baseUrl}}/menu/management
+### 1. Danh sách danh mục
+GET {{baseUrl}}/menu-categories
 Authorization: Bearer {{token}}
 
-### 2.2 Tạo danh mục thử nghiệm
+### 2. Tạo danh mục
 # @name createCategory
-POST {{baseUrl}}/menu/categories
+POST {{baseUrl}}/menu-categories
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "code": "QA_CATEGORY",
+  "code": "QA_MENU_CATEGORY",
   "name": "Danh mục kiểm thử",
   "description": "Danh mục dùng để kiểm thử API ResMan"
 }
 
-### 2.3 Tạo món thử nghiệm
-# @name createMenuItem
-POST {{baseUrl}}/menu/items
+### 3. Danh sách món quản lý (có tìm kiếm, lọc, phân trang)
+GET {{baseUrl}}/menu-items?search=&page=1&limit=100
+Authorization: Bearer {{token}}
+
+### 4. Tạo món giá cố định
+# @name createFixedItem
+POST {{baseUrl}}/menu-items
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "code": "QA_ITEM_01",
+  "code": "QA_FIXED_01",
   "categoryId": {{createCategory.response.body.$.id}},
-  "name": "Món kiểm thử",
-  "description": "Món dùng để kiểm thử chức năng quản lý thực đơn",
-  "price": "45000"
+  "name": "Món giá cố định",
+  "description": "Món dùng để kiểm thử loại giá FIXED",
+  "price": 45000,
+  "pricingType": "FIXED"
 }
 
-### 2.4 Cập nhật món
-PATCH {{baseUrl}}/menu/items/{{createMenuItem.response.body.$.id}}
+### 5. Tạo món giá theo đơn vị (ví dụ theo lạng)
+# @name createPerUnitItem
+POST {{baseUrl}}/menu-items
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Món kiểm thử đã cập nhật",
-  "price": "50000"
+  "code": "QA_PER_UNIT_01",
+  "categoryId": {{createCategory.response.body.$.id}},
+  "name": "Món tính theo lạng",
+  "description": "Món dùng để kiểm thử loại giá PER_UNIT",
+  "price": 25000,
+  "pricingType": "PER_UNIT",
+  "priceUnit": "lạng"
 }
 
-### 2.5 Xem thực đơn công khai
-GET {{baseUrl}}/menu
+### 6. Tạo món giá thị trường (không có giá)
+# @name createMarketPriceItem
+POST {{baseUrl}}/menu-items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "QA_MARKET_01",
+  "categoryId": {{createCategory.response.body.$.id}},
+  "name": "Món giá thị trường",
+  "description": "Món dùng để kiểm thử loại giá MARKET_PRICE",
+  "price": null,
+  "pricingType": "MARKET_PRICE"
+}
+
+### 7. Tạo món chưa thiết lập giá
+# @name createUnsetItem
+POST {{baseUrl}}/menu-items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "QA_UNSET_01",
+  "categoryId": {{createCategory.response.body.$.id}},
+  "name": "Món chưa có giá",
+  "description": "Món dùng để kiểm thử loại giá UNSET",
+  "price": null,
+  "pricingType": "UNSET"
+}
+
+### 8. Cập nhật trạng thái món (hết món)
+PATCH {{baseUrl}}/menu-items/{{createFixedItem.response.body.$.id}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": true,
+  "availabilityStatus": "MANUAL_UNAVAILABLE",
+  "availabilityReason": "Hết món kiểm thử"
+}
+
+### 9. Khôi phục trạng thái món
+PATCH {{baseUrl}}/menu-items/{{createFixedItem.response.body.$.id}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": true,
+  "availabilityStatus": "AVAILABLE",
+  "availabilityReason": null
+}
+
+### 10. Thực đơn công khai dành cho khách hàng
+GET {{baseUrl}}/menu-items/customer/menu
+
+### 11. Xóa danh mục kiểm thử (chỉ thành công sau khi đã xóa các món kiểm thử)
+DELETE {{baseUrl}}/menu-categories/{{createCategory.response.body.$.id}}
+Authorization: Bearer {{token}}
