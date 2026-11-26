@@ -70,7 +70,7 @@ export function TablesScreen() {
       </View>
 
       <View style={[styles.summary, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-        <Text style={{ color: theme.colors.onSurface, fontWeight: "700" }}>Tổng {tables.length}/20 bàn</Text>
+        <Text style={{ color: theme.colors.onSurface, fontWeight: "700" }}>Tổng {tables.length} bàn</Text>
         <Text style={{ color: theme.colors.success }}>Đang mở: {occupiedCount}</Text>
         <Text style={{ color: theme.colors.onSurfaceVariant }}>Đang đóng: {Math.max(0, tables.length - occupiedCount)}</Text>
       </View>
@@ -118,7 +118,7 @@ export function TablesScreen() {
       </View>
       {!loading && tables.length === 0 ? (
         <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: "center", marginTop: 20 }}>
-          Chưa có bàn. Hãy chạy seed backend để khởi tạo 20 bàn cố định.
+          Chưa có bàn. Quản lý cần tạo bàn trong chức năng quản lý bàn.
         </Text>
       ) : null}
     </ScrollView>
