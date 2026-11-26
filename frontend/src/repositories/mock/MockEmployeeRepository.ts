@@ -51,8 +51,6 @@ export class MockEmployeeRepository implements EmployeeRepository {
       email: input.email.trim().toLowerCase(),
       phone: input.phone.trim(),
       role: input.role,
-      station: input.station.trim(),
-      shift: input.shift.trim(),
       isActive: true,
       avatarInitials: getInitials(input.fullName),
       password: input.password,
@@ -76,8 +74,6 @@ export class MockEmployeeRepository implements EmployeeRepository {
     if (input.email !== undefined) target.email = input.email.trim().toLowerCase();
     if (input.phone !== undefined) target.phone = input.phone.trim();
     if (input.role !== undefined) target.role = input.role;
-    if (input.station !== undefined) target.station = input.station.trim();
-    if (input.shift !== undefined) target.shift = input.shift.trim();
     if (input.isActive !== undefined) target.isActive = input.isActive;
     mockStoreEvents.emit();
     return toEmployee(target);
