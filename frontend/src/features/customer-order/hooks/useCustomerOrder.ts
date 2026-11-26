@@ -33,6 +33,7 @@ export function useCustomerOrder() {
   const [tableOrders, setTableOrders] = useState<CustomerOrderTracking[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [startingSession, setStartingSession] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
@@ -51,12 +52,13 @@ export function useCustomerOrder() {
         setCategories(menu.categories);
         setItems(menu.items);
 
-        const recentOrders = await repositories.customerOrder.getRecentTableOrders('');
-        setTableOrders(recentOrders);
-        if (recentOrders[0]) {
-          setTableNumber(recentOrders[0].tableNumber);
-        } else {
-          setTableNumber('Chưa có phiên bàn');
+        try {
+          const recentOrders = await repositories.customerOrder.getRecentTableOrders('');
+          setTableOrders(recentOrders);
+          if (recentOrders[0]) setTableNumber(recentOrders[0].tableNumber);
+        } catch {
+          // No active session is a normal state before the customer starts ordering.
+          setTableOrders([]);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không thể tải thực đơn.');
@@ -68,52 +70,60 @@ export function useCustomerOrder() {
   );
 
   useEffect(() => {
-      let mounted = true;
-      const activateCustomerOrdering = async () => {
-        try {
-          // Each time the customer enters the ordering feature, start or reuse
-          // the session belonging to this tablet's assigned table.
-          let sessionId: string | null = null;
-          if (!USE_MOCK_CUSTOMER_ORDER) {
-            sessionId = await repositories.customerOrder.startSession();
-          }
-          if (!mounted) return;
-          setActiveSessionId(sessionId);
-
-          // A local cart belongs to exactly one dining session. Never restore
-          // unsent items from a previous guest after the table has been paid.
-          const savedCart = await storageService.getJson<{
-            sessionId: string;
-            items: CartItem[];
-          }>(storageService.KEYS.CUSTOMER_CART);
-          if (!mounted) return;
-          if (
-            sessionId &&
-            savedCart &&
-            savedCart.sessionId === sessionId &&
-            Array.isArray(savedCart.items)
-          ) {
-            setCart(savedCart.items);
-          } else {
-            setCart([]);
-            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
-              sessionId,
-              items: [],
-            });
-          }
-          if (mounted) await loadCustomerData(false);
-        } catch (err) {
-          if (mounted) {
-            setError(err instanceof Error ? err.message : 'Không thể khởi động phiên bàn.');
-            setLoading(false);
-          }
+    let mounted = true;
+    const restoreCustomerSession = async () => {
+      try {
+        let session: { id: string; tableNumber: string } | null = null;
+        if (!USE_MOCK_CUSTOMER_ORDER) {
+          session = await repositories.customerOrder.getActiveSession();
         }
-      };
-      void activateCustomerOrdering();
-      return () => {
-        mounted = false;
-      };
+        if (!mounted) return;
+        setActiveSessionId(session?.id ?? null);
+        if (session) setTableNumber(session.tableNumber);
+
+        const savedCart = await storageService.getJson<{
+          sessionId: string;
+          items: CartItem[];
+        }>(storageService.KEYS.CUSTOMER_CART);
+        if (!mounted) return;
+        if (session && savedCart?.sessionId === session.id && Array.isArray(savedCart.items)) {
+          setCart(savedCart.items);
+        } else {
+          setCart([]);
+          await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+            sessionId: session?.id ?? null,
+            items: [],
+          });
+        }
+        if (mounted) await loadCustomerData(false);
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Không thể khôi phục phiên bàn.');
+          setLoading(false);
+        }
+      }
+    };
+    void restoreCustomerSession();
+    return () => { mounted = false; };
   }, [loadCustomerData]);
+
+  const startCustomerSession = useCallback(async () => {
+    if (activeSessionId) return activeSessionId;
+    setStartingSession(true);
+    setError(null);
+    try {
+      const sessionId = USE_MOCK_CUSTOMER_ORDER
+        ? 'mock-session'
+        : await repositories.customerOrder.startSession();
+      setActiveSessionId(sessionId);
+      setCart([]);
+      await storageService.setJson(storageService.KEYS.CUSTOMER_CART, { sessionId, items: [] });
+      await loadCustomerData(false);
+      return sessionId;
+    } finally {
+      setStartingSession(false);
+    }
+  }, [activeSessionId, loadCustomerData]);
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
@@ -247,6 +257,7 @@ export function useCustomerOrder() {
 
   const submitOrder = useCallback(
     async (orderNote?: string) => {
+      if (!activeSessionId) throw new Error('Vui lòng mở phiên gọi món trước.');
       if (cart.length === 0) throw new Error('Giỏ hàng đang trống.');
       if (cart.length > 30) throw new Error('Mỗi lần gửi không được vượt quá 30 loại món.');
       setSubmitting(true);
@@ -271,7 +282,7 @@ export function useCustomerOrder() {
         setSubmitting(false);
       }
     },
-    [cart, tableNumber, guestName, guestCount, persistCart],
+    [cart, tableNumber, guestName, guestCount, persistCart, activeSessionId],
   );
 
   const filteredItems = useMemo(() => {
@@ -319,6 +330,9 @@ export function useCustomerOrder() {
     tableOrders,
     loading,
     submitting,
+    startingSession,
+    activeSessionId,
+    startCustomerSession,
     error,
     search,
     setSearch,
