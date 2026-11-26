@@ -8,6 +8,70 @@ type PaymentMethod = "CASH" | "CARD" | "BANK_TRANSFER";
 export class PaymentsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async requestForCustomer(userId: bigint) {
+    const device = await this.prisma.tableDevice.findUnique({
+      where: { userId },
+      select: { diningTableId: true, isActive: true },
+    });
+    if (!device || !device.isActive) {
+      throw new NotFoundException("Tài khoản khách hàng chưa được gán với tablet và bàn hoạt động");
+    }
+    const session = await this.prisma.diningSession.findFirst({
+      where: { tableId: device.diningTableId, status: "OPEN" },
+      select: { id: true },
+    });
+    if (!session) throw new ConflictException("Bàn chưa có phiên gọi món đang hoạt động");
+    const existingPayment = await this.prisma.payment.findUnique({
+      where: { order: { diningSessionId: session.id } },
+      select: { id: true },
+    });
+    if (existingPayment) throw new ConflictException("Phiên này đã được thanh toán");
+    const request = await this.prisma.paymentRequest.upsert({
+      where: { diningSessionId: session.id },
+      create: { diningSessionId: session.id, status: "PENDING" },
+      update: { status: "PENDING", requestedAt: new Date(), resolvedAt: null },
+    });
+    return { id: request.id.toString(), status: request.status, requestedAt: request.requestedAt };
+  }
+
+  async listPendingRequests() {
+    const requests = await this.prisma.paymentRequest.findMany({
+      where: { status: "PENDING", diningSession: { status: "OPEN" } },
+      orderBy: { requestedAt: "asc" },
+      include: {
+        diningSession: {
+          include: {
+            table: { select: { id: true, code: true, name: true } },
+            order: { include: { items: { orderBy: { createdAt: "asc" } } } },
+          },
+        },
+      },
+    });
+    return requests.map((request) => {
+      const order = request.diningSession.order;
+      const items = order?.items ?? [];
+      const totalAmount = items
+        .filter((item) => item.status !== "CANCELLED")
+        .reduce((total, item) => total.add(item.lineTotal), new Prisma.Decimal(0));
+      return {
+        id: request.id.toString(),
+        requestedAt: request.requestedAt,
+        sessionId: request.diningSession.id.toString(),
+        table: request.diningSession.table,
+        orderId: order?.id.toString() ?? null,
+        orderCode: order?.orderCode ?? null,
+        totalAmount: totalAmount.toString(),
+        items: items.map((item) => ({
+          id: item.id.toString(),
+          name: item.itemNameSnapshot,
+          quantity: item.quantity,
+          status: item.status,
+          lineTotal: item.lineTotal.toString(),
+        })),
+      };
+    });
+  }
+
   async confirmForSession(
     sessionId: bigint,
     actorId: bigint,
@@ -72,6 +136,11 @@ export class PaymentsService {
             status: "PAID",
             recordedBy: actorId,
           },
+        });
+
+        await tx.paymentRequest.updateMany({
+          where: { diningSessionId: session.id, status: "PENDING" },
+          data: { status: "COMPLETED", resolvedAt: new Date() },
         });
 
         const closedAt = new Date();
