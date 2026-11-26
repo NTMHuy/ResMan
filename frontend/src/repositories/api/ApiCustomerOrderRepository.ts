@@ -143,9 +143,8 @@ function mapGuestOrder(data: GuestSessionResponse): CustomerOrderTracking {
   };
 }
 
-export class ApiCustomerOrderRepository implements CustomerOrderRepositoexport class ApiCustomerOrderRepository implements CustomerOrderRepository {
-  private async startOrReuseAssignedSession(): Promise<void> {
-    // Backend resolves the dining table from the authenticated CUSTOMER account.
+export class ApiCustomerOrderRepository implements CustomerOrderRepository {
+  async startSession(): Promise<void> {
     await apiClient.post('/sessions/customer/open');
   }
 
@@ -160,7 +159,6 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepositoexport c
   }
 
   async submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking> {
-    await this.startOrReuseAssignedSession();
     const items = input.items.map((item) => ({
       menuItemId: Number(item.menuItemId),
       quantity: item.quantity,
@@ -177,7 +175,6 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepositoexport c
   }
 
   async getRecentTableOrders(_tableNumber: string): Promise<CustomerOrderTracking[]> {
-    await this.startOrReuseAssignedSession();
     return [mapGuestOrder(await this.getCustomerSession())];
   }
 
