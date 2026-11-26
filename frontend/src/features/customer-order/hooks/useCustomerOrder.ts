@@ -26,6 +26,7 @@ export function useCustomerOrder() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [tableNumber, setTableNumber] = useState(USE_MOCK_CUSTOMER_ORDER ? 'Bàn 04' : 'Chưa kết nối');
   const [guestName, setGuestName] = useState('');
   const [guestCount, setGuestCount] = useState(2);
@@ -70,14 +71,35 @@ export function useCustomerOrder() {
       let mounted = true;
       const activateCustomerOrdering = async () => {
         try {
-          const savedCart = await storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART);
-          if (!mounted) return;
-          if (Array.isArray(savedCart)) setCart(savedCart);
-
           // Each time the customer enters the ordering feature, start or reuse
           // the session belonging to this tablet's assigned table.
+          let sessionId: string | null = null;
           if (!USE_MOCK_CUSTOMER_ORDER) {
-            await repositories.customerOrder.startSession();
+            sessionId = await repositories.customerOrder.startSession();
+          }
+          if (!mounted) return;
+          setActiveSessionId(sessionId);
+
+          // A local cart belongs to exactly one dining session. Never restore
+          // unsent items from a previous guest after the table has been paid.
+          const savedCart = await storageService.getJson<{
+            sessionId: string;
+            items: CartItem[];
+          }>(storageService.KEYS.CUSTOMER_CART);
+          if (!mounted) return;
+          if (
+            sessionId &&
+            savedCart &&
+            savedCart.sessionId === sessionId &&
+            Array.isArray(savedCart.items)
+          ) {
+            setCart(savedCart.items);
+          } else {
+            setCart([]);
+            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+              sessionId,
+              items: [],
+            });
           }
           if (mounted) await loadCustomerData(false);
         } catch (err) {
@@ -140,8 +162,11 @@ export function useCustomerOrder() {
 
   const persistCart = useCallback((nextCart: CartItem[]) => {
     setCart(nextCart);
-    void storageService.setJson(storageService.KEYS.CUSTOMER_CART, nextCart);
-  }, []);
+    void storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+      sessionId: activeSessionId,
+      items: nextCart,
+    });
+  }, [activeSessionId]);
 
   const addToCart = useCallback(
     (menuItem: MenuItem, quantity: number, selectedModifiers: string[], note: string) => {
