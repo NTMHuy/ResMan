@@ -171,7 +171,10 @@ export class ApiOrderRepository implements OrderRepository {
       session: { id: string; status: string; table: { id: string; status: string } };
       payment: { id: string; orderId: string; amount: string; status: string; paidAt: string };
     }>(`/payments/sessions/${order.sessionId}/confirm`, { paymentMethod: method });
-    const result = unwrapData(response.data);
+    const result = unwrapData<{
+      session: { id: string; status: string; table: { id: string; status: string } };
+      payment: { id: string; orderId: string; amount: string; status: string; paidAt: string };
+    }>(response.data);
     if (result.payment.status !== 'PAID' || result.session.status !== 'CLOSED') {
       throw new Error('Backend chưa xác nhận thanh toán và đóng phiên thành công.');
     }
