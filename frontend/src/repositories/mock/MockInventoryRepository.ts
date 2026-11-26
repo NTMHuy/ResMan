@@ -176,6 +176,7 @@ export class MockInventoryRepository implements InventoryRepository {
         ingredientSku: movement.ingredientSku,
         ingredientName: movement.ingredientName,
         actualQuantity: movement.newStock,
+        countType: 'GENERAL',
         unit: movement.unit,
         note: movement.reason,
         countedBy: movement.actorName,
