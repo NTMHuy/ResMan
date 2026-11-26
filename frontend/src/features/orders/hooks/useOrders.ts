@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { apiClient } from '@/src/services/api/apiClient';
 import { repositories } from '@/src/repositories';
 import { useAuth } from '@/src/contexts/AuthContext';
 import type {
@@ -14,6 +15,7 @@ export function useOrders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [availableMenuItems, setAvailableMenuItems] = useState<MenuItem[]>([]);
+  const [paymentRequests, setPaymentRequests] = useState<Array<{ id: string; requestedAt: string; sessionId: string; table: { code: string; name: string }; orderId: string | null; orderCode: string | null; totalAmount: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,17 @@ export function useOrders() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải danh sách đơn hàng.');
+    }
+
+    try {
+      const response = await apiClient.get('/payments/requests');
+      const payload = response.data as { data?: unknown } | unknown;
+      const rows = payload && typeof payload === 'object' && 'data' in payload
+        ? (payload as { data: unknown }).data
+        : payload;
+      setPaymentRequests(Array.isArray(rows) ? rows as typeof paymentRequests : []);
+    } catch {
+      // Keep the order queue available if the payment notification endpoint is temporarily unavailable.
     }
 
     try {
@@ -167,6 +180,7 @@ export function useOrders() {
   return {
     orders: filteredOrders,
     availableMenuItems,
+    paymentRequests,
     counts,
     loading,
     mutating,
