@@ -1,34 +1,27 @@
-
 @baseUrl = http://localhost:3000/api/v1
-
-# Lấy sessionCode từ response của request 3.5
-@sessionCode = b350c4f49bb8be21577c0725b030abbdc46092cd10620ede32854a4cec4983c8
-
-# Lấy menuItemId từ response của request 4.1
+@customerToken = YOUR_CUSTOMER_ACCESS_TOKEN
 @menuItemId = 1
+@itemId = 1
 
-### 4.1 - Khách xem thực đơn
-# Expected: 200 OK
-# Có danh sách danh mục và các món đang hoạt động, còn khả dụng.
+### 4.1 - CUSTOMER xem thực đơn đã đăng nhập
+GET {{baseUrl}}/menu-items/customer/menu
+Authorization: Bearer {{customerToken}}
 
-GET {{baseUrl}}/menu
+### 4.2 - Tablet CUSTOMER khởi động chức năng gọi món
+# Backend tự xác định bàn qua tài khoản CUSTOMER đã được gán.
+# Nếu bàn chưa có phiên, tạo DiningSession + Order.
+# Nếu đã có phiên OPEN, sử dụng lại; không tạo trùng.
+POST {{baseUrl}}/sessions/customer/open
+Authorization: Bearer {{customerToken}}
 
+### 4.3 - CUSTOMER xem phiên của bàn được gán
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
 
-### 4.2 - Khách xem phiên bàn
-# Expected: 200 OK
-# Trả về thông tin session, table và items (ban đầu có thể là []).
-
-GET {{baseUrl}}/guest/session
-X-Session-Code: {{sessionCode}}
-
-
-### 4.3 - Khách gọi món
-# Expected: 201 Created
-# Món mới có trạng thái AWAITING_ACCEPTANCE.
-
-POST {{baseUrl}}/guest/session/items
+### 4.4 - CUSTOMER gọi món
+POST {{baseUrl}}/customer/session/items
+Authorization: Bearer {{customerToken}}
 Content-Type: application/json
-X-Session-Code: {{sessionCode}}
 
 {
   "items": [
@@ -40,29 +33,17 @@ X-Session-Code: {{sessionCode}}
   ]
 }
 
+### 4.5 - CUSTOMER kiểm tra món vừa gọi
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
 
-### 4.4 - Kiểm tra món vừa gọi
-# Expected: 200 OK
-# Có món vừa gọi, số lượng 2, ghi chú "Ít cay".
+### 4.6 - CUSTOMER hủy món trước khi bếp tiếp nhận
+DELETE {{baseUrl}}/customer/session/items/{{itemId}}
+Authorization: Bearer {{customerToken}}
 
-GET {{baseUrl}}/guest/session
-X-Session-Code: {{sessionCode}}
+### 4.7 - CUSTOMER kiểm tra trạng thái sau khi hủy
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
 
-
-### 4.5 - Khách hủy món trước khi bếp tiếp nhận
-# Expected: 200 OK
-# Trạng thái món chuyển thành CANCELLED.
-# Lấy itemId từ response của request 4.3.
-
-@itemId = 2
-
-DELETE {{baseUrl}}/guest/session/items/{{itemId}}
-X-Session-Code: {{sessionCode}}
-
-
-### 4.6 - Kiểm tra trạng thái sau khi hủy
-# Expected: 200 OK
-# Món vẫn xuất hiện trong danh sách nhưng có status CANCELLED.
-
-GET {{baseUrl}}/guest/session
-X-Session-Code: {{sessionCode}}
+# Không còn sử dụng GET /guest/session/tables, POST /guest/session/connect
+# hoặc X-Session-Code. Bàn được xác định hoàn toàn từ tài khoản CUSTOMER.
