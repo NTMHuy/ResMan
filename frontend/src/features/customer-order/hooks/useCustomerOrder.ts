@@ -115,6 +115,13 @@ export function useCustomerOrder() {
       const sessionId = USE_MOCK_CUSTOMER_ORDER
         ? 'mock-session'
         : await repositories.customerOrder.startSession();
+      if (!USE_MOCK_CUSTOMER_ORDER) {
+        const session = await repositories.customerOrder.getActiveSession();
+        if (!session || session.id !== sessionId) {
+          throw new Error('Không thể xác nhận phiên gọi món vừa mở. Vui lòng tải lại.');
+        }
+        setTableNumber(session.tableNumber);
+      }
       setActiveSessionId(sessionId);
       setCart([]);
       await storageService.setJson(storageService.KEYS.CUSTOMER_CART, { sessionId, items: [] });
