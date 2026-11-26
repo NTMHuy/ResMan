@@ -55,41 +55,12 @@ export function useCustomerOrder() {
         setCategories(menu.categories);
         setItems(menu.items);
 
-        if (!USE_MOCK_CUSTOMER_ORDER) {
-          const response = await apiClient.get('/guest/session/tables');
-          const payload = response.data && typeof response.data === 'object' && 'data' in response.data
-            ? (response.data as { data: OpenGuestTable[] }).data
-            : response.data as OpenGuestTable[];
-          setOpenTables(Array.isArray(payload) ? payload : []);
-        }
-
-        if (USE_MOCK_CUSTOMER_ORDER) {
-          const recentOrders = await repositories.customerOrder.getRecentTableOrders(
-            targetTable ?? tableNumber,
-          );
-          setTableOrders(recentOrders);
-        } else if (code) {
-          try {
-            const recentOrders = await repositories.customerOrder.getRecentTableOrders('');
-            setTableOrders(recentOrders);
-            if (recentOrders[0]) setTableNumber(recentOrders[0].tableNumber);
-          } catch (sessionError) {
-            const statusCode = sessionError && typeof sessionError === 'object' && 'statusCode' in sessionError
-              ? Number((sessionError as { statusCode?: number }).statusCode)
-              : 0;
-            setTableOrders([]);
-            setTableNumber('Chưa kết nối');
-
-            // A closed/deleted session code is no longer usable. Remove it so the
-            // customer screen does not keep retrying /guest/session with a stale code.
-            if (statusCode === 401 || statusCode === 404) {
-              await storageService.removeCustomerSessionCode();
-              setSessionCode('');
-            }
-          }
+        const recentOrders = await repositories.customerOrder.getRecentTableOrders('');
+        setTableOrders(recentOrders);
+        if (recentOrders[0]) {
+          setTableNumber(recentOrders[0].tableNumber);
         } else {
-          setTableOrders([]);
-          setTableNumber('Chưa kết nối');
+          setTableNumber('Chưa có phiên bàn');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không thể tải thực đơn.');
@@ -104,16 +75,10 @@ export function useCustomerOrder() {
     let mounted = true;
     const restore = async () => {
       try {
-        const [savedTable, savedCart, savedCode] = await Promise.all([
-          storageService.getJson<string>(storageService.KEYS.CUSTOMER_TABLE),
-          storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART),
-          storageService.getCustomerSessionCode(),
-        ]);
+        const savedCart = await storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART);
         if (!mounted) return;
         if (Array.isArray(savedCart)) setCart(savedCart);
-        if (savedCode) setSessionCode(savedCode);
-        if (USE_MOCK_CUSTOMER_ORDER && savedTable) setTableNumber(savedTable);
-        await loadCustomerData(savedCode ?? undefined, false, savedTable ?? undefined);
+        await loadCustomerData(undefined, false);
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Không thể khôi phục dữ liệu gọi món.');
@@ -281,9 +246,6 @@ export function useCustomerOrder() {
     async (orderNote?: string) => {
       if (cart.length === 0) throw new Error('Giỏ hàng đang trống.');
       if (cart.length > 30) throw new Error('Mỗi lần gửi không được vượt quá 30 loại món.');
-      if (!USE_MOCK_CUSTOMER_ORDER && !sessionCode.trim()) {
-        throw new Error('Vui lòng kết nối phiên bàn trước khi gửi món.');
-      }
       setSubmitting(true);
       try {
         const created = await repositories.customerOrder.submitOrder({
@@ -348,11 +310,6 @@ export function useCustomerOrder() {
     cartSummary,
     tableNumber,
     changeTable,
-    sessionCode,
-    setSessionCode,
-    openTables,
-    connectTable,
-    disconnectSession,
     guestName,
     setGuestName,
     guestCount,
