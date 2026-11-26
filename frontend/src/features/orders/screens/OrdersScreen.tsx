@@ -190,8 +190,7 @@ export function OrdersScreen() {
             { key: 'PENDING', label: 'Chờ duyệt', count: counts.PENDING },
             { key: 'CONFIRMED', label: 'Đã nhận' },
             { key: 'COOKING', label: 'Đang nấu' },
-            { key: 'READY', label: 'Sẵn sàng' },
-            { key: 'COMPLETED', label: 'Hoàn tất' },
+                        { key: 'COMPLETED', label: 'Hoàn tất' },
             { key: 'CANCELLED', label: 'Đã hủy' },
           ]}
         />
@@ -200,7 +199,7 @@ export function OrdersScreen() {
       {orders.length === 0 ? (
         <EmptyState
           title="Chưa có đơn hàng phù hợp"
-          description="Thay đổi bộ lọc hoặc tạo đơn hàng mới để bắt đầu phục vụ."
+          description="Thay đổi bộ lọc hoặc chọn bàn trong màn hình Quản lý bàn để tiếp tục phục vụ."
           actionLabel="Xem tất cả đơn"
           onAction={() => {
             setStatusFilter('ALL');
@@ -425,32 +424,6 @@ export function OrdersScreen() {
                     ]}
                   >
                     {formatVND(selectedOrder.subtotal)}
-                  </Text>
-                </View>
-                <View style={styles.totalLine}>
-                  <Text style={[styles.totalKey, { color: theme.colors.onSurfaceVariant }]}>
-                    Phí phục vụ (5%)
-                  </Text>
-                  <Text
-                    style={[
-                      styles.totalVal,
-                      { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
-                    ]}
-                  >
-                    {formatVND(selectedOrder.serviceFee)}
-                  </Text>
-                </View>
-                <View style={styles.totalLine}>
-                  <Text style={[styles.totalKey, { color: theme.colors.onSurfaceVariant }]}>
-                    Thuế VAT (8%)
-                  </Text>
-                  <Text
-                    style={[
-                      styles.totalVal,
-                      { color: theme.colors.onSurface, fontFamily: theme.typography.mono },
-                    ]}
-                  >
-                    {formatVND(selectedOrder.taxAmount)}
                   </Text>
                 </View>
                 <View style={[styles.totalLine, styles.grandLine]}>
