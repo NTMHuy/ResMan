@@ -30,6 +30,13 @@ export class UsersService {
         ...user,
         id: user.id.toString(),
         role: { ...user.role, id: user.role.id.toString() },
+        tableDevice: user.tableDevice
+          ? {
+              ...user.tableDevice,
+              id: user.tableDevice.id.toString(),
+              diningTableId: user.tableDevice.diningTableId.toString(),
+            }
+          : null,
       })),
       pagination: { page: safePage, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) },
     };
