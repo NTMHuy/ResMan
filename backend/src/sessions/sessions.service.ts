@@ -91,11 +91,14 @@ export class SessionsService {
     }
 
     // Mở chức năng gọi món nhiều lần không được tạo phiên hoặc order trùng.
-    if (device.table.status === "OCCUPIED") {
-      return this.findActiveByTable(device.diningTableId);
-    }
+    const session =
+      device.table.status === "OCCUPIED"
+        ? await this.findActiveByTable(device.diningTableId)
+        : await this.open(Number(device.diningTableId), userId);
 
-    return this.open(Number(device.diningTableId), userId);
+    // Session codes are internal bearer secrets and are never returned to customer tablets.
+    const { sessionCode: _sessionCode, ...customerSession } = session;
+    return customerSession;
   }
 
   async findActiveByTable(tableId: bigint) {
