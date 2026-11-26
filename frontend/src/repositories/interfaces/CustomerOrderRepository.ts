@@ -7,6 +7,7 @@ import type {
 export interface CustomerOrderRepository {
   getActiveSession(): Promise<{ id: string; tableNumber: string } | null>;
   startSession(): Promise<string>;
+  requestPayment(): Promise<void>;
   getCustomerMenu(): Promise<{ categories: MenuCategory[]; items: MenuItem[] }>;
   submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking>;
   getOrderStatus(orderId: string): Promise<CustomerOrderTracking>;
