@@ -127,7 +127,7 @@ export function useCustomerOrder() {
       if (!USE_MOCK_CUSTOMER_ORDER) return;
       setTableNumber(nextTable);
       void storageService.setJson(storageService.KEYS.CUSTOMER_TABLE, nextTable);
-      void loadCustomerData(undefined, true, nextTable);
+      void loadCustomerData(true);
     },
     [loadCustomerData],
   );
