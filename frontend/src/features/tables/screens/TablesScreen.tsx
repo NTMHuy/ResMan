@@ -240,7 +240,13 @@ export function TablesScreen() {
       try {
         const response = await apiClient.get(`/sessions/${selectedSession.id}`);
         const latest = unwrap<ActiveSession>(response.data);
-        if (active && latest.status === "OPEN") setSelectedSession(latest);
+        if (!active) return;
+        if (latest.status === "OPEN") {
+          setSelectedSession(latest);
+        } else {
+          setSelectedSession(null);
+          void loadTables(true);
+        }
       } catch {
         // Preserve the currently displayed details during temporary network failures.
       }
