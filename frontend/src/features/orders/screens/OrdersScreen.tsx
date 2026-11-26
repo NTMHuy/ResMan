@@ -133,11 +133,6 @@ export function OrdersScreen() {
     );
   }
 
-  const isTerminal =
-    selectedOrder?.status === 'COMPLETED' ||
-    selectedOrder?.status === 'CANCELLED' ||
-    selectedOrder?.status === 'REJECTED';
-
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: theme.colors.background }]}
@@ -312,8 +307,7 @@ export function OrdersScreen() {
 
               {/* Action Toolbar gated by RBAC */}
               <View style={styles.actionBar}>
-                {!isTerminal ? (
-                  <>
+                <>
                     <PermissionGate permission="ORDER_ADD_ITEM">
                       <Button
                         label="Gọi thêm món"
@@ -324,8 +318,7 @@ export function OrdersScreen() {
                       />
                     </PermissionGate>
 
-                  </>
-                ) : null}
+                </>
               </View>
 
               {selectedOrder.paymentStatus === 'UNPAID' ? (
