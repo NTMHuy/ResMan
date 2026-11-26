@@ -63,12 +63,11 @@ Frontend xử lý theo error.code, không phân tích message.
 - Sort whitelist theo từng endpoint; không truyền raw SQL sort field.
 
 ### 1.5 Authentication
-- Nhân viên dùng Authorization: Bearer <accessToken>.
-- Tablet dùng device credential riêng, tách khỏi JWT nhân viên.
-- Device credential được provision bởi nhân viên có quyền, lưu an toàn trên tablet, có thể revoke/rotate.
-- Không chấp nhận tableId từ client làm bằng chứng tablet được phép truy cập bàn đó.
-
-CẦN DUYỆT: access token expiry, refresh strategy/cookie, device provisioning và secret rotation trước khi triển khai auth.
+- Nhân viên và tablet CUSTOMER đều dùng Authorization: Bearer <accessToken>.
+- Mỗi tài khoản CUSTOMER được gán đúng một bàn thông qua TableDevice; tablet đăng nhập sẵn tài khoản này.
+- Không chấp nhận tableId hoặc sessionCode từ CUSTOMER client để xác định bàn/phiên.
+- Backend xác định bàn từ principal CUSTOMER -> TableDevice -> DiningTable.
+- Nhân viên ORDER_STAFF vẫn có thể chọn bàn bất kỳ qua API mở phiên có permission sessions:open.
 
 ## 2. Actors, roles và permissions
 
@@ -78,7 +77,7 @@ CẦN DUYỆT: access token expiry, refresh strategy/cookie, device provisioning
 | Nhân viên Order | ORDER_STAFF | Bàn, phiên, đơn, thanh toán |
 | Nhân viên Bếp | KITCHEN_STAFF | Queue và trạng thái món |
 | Nhân viên Kho | INVENTORY_STAFF | Nguyên liệu, tồn, kiểm kê |
-| Khách hàng | GUEST device context | Guest tablet, không có User account |
+| Khách hàng | CUSTOMER | Đăng nhập sẵn trên tablet; mỗi tài khoản gắn đúng một bàn |
 
 Permission codes đề xuất:
 - auth:me
@@ -224,9 +223,10 @@ Không xóa bàn có session/order history; ưu tiên deactivate. Table status �
 
 | Method | Endpoint | Quyền |
 |---|---|---|
-| POST | /tables/:tableId/sessions | MANAGER, ORDER_STAFF |
-| GET | /tables/:tableId/sessions/current | MANAGER, ORDER_STAFF |
-| GET | /sessions/:id | MANAGER, ORDER_STAFF |
+| POST | /sessions | ORDER_STAFF, chọn bàn bất kỳ |
+| POST | /sessions/customer/open | CUSTOMER, chỉ bàn được gán với tài khoản |
+| GET | /sessions/table/:tableId/active | Staff có tables:read |
+| GET | /sessions/:id | Staff có orders:read |
 | GET | /sessions/active | MANAGER, ORDER_STAFF |
 
 Open session request:
@@ -245,30 +245,24 @@ Server transaction:
 5. Update table status.
 6. Return session, order và table summary.
 
-### 5.3 Device provisioning
+### 5.3 Customer account và tablet assignment
+
+- Manager tạo tài khoản CUSTOMER cùng lúc với thông tin bàn, deviceCode và deviceName qua POST /users.
+- Mỗi CUSTOMER user có tối đa một TableDevice (user_id UNIQUE).
+- Mỗi DiningTable chỉ được gán tối đa một TableDevice (dining_table_id UNIQUE).
+- Tablet không tự đổi bàn; chỉ manager cập nhật/gán lại assignment.
+- Tài khoản CUSTOMER vẫn đăng nhập khi bàn trống; không giữ DiningSession OPEN khi bàn trống.
+
+## 6. Customer ordering
+
+Các endpoint yêu cầu JWT của tài khoản CUSTOMER. Bàn được suy ra từ tài khoản đã gán; client không gửi tableId hoặc sessionCode.
 
 | Method | Endpoint | Quyền |
 |---|---|---|
-| POST | /tables/:tableId/devices | MANAGER |
-| GET | /tables/:tableId/devices | MANAGER |
-| PATCH | /devices/:deviceId/status | MANAGER |
-
-Credential chỉ hiển thị một lần khi provision; DB chỉ lưu hash nếu dùng secret. Không có endpoint cho tablet tự đổi bàn.
-
-CẦN DUYỆT: quy trình provision, rotate và revoke credential.
-
-## 6. Customer guest ordering
-
-Các endpoint yêu cầu TABLE_DEVICE authentication; không cần customer account.
-
-| Method | Endpoint | Quyền |
-|---|---|---|
-| GET | /customer/session | TABLE_DEVICE |
-| GET | /customer/menu | TABLE_DEVICE |
-| GET | /customer/orders/current | TABLE_DEVICE |
-| GET | /customer/orders/items | TABLE_DEVICE |
-| POST | /customer/orders/items | TABLE_DEVICE |
-| PATCH | /customer/orders/items/:itemId/cancel | TABLE_DEVICE |
+| POST | /sessions/customer/open | CUSTOMER; bắt đầu hoặc tiếp tục phiên của bàn được gán |
+| GET | /customer/session | CUSTOMER; chỉ phiên bàn được gán |
+| POST | /customer/session/items | CUSTOMER; gọi món vào order của phiên đang mở |
+| DELETE | /customer/session/items/:itemId | CUSTOMER; chỉ hủy AWAITING_ACCEPTANCE |
 
 ### POST /customer/orders/items
 
@@ -303,7 +297,7 @@ Response data:
 ~~~
 
 Server rules:
-- Device identity xác định table/session; không nhận tableId từ payload.
+- CUSTOMER identity xác định table/session qua TableDevice; không nhận tableId/sessionCode từ payload.
 - Chỉ cho thao tác khi session OPEN.
 - Validate menu item active và AVAILABLE.
 - Lấy giá từ DB, tự tính lineTotal.
