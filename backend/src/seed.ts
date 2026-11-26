@@ -48,6 +48,7 @@ const permissionDefinitions = [
   ["inventory:manage", "Quản lý kho", "inventory"],
   ["inventory:count", "Kiểm kê kho", "inventory"],
   ["payments:read", "Xem thanh toán", "payments"],
+  ["payments:request", "Yêu cầu thanh toán", "payments"],
   ["payments:confirm", "Xác nhận thanh toán", "payments"],
   ["reports:read", "Xem báo cáo", "reports"],
 ] as const;
@@ -73,6 +74,7 @@ const rolePermissions: Record<string, string[]> = {
     "customer:session:read",
     "customer:order:create-item",
     "customer:order:cancel-item",
+    "payments:request",
   ],
 };
 
