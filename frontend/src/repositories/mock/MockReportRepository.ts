@@ -58,6 +58,7 @@ export class MockReportRepository implements ReportRepository {
         lowStockCount: lowStockItems.length,
         lowStockItems,
       },
+      orderHistory: [],
     };
   }
 }
