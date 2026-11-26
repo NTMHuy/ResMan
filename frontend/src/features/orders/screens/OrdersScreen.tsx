@@ -22,7 +22,6 @@ import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/St
 import { OrderStatusBadge } from '@/src/features/orders/components/OrderStatusBadge';
 import {
   AddOrderItemModal,
-  OrderReasonModal,
   PaymentModal,
 } from '@/src/features/orders/components/OrderModals';
 
@@ -296,51 +295,6 @@ export function OrdersScreen() {
                       />
                     </PermissionGate>
 
-                    {selectedOrder.status === 'CONFIRMED' ? (
-                      <PermissionGate permission="ORDER_UPDATE_STATUS">
-                        <Button
-                          label="Chuyển Đang nấu"
-                          variant="secondary"
-                          size="sm"
-                          leftIcon={<ChefHat size={15} color={theme.colors.secondary} />}
-                          onPress={() =>
-                            void updateOrderStatus(
-                              selectedOrder.id,
-                              'COOKING',
-                              'Nhân viên xác nhận bếp đang chế biến'
-                            )
-                          }
-                        />
-                      </PermissionGate>
-                    ) : null}
-
-                    {selectedOrder.status === 'COOKING' ? (
-                      <PermissionGate permission="ORDER_UPDATE_STATUS">
-                        <Button
-                          label="Báo Sẵn sàng"
-                          variant="secondary"
-                          size="sm"
-                          leftIcon={<UtensilsCrossed size={15} color={theme.colors.success} />}
-                          onPress={() =>
-                            void updateOrderStatus(
-                              selectedOrder.id,
-                              'READY',
-                              'Món đã hoàn tất, sẵn sàng lên bàn'
-                            )
-                          }
-                        />
-                      </PermissionGate>
-                    ) : null}
-
-                    <PermissionGate permission="ORDER_CANCEL">
-                      <Button
-                        label="Hủy đơn"
-                        variant="danger"
-                        size="sm"
-                        leftIcon={<Ban size={15} color={theme.colors.onErrorContainer} />}
-                        onPress={() => setReasonModal('CANCEL')}
-                      />
-                    </PermissionGate>
                   </>
                 ) : null}
               </View>
