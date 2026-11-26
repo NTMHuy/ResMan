@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-import { Armchair, Plus, RefreshCw, Tablet, UserRound } from "lucide-react-native";
+import { Armchair, Plus, RefreshCw, Tablet } from "lucide-react-native";
 import { apiClient } from "@/src/services/api/apiClient";
 import { useTheme } from "@/src/theme/ThemeContext";
 import { useToast } from "@/src/contexts/ToastContext";
@@ -9,7 +9,7 @@ import { Badge } from "@/src/components/common/Badge";
 import { Button } from "@/src/components/common/Button";
 import { Input } from "@/src/components/common/Input";
 import { ModalDialog } from "@/src/components/common/ModalDialog";
-import type { DiningTable } from "@/src/features/tables/types/table.types";
+type DiningTable = { id: string; code: string; name: string; status: "AVAILABLE" | "OCCUPIED"; capacity: number | null };
 
 type CustomerAccount = {
   id: string;
@@ -57,8 +57,8 @@ export function CustomerTabletAccountsPanel() {
         apiClient.get("/users", { params: { page: 1, limit: 100 } }),
         apiClient.get("/tables"),
       ]);
-      const usersPayload = unwrap<{ data: Array<CustomerAccount & { role: { code: string } }> }>(usersResponse.data);
-      setAccounts((usersPayload.data ?? []).filter((user) => user.role.code === "CUSTOMER"));
+      const users = unwrap<Array<CustomerAccount & { role: { code: string } }>>(usersResponse.data);
+      setAccounts((users ?? []).filter((user) => user.role.code === "CUSTOMER"));
       setTables(unwrap<DiningTable[]>(tablesResponse.data) ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải tài khoản tablet.");
