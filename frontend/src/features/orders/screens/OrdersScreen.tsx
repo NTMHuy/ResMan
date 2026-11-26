@@ -84,7 +84,7 @@ export function OrdersScreen() {
       }
     }
     if (previousItemStatuses.current) {
-      for (const item of current.values()) {
+      for (const [itemId, item] of current) {
         const previous = previousItemStatuses.current.get(itemId);
         if (item.status === 'COMPLETED' && previous?.status !== 'COMPLETED') {
           Alert.alert(
