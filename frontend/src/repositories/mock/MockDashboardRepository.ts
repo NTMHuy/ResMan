@@ -27,8 +27,8 @@ export class MockDashboardRepository implements DashboardRepository {
     );
 
     return {
-      todayRevenue: report.totalRevenue,
-      todayOrderCount: report.totalOrders,
+      todayRevenue: report.revenue,
+      todayOrderCount: report.paidOrderCount,
       activeOrderCount: activeOrders.length,
       pendingOrderCount: mockOrdersData.filter((o) => o.status === 'PENDING').length,
       kdsQueueCount: mockKdsItemsData.filter(
