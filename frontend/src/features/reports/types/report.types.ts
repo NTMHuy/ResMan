@@ -35,4 +35,25 @@ export interface ReportSummary {
   revenueSeries: RevenuePoint[];
   topDishes: TopSellingDish[];
   inventory: InventoryHealthSummary;
+  orderHistory: ReportOrderHistoryItem[];
+}
+
+export interface ReportOrderHistoryItem {
+  id: string;
+  orderCode: string;
+  createdAt: string;
+  table: { code: string; name: string };
+  items: Array<{
+    itemName: string;
+    quantity: number;
+    unitPrice: string;
+    lineTotal: string;
+    status: string;
+  }>;
+  payment: null | {
+    amount: string;
+    paymentMethod: string | null;
+    status: string;
+    paidAt: string | null;
+  };
 }
