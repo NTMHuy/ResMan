@@ -4,6 +4,9 @@ export class InventoryCountDto {
   @Matches(/^[0-9]+(\.\d{1,3})?$/)
   actualQuantity!: string;
 
+  @IsIn(["OPENING", "CLOSING"])
+  countType!: "OPENING" | "CLOSING";
+
   @IsOptional()
   @IsString()
   @MaxLength(500)
