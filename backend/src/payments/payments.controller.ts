@@ -12,7 +12,7 @@ export class PaymentsController {
   constructor(private readonly payments: PaymentsService) {}
 
   @Post("customer/request")
-  @Permissions("customer:session:start")
+  @Permissions("payments:request")
   requestForCustomer(@CurrentUser() user: { id: string }) {
     return this.payments.requestForCustomer(BigInt(user.id));
   }
