@@ -129,9 +129,38 @@ export function useCustomerOrder() {
     if (USE_MOCK_CUSTOMER_ORDER) return;
     const interval = setInterval(() => {
       void loadCustomerData(true);
+      void (async () => {
+        try {
+          const session = await repositories.customerOrder.getActiveSession();
+          if (session?.id === activeSessionId) return;
+          setActiveSessionId(session?.id ?? null);
+          if (session) {
+            setTableNumber(session.tableNumber);
+            const savedCart = await storageService.getJson<{ sessionId: string; items: CartItem[] }>(
+              storageService.KEYS.CUSTOMER_CART,
+            );
+            const restored = savedCart?.sessionId === session.id && Array.isArray(savedCart.items)
+              ? savedCart.items
+              : [];
+            setCart(restored);
+            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+              sessionId: session.id,
+              items: restored,
+            });
+          } else {
+            setCart([]);
+            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+              sessionId: null,
+              items: [],
+            });
+          }
+        } catch {
+          // A temporary network failure must not clear the currently restored session.
+        }
+      })();
     }, 5000);
     return () => clearInterval(interval);
-  }, [loadCustomerData]);
+  }, [activeSessionId, loadCustomerData]);
 
   useEffect(() => {
     let active = true;
