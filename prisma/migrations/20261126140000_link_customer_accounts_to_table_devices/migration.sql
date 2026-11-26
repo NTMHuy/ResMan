@@ -8,3 +8,6 @@ ALTER TABLE "table_devices"
 ADD CONSTRAINT "table_devices_user_id_fkey"
 FOREIGN KEY ("user_id") REFERENCES "users"("id")
 ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE UNIQUE INDEX "table_devices_dining_table_id_key"
+ON "table_devices"("dining_table_id");
