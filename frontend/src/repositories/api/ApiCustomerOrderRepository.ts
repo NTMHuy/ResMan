@@ -8,7 +8,6 @@ import type { ApiResponse } from '@/src/types/common';
 import type { OrderItem, OrderStatus } from '@/src/features/orders/types/order.types';
 import { resolveMenuImageUrl } from '@/src/constants/config';
 import { apiClient } from '@/src/services/api/apiClient';
-import { storageService } from '@/src/services/storage/storageService';
 
 interface GuestMenuItem {
   id: string;
@@ -144,17 +143,14 @@ function mapGuestOrder(data: GuestSessionResponse): CustomerOrderTracking {
   };
 }
 
-export class ApiCustomerOrderRepository implements CustomerOrderRepository {
-  private async readSessionCode(): Promise<string | null> {
-    return storageService.getCustomerSessionCode();
+export class ApiCustomerOrderRepository implements CustomerOrderRepositoexport class ApiCustomerOrderRepository implements CustomerOrderRepository {
+  private async startOrReuseAssignedSession(): Promise<void> {
+    // Backend resolves the dining table from the authenticated CUSTOMER account.
+    await apiClient.post('/sessions/customer/open');
   }
 
-  private async getGuestSession(): Promise<GuestSessionResponse> {
-    const sessionCode = await this.readSessionCode();
-    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
-    const response = await apiClient.get('/guest/session', {
-      headers: { 'X-Session-Code': sessionCode },
-    });
+  private async getCustomerSession(): Promise<GuestSessionResponse> {
+    const response = await apiClient.get('/customer/session');
     return unwrapData<GuestSessionResponse>(response.data);
   }
 
@@ -164,36 +160,28 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
   }
 
   async submitOrder(input: SubmitCustomerOrderInput): Promise<CustomerOrderTracking> {
-    const sessionCode = input.sessionCode?.trim() || await this.readSessionCode();
-    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn. Hãy nhập mã phiên do nhân viên cung cấp.');
-    await storageService.setCustomerSessionCode(sessionCode);
+    await this.startOrReuseAssignedSession();
     const items = input.items.map((item) => ({
       menuItemId: Number(item.menuItemId),
       quantity: item.quantity,
-      note: [input.note?.trim(), item.note.trim()].filter(Boolean).join(' | ').slice(0, 500),
+      note: item.note.trim().slice(0, 500),
     }));
-    await apiClient.post('/guest/session/items', { items }, {
-      headers: { 'X-Session-Code': sessionCode },
-    });
-    return mapGuestOrder(await this.getGuestSession());
+    await apiClient.post('/customer/session/items', { items });
+    return mapGuestOrder(await this.getCustomerSession());
   }
 
   async getOrderStatus(orderId: string): Promise<CustomerOrderTracking> {
-    const order = mapGuestOrder(await this.getGuestSession());
+    const order = mapGuestOrder(await this.getCustomerSession());
     if (order.id !== orderId) throw new Error('Không tìm thấy đơn hàng trong phiên bàn hiện tại.');
     return order;
   }
 
   async getRecentTableOrders(_tableNumber: string): Promise<CustomerOrderTracking[]> {
-    if (!(await this.readSessionCode())) return [];
-    return [mapGuestOrder(await this.getGuestSession())];
+    await this.startOrReuseAssignedSession();
+    return [mapGuestOrder(await this.getCustomerSession())];
   }
 
   async cancelGuestItem(itemId: string): Promise<void> {
-    const sessionCode = await this.readSessionCode();
-    if (!sessionCode) throw new Error('Chưa kết nối phiên bàn.');
-    await apiClient.delete(`/guest/session/items/${encodeURIComponent(itemId)}`, {
-      headers: { 'X-Session-Code': sessionCode },
-    });
+    await apiClient.delete(`/customer/session/items/${encodeURIComponent(itemId)}`);
   }
 }
