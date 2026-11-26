@@ -233,6 +233,22 @@ export function TablesScreen() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedSession?.id) return;
+    let active = true;
+    const refreshSelectedSession = async () => {
+      try {
+        const response = await apiClient.get(`/sessions/${selectedSession.id}`);
+        const latest = unwrap<ActiveSession>(response.data);
+        if (active && latest.status === "OPEN") setSelectedSession(latest);
+      } catch {
+        // Preserve the currently displayed details during temporary network failures.
+      }
+    };
+    const timer = setInterval(() => void refreshSelectedSession(), 5000);
+    return () => { active = false; clearInterval(timer); };
+  }, [selectedSession?.id]);
+
   const occupiedCount = tables.filter((table) => table.sessions?.length || table.status === "OCCUPIED").length;
   const isOpen = (table: DiningTable) => Boolean(table.sessions?.length) || table.status === "OCCUPIED";
   const currentOrder = selectedSession?.order;
