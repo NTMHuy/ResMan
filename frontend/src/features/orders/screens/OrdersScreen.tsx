@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   Ban,
   Check,
@@ -49,6 +49,7 @@ export function OrdersScreen() {
   const {
     orders,
     availableMenuItems,
+    paymentRequests,
     counts,
     loading,
     mutating,
@@ -75,6 +76,28 @@ export function OrdersScreen() {
     if (orders.length === 0) return null;
     return orders.find((o) => o.id === selectedOrderId) ?? orders[0];
   }, [orders, selectedOrderId]);
+
+  const notifiedPaymentRequests = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const request of paymentRequests) {
+      const notificationKey = `${request.id}:${request.requestedAt}`;
+      if (notifiedPaymentRequests.current.has(notificationKey)) continue;
+      notifiedPaymentRequests.current.add(notificationKey);
+      Alert.alert(
+        'Khách yêu cầu thanh toán',
+        `${request.table.code} · ${request.orderCode ?? 'Đơn đang mở'}\nTổng tạm tính: ${formatVND(Number(request.totalAmount))}\nVui lòng kiểm tra đơn và đến bàn nhận thanh toán.`,
+        [
+          { text: 'Để sau', style: 'cancel' },
+          {
+            text: 'Xem đơn',
+            onPress: () => {
+              if (request.orderId) setSelectedOrderId(request.orderId);
+            },
+          },
+        ],
+      );
+    }
+  }, [paymentRequests]);
 
   if (loading && orders.length === 0) {
     return (
