@@ -157,6 +157,10 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
     return String(session.id);
   }
 
+  async requestPayment(): Promise<void> {
+    await apiClient.post('/payments/customer/request');
+  }
+
   private async getCustomerSession(): Promise<GuestSessionResponse> {
     const response = await apiClient.get('/customer/session');
     return unwrapData<GuestSessionResponse>(response.data);
