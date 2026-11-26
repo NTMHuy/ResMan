@@ -19,9 +19,11 @@ import { PermissionGate } from '@/src/components/common/PermissionGate';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 import { EmployeeFormModal } from '@/src/features/employees/components/EmployeeFormModal';
+import { CustomerTabletAccountsPanel } from '@/src/features/employees/components/CustomerTabletAccountsPanel';
 
 export function EmployeesScreen() {
   const { theme } = useTheme();
+  const [viewMode, setViewMode] = useState<'STAFF' | 'CUSTOMER_TABLETS'>('STAFF');
   const { isMobile } = useResponsive();
   const { showToast } = useToast();
   const { user: currentUser, hasPermission } = useAuth();
@@ -47,7 +49,7 @@ export function EmployeesScreen() {
     null
   );
 
-  if (loading && employees.length === 0) {
+  if (viewMode === 'STAFF' && loading && employees.length === 0) {
     return (
       <View style={styles.padded}>
         <LoadingState message="Đang tải danh sách nhân sự nhà hàng..." />
@@ -55,7 +57,7 @@ export function EmployeesScreen() {
     );
   }
 
-  if (error) {
+  if (viewMode === 'STAFF' && error) {
     return (
       <View style={styles.padded}>
         <ErrorState message={error} onRetry={() => void reload()} />
@@ -71,6 +73,18 @@ export function EmployeesScreen() {
       style={[styles.scroll, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.container}
     >
+      <SegmentedTabs<'STAFF' | 'CUSTOMER_TABLETS'>
+        value={viewMode}
+        onChange={setViewMode}
+        options={[
+          { key: 'STAFF', label: 'Tài khoản nhân viên' },
+          { key: 'CUSTOMER_TABLETS', label: 'Tài khoản khách / Tablet' },
+        ]}
+      />
+      {viewMode === 'CUSTOMER_TABLETS' ? (
+        <CustomerTabletAccountsPanel />
+      ) : (
+        <>
       {/* KPI Strip */}
       <View style={[styles.kpiStrip, isMobile ? styles.col : styles.row]}>
         <StatCard
@@ -276,6 +290,8 @@ export function EmployeesScreen() {
         }}
         onCancel={() => setToggleTarget(null)}
       />
+        </>
+      )}
     </ScrollView>
   );
 }
