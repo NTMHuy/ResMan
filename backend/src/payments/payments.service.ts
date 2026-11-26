@@ -21,8 +21,8 @@ export class PaymentsService {
       select: { id: true },
     });
     if (!session) throw new ConflictException("Bàn chưa có phiên gọi món đang hoạt động");
-    const existingPayment = await this.prisma.payment.findUnique({
-      where: { order: { diningSessionId: session.id } },
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: { order: { is: { diningSessionId: session.id } } },
       select: { id: true },
     });
     if (existingPayment) throw new ConflictException("Phiên này đã được thanh toán");
