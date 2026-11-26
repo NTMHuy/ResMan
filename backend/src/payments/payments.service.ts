@@ -26,6 +26,16 @@ export class PaymentsService {
       select: { id: true },
     });
     if (existingPayment) throw new ConflictException("Phiên này đã được thanh toán");
+    const existingRequest = await this.prisma.paymentRequest.findUnique({
+      where: { diningSessionId: session.id },
+    });
+    if (existingRequest?.status === "PENDING") {
+      return {
+        id: existingRequest.id.toString(),
+        status: existingRequest.status,
+        requestedAt: existingRequest.requestedAt,
+      };
+    }
     const request = await this.prisma.paymentRequest.upsert({
       where: { diningSessionId: session.id },
       create: { diningSessionId: session.id, status: "PENDING" },
