@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { apiClient } from '@/src/services/api/apiClient';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
@@ -23,18 +22,14 @@ export const TABLE_OPTIONS = [
 
 const USE_MOCK_CUSTOMER_ORDER = false;
 
-type OpenGuestTable = { id: string; code: string; name: string; status: string };
-
 export function useCustomerOrder() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableNumber, setTableNumber] = useState(USE_MOCK_CUSTOMER_ORDER ? 'Bàn 04' : 'Chưa kết nối');
-  const [sessionCode, setSessionCode] = useState('');
   const [guestName, setGuestName] = useState('');
   const [guestCount, setGuestCount] = useState(2);
   const [tableOrders, setTableOrders] = useState<CustomerOrderTracking[]>([]);
-  const [openTables, setOpenTables] = useState<OpenGuestTable[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +40,7 @@ export function useCustomerOrder() {
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
 
   const loadCustomerData = useCallback(
-    async (code?: string, silent = false, targetTable?: string) => {
+    async (silent = false) => {
       if (!silent) {
         setLoading(true);
         setError(null);
@@ -78,7 +73,7 @@ export function useCustomerOrder() {
         const savedCart = await storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART);
         if (!mounted) return;
         if (Array.isArray(savedCart)) setCart(savedCart);
-        await loadCustomerData(undefined, false);
+        await loadCustomerData(false);
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Không thể khôi phục dữ liệu gọi món.');
@@ -93,12 +88,12 @@ export function useCustomerOrder() {
   }, [loadCustomerData]);
 
   useEffect(() => {
-    if (USE_MOCK_CUSTOMER_ORDER || sessionCode) return;
+    if (USE_MOCK_CUSTOMER_ORDER) return;
     const interval = setInterval(() => {
-      void loadCustomerData(undefined, true);
+      void loadCustomerData(true);
     }, 5000);
     return () => clearInterval(interval);
-  }, [loadCustomerData, sessionCode]);
+  }, [loadCustomerData]);
 
   useEffect(() => {
     let active = true;
@@ -126,29 +121,6 @@ export function useCustomerOrder() {
     };
   }, [items, selectedCategoryId, search]);
 
-  const connectTable = useCallback(async (tableId: string) => {
-    const table = openTables.find((item) => item.id === tableId);
-    if (!table || table.status !== 'OPEN') {
-      throw new Error('Bàn này chưa được nhân viên mở phiên. Vui lòng chọn bàn đang mở.');
-    }
-    const response = await apiClient.post('/guest/session/connect', { tableId: Number(table.id) });
-    const payload = response.data && typeof response.data === 'object' && 'data' in response.data
-      ? (response.data as { data: { sessionCode: string; table: { name: string; code: string } } }).data
-      : response.data as { sessionCode: string; table: { name: string; code: string } };
-    const code = payload.sessionCode;
-    await storageService.setCustomerSessionCode(code);
-    setSessionCode(code);
-    setTableNumber(payload.table.name || payload.table.code);
-    const orders = await repositories.customerOrder.getRecentTableOrders('');
-    setTableOrders(orders);
-  }, [openTables]);
-
-  const disconnectSession = useCallback(async () => {
-    await storageService.removeCustomerSessionCode();
-    setSessionCode('');
-    setTableNumber('Chưa kết nối');
-    setTableOrders([]);
-  }, []);
 
   const changeTable = useCallback(
     (nextTable: string) => {
@@ -249,7 +221,6 @@ export function useCustomerOrder() {
       setSubmitting(true);
       try {
         const created = await repositories.customerOrder.submitOrder({
-          sessionCode: sessionCode || undefined,
           tableNumber,
           guestName: guestName.trim() || undefined,
           guestCount,
@@ -269,7 +240,7 @@ export function useCustomerOrder() {
         setSubmitting(false);
       }
     },
-    [cart, sessionCode, tableNumber, guestName, guestCount, persistCart],
+    [cart, tableNumber, guestName, guestCount, persistCart],
   );
 
   const filteredItems = useMemo(() => {
@@ -331,6 +302,6 @@ export function useCustomerOrder() {
     clearCart,
     submitOrder,
     cancelGuestItem,
-    reload: () => loadCustomerData(sessionCode || undefined, false),
+    reload: () => loadCustomerData(false),
   };
 }
