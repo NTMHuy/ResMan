@@ -2,6 +2,8 @@ export type StockStatus = 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
 export type StorageZone = 'HOT_KITCHEN_COLD' | 'MAIN_COOLER' | 'BAR_PANTRY';
 
+export type InventoryCountType = 'OPENING' | 'CLOSING' | 'GENERAL';
+
 export type StockMovementType = 'IMPORT' | 'EXPORT' | 'ADJUST' | 'AUDIT';
 
 export interface Ingredient {
@@ -38,6 +40,7 @@ export interface InventoryCount {
   ingredientSku: string;
   ingredientName: string;
   actualQuantity: number;
+  countType: InventoryCountType;
   unit: string;
   note: string;
   countedBy: string;
@@ -66,6 +69,7 @@ export interface StockOperationInput {
   ingredientId: string;
   quantity: number;
   reason: string;
+  countType?: Exclude<InventoryCountType, 'GENERAL'>;
 }
 
 export interface InventoryFilterParams {
