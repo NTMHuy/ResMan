@@ -56,6 +56,8 @@ const permissionDefinitions = [
 const rolePermissions: Record<string, string[]> = {
   MANAGER: permissionDefinitions.map(([code]) => code),
   ORDER_STAFF: [
+    "menu.category.read",
+    "menu.item.read",
     "tables:read",
     "sessions:open",
     "sessions:close",
