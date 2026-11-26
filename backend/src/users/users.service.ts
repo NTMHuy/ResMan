@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { PrismaService } from "../database/prisma.service.js";
 import { CreateUserDto } from "./dto/create-user.dto.js";
@@ -20,6 +20,7 @@ export class UsersService {
           id: true, username: true, email: true, isActive: true, lastLoginAt: true, createdAt: true,
           role: { select: { id: true, code: true, name: true } },
           employee: { select: { employeeCode: true, fullName: true, phone: true } },
+          tableDevice: { select: { id: true, diningTableId: true, deviceCode: true, deviceName: true, isActive: true, table: { select: { code: true, name: true } } } },
         },
       }),
       this.prisma.user.count(),
@@ -37,6 +38,85 @@ export class UsersService {
   async create(dto: CreateUserDto) {
     const role = await this.prisma.role.findUnique({ where: { code: dto.roleCode } });
     if (!role) throw new NotFoundException("Vai trò không tồn tại");
+
+    if (dto.roleCode === "CUSTOMER") {
+      if (!dto.tableId || !dto.deviceCode?.trim() || !dto.deviceName?.trim()) {
+        throw new BadRequestException(
+          "Tài khoản CUSTOMER cần tableId, deviceCode và deviceName để gán tablet với bàn",
+        );
+      }
+
+      try {
+        const created = await this.prisma.$transaction(async (tx) => {
+          const table = await tx.diningTable.findUnique({
+            where: { id: BigInt(dto.tableId!) },
+            select: { id: true, code: true, name: true, status: true },
+          });
+          if (!table) throw new NotFoundException("Bàn được chọn không tồn tại");
+          if (table.status !== "AVAILABLE") {
+            throw new ConflictException("Chỉ có thể gán tablet cho bàn đang trống");
+          }
+
+          const user = await tx.user.create({
+            data: {
+              username: dto.username.trim(),
+              email: dto.email?.trim().toLowerCase() || null,
+              passwordHash: await bcrypt.hash(dto.password, 12),
+              roleId: role.id,
+            },
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              isActive: true,
+              createdAt: true,
+              role: { select: { id: true, code: true, name: true } },
+            },
+          });
+
+          const device = await tx.tableDevice.create({
+            data: {
+              userId: user.id,
+              diningTableId: table.id,
+              deviceCode: dto.deviceCode!.trim(),
+              deviceName: dto.deviceName!.trim(),
+            },
+          });
+
+          return { user, device, table };
+        });
+
+        return {
+          ...created.user,
+          id: created.user.id.toString(),
+          role: { ...created.user.role, id: created.user.role.id.toString() },
+          tableDevice: {
+            id: created.device.id.toString(),
+            deviceCode: created.device.deviceCode,
+            deviceName: created.device.deviceName,
+            isActive: created.device.isActive,
+            table: {
+              id: created.table.id.toString(),
+              code: created.table.code,
+              name: created.table.name,
+            },
+          },
+          employee: null,
+        };
+      } catch (error) {
+        if (this.isUniqueViolation(error)) {
+          throw new ConflictException(
+            "Username, email, deviceCode hoặc bàn đã được gán cho tài khoản khác",
+          );
+        }
+        throw error;
+      }
+    }
+
+    if (!dto.employeeCode?.trim() || !dto.fullName?.trim()) {
+      throw new BadRequestException("Tài khoản nhân viên cần employeeCode và fullName");
+    }
+
     try {
       const user = await this.prisma.user.create({
         data: {
