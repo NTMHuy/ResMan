@@ -105,10 +105,10 @@ export function useKds() {
   }, [items, stationFilter, statusFilter, urgentOnly, nowMs]);
 
   const updateItemStatus = useCallback(
-    async (itemId: string, nextStatus: KdsItemStatus) => {
+    async (itemId: string, nextStatus: KdsItemStatus, reason?: string) => {
       setMutating(true);
       try {
-        await repositories.kds.updateItemStatus(itemId, nextStatus);
+        await repositories.kds.updateItemStatus(itemId, nextStatus, reason);
         await fetchQueue(true);
       } finally {
         setMutating(false);
