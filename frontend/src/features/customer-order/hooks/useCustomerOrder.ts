@@ -180,6 +180,7 @@ export function useCustomerOrder() {
 
   const addToCart = useCallback(
     (menuItem: MenuItem, quantity: number, selectedModifiers: string[], note: string) => {
+      if (!USE_MOCK_CUSTOMER_ORDER && !activeSessionId) return;
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
       if (
         menuItem.price <= 0 ||
@@ -217,7 +218,7 @@ export function useCustomerOrder() {
         persistCart([...cart, newEntry]);
       }
     },
-    [cart, persistCart],
+    [cart, persistCart, activeSessionId],
   );
 
   const updateCartQuantity = useCallback(
