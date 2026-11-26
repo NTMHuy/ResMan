@@ -29,7 +29,7 @@ export class MockInventoryRepository implements InventoryRepository {
           !search ||
           ing.name.toLowerCase().includes(search) ||
           ing.sku.toLowerCase().includes(search) ||
-          ing.supplier.toLowerCase().includes(search);
+          ing.description.toLowerCase().includes(search);
         const matchStatus = !status || status === 'ALL' || ing.status === status;
         const matchZone = !zone || zone === 'ALL' || ing.zone === zone;
         return matchSearch && matchStatus && matchZone;
