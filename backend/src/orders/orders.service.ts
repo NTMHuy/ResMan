@@ -444,6 +444,61 @@ export class OrdersService {
     }));
   }
 
+
+  async addStaffItems(orderId: bigint, requestedItems: GuestOrderItemDto[], actorId: bigint) {
+    if (!Array.isArray(requestedItems) || requestedItems.length < 1 || requestedItems.length > 30 ||
+      requestedItems.some((item) => !Number.isSafeInteger(item.menuItemId) || item.menuItemId < 1 ||
+        !Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 99)) {
+      throw new ConflictException("Thông tin món hoặc số lượng không hợp lệ (tối đa 30 loại món, mỗi loại 1–99)");
+    }
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: { diningSession: true },
+        });
+        if (!order) throw new NotFoundException("Không tìm thấy đơn hàng");
+        if (order.diningSession.status !== "OPEN") throw new ConflictException("Phiên phục vụ đã đóng");
+        const menuIds = [...new Set(requestedItems.map((item) => BigInt(item.menuItemId)))];
+        const menuItems = await tx.menuItem.findMany({
+          where: { id: { in: menuIds }, isActive: true, availabilityStatus: "AVAILABLE", category: { is: { isActive: true } } },
+          select: { id: true, name: true, price: true, pricingType: true },
+        });
+        const byId = new Map(menuItems.map((item) => [item.id.toString(), item]));
+        if (byId.size !== menuIds.length) throw new ConflictException("Một hoặc nhiều món không còn khả dụng");
+        const created = [];
+        for (const requested of requestedItems) {
+          const menuItem = byId.get(String(requested.menuItemId));
+          if (!menuItem || menuItem.price === null || menuItem.pricingType === "MARKET_PRICE" || menuItem.pricingType === "UNSET") {
+            throw new ConflictException("Món không có giá cố định hoặc không còn khả dụng");
+          }
+          const item = await tx.orderItem.create({ data: {
+            orderId: order.id, menuItemId: menuItem.id, itemNameSnapshot: menuItem.name,
+            quantity: requested.quantity, unitPrice: menuItem.price,
+            lineTotal: menuItem.price.mul(requested.quantity), note: requested.note?.trim() || null,
+            status: "AWAITING_ACCEPTANCE",
+          }});
+          await tx.orderItemStatusHistory.create({ data: {
+            orderItemId: item.id, fromStatus: null, toStatus: "AWAITING_ACCEPTANCE",
+            reason: "Nhân viên Order gọi thêm món", actorId,
+          }});
+          created.push(item.id.toString());
+        }
+        await tx.auditLog.create({ data: {
+          actorId, action: "ORDER_STAFF_ITEMS_ADDED", entityType: "ORDER", entityId: order.id.toString(),
+          metadata: { itemIds: created, sessionId: order.diningSessionId.toString() },
+        }});
+        return { id: order.id.toString(), orderCode: order.orderCode, createdItemIds: created };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+        throw new ConflictException("Phiên vừa thay đổi. Vui lòng tải lại đơn hàng.");
+      }
+      throw error;
+    }
+  }
+
   async updateOrderItemsStatus(
     orderId: bigint,
     nextStatus: "ACCEPTED" | "IN_PREPARATION" | "COMPLETED" | "CANCELLED",
