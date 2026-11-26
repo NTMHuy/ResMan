@@ -151,6 +151,7 @@ model DiningSession {
   opener      User?       @relation("SessionOpener", fields: [openedBy], references: [id], onDelete: Restrict)
   closer      User?       @relation("SessionCloser", fields: [closedBy], references: [id], onDelete: Restrict)
   order       Order?
+  paymentRequest PaymentRequest?
 
   @@index([tableId, status])
   @@map("dining_sessions")
@@ -278,6 +279,18 @@ model InventoryCountRecord {
   @@index([ingredientId, countedAt(sort: Desc)])
   @@index([countedAt(sort: Desc)])
   @@map("inventory_count_records")
+}
+
+model PaymentRequest {
+  id             BigInt        @id @default(autoincrement())
+  diningSessionId BigInt       @unique @map("dining_session_id")
+  status         String        @default("PENDING") @db.VarChar(20)
+  requestedAt    DateTime      @default(now()) @map("requested_at") @db.Timestamptz(6)
+  resolvedAt     DateTime?     @map("resolved_at") @db.Timestamptz(6)
+  diningSession  DiningSession @relation(fields: [diningSessionId], references: [id], onDelete: Restrict)
+
+  @@index([status, requestedAt])
+  @@map("payment_requests")
 }
 
 model Payment {
