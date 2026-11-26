@@ -3,6 +3,7 @@ import type {
   CreateIngredientInput,
   Ingredient,
   InventoryCount,
+  InventoryCountType,
   InventoryFilterParams,
   StockMovement,
   StockOperationInput,
@@ -46,6 +47,7 @@ type ApiCount = {
   id: string;
   ingredient: { id: string; code: string; name: string; unit: string };
   actualQuantity: string;
+  countType: InventoryCountType;
   countedAt: string;
   note: string | null;
   actor: ApiActor;
@@ -152,6 +154,7 @@ export class ApiInventoryRepository implements InventoryRepository {
   async countStock(input: StockOperationInput): Promise<Ingredient> {
     await apiClient.post(`/inventory/ingredients/${input.ingredientId}/count`, {
       actualQuantity: String(input.quantity),
+      countType: input.countType ?? 'CLOSING',
       note: input.reason,
     });
     return this.getIngredient(input.ingredientId);
@@ -213,6 +216,7 @@ export class ApiInventoryRepository implements InventoryRepository {
       ingredientSku: record.ingredient.code,
       ingredientName: record.ingredient.name,
       actualQuantity: Number(record.actualQuantity),
+      countType: record.countType ?? 'GENERAL',
       unit: record.ingredient.unit,
       note: record.note ?? '',
       countedBy: record.actor.fullName || record.actor.username,
