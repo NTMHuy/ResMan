@@ -7,6 +7,7 @@ type OverviewApi = { from: string | null; to: string | null; revenue: string; pa
 type RevenueApi = { period: 'day' | 'month'; data: Array<{ date: string; revenue: string; paymentCount: number }> };
 type BestSellerApi = Array<{ itemName: string; quantitySold: number; revenue: string }>;
 type InventoryApi = { ingredientCount: number; lowStockCount: number; lowStockItems: Array<{ id: string; code: string; name: string; quantityOnHand: string; lowStockThreshold: string | null }> };
+type OrdersApi = { data: Array<{ id: string; orderCode: string; createdAt: string; table: { code: string; name: string }; items: Array<{ itemName: string; quantity: number; unitPrice: string; lineTotal: string; status: string }>; payment: null | { amount: string; paymentMethod: string | null; status: string; paidAt: string | null } }> };
 
 function unwrap<T>(value: ApiResponse<T> | T): T {
   if (
@@ -39,17 +40,19 @@ export class ApiReportRepository implements ReportRepository {
     const to = localDate(today);
     const grouping = period === 'MONTH' ? 'month' : 'day';
 
-    const [overviewResponse, revenueResponse, bestSellersResponse, inventoryResponse] = await Promise.all([
+    const [overviewResponse, revenueResponse, bestSellersResponse, inventoryResponse, ordersResponse] = await Promise.all([
       apiClient.get<ApiResponse<OverviewApi> | OverviewApi>('/reports/overview', { params: { from, to } }),
       apiClient.get<ApiResponse<RevenueApi> | RevenueApi>('/reports/revenue', { params: { from, to, period: grouping } }),
       apiClient.get<ApiResponse<BestSellerApi> | BestSellerApi>('/reports/best-sellers', { params: { from, to, limit: 10 } }),
       apiClient.get<ApiResponse<InventoryApi> | InventoryApi>('/reports/inventory'),
+      apiClient.get<ApiResponse<OrdersApi> | OrdersApi>('/reports/orders', { params: { from, to, page: 1, limit: 100 } }),
     ]);
 
     const overview = unwrap(overviewResponse.data);
     const revenue = unwrap(revenueResponse.data);
     const bestSellers = unwrap(bestSellersResponse.data);
     const inventory = unwrap(inventoryResponse.data);
+    const orders = unwrap(ordersResponse.data);
 
     return {
       period,
@@ -76,6 +79,7 @@ export class ApiReportRepository implements ReportRepository {
         lowStockCount: inventory.lowStockCount,
         lowStockItems: inventory.lowStockItems,
       },
+      orderHistory: orders.data ?? [],
     };
   }
 }
