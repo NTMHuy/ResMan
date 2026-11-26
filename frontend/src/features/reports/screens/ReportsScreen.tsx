@@ -3,11 +3,12 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BarChart3, DollarSign, Package, RefreshCw, ShoppingBag } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { useResponsive } from '@/src/hooks/useResponsive';
-import { formatVND } from '@/src/utils/formatters';
+import { formatDateTime, formatVND } from '@/src/utils/formatters';
 import { useReports } from '@/src/features/reports/hooks/useReports';
 import type { ReportPeriod } from '@/src/types/common';
 import { Card } from '@/src/components/common/Card';
 import { Button } from '@/src/components/common/Button';
+import { Badge } from '@/src/components/common/Badge';
 import { StatCard } from '@/src/components/common/StatCard';
 import { SegmentedTabs } from '@/src/components/common/SegmentedTabs';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
@@ -81,6 +82,29 @@ export function ReportsScreen() {
           )) : <Text style={{ color: theme.colors.onSurfaceVariant }}>Không có nguyên liệu dưới định mức.</Text>}
         </Card>
       </View>
+      <Card padding="md" style={styles.card}>
+        <Text style={[styles.title, { color: theme.colors.onSurface }]}>Lịch sử đơn hàng ({report.orderHistory.length})</Text>
+        {report.orderHistory.length ? report.orderHistory.map((order) => (
+          <View key={order.id} style={[styles.historyOrder, { borderBottomColor: theme.colors.border }]}>
+            <View style={styles.historyHeader}>
+              <View style={styles.itemInfo}>
+                <Text style={[styles.itemName, { color: theme.colors.onSurface }]}>{order.orderCode} · {order.table.code}</Text>
+                <Text style={[styles.muted, { color: theme.colors.onSurfaceVariant }]}>{order.table.name} · {formatDateTime(order.createdAt)}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                <Badge label={order.payment?.status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'} tone={order.payment?.status === 'PAID' ? 'success' : 'warning'} />
+                <Text style={[styles.amount, { color: theme.colors.onSurface }]}>{formatVND(Number(order.payment?.amount ?? order.items.filter((item) => item.status !== 'CANCELLED').reduce((sum, item) => sum + Number(item.lineTotal), 0)))}</Text>
+              </View>
+            </View>
+            {order.items.map((item, index) => (
+              <View key={`${order.id}-${index}`} style={styles.historyItem}>
+                <Text style={[styles.muted, { color: theme.colors.onSurfaceVariant, flex: 1 }]}>{item.quantity} × {item.itemName} · {item.status === 'CANCELLED' ? 'Đã hủy' : item.status === 'COMPLETED' ? 'Hoàn thiện' : item.status === 'IN_PREPARATION' ? 'Đang chế biến' : item.status === 'ACCEPTED' ? 'Bếp đã nhận' : 'Chờ bếp nhận'}</Text>
+                <Text style={[styles.muted, { color: theme.colors.onSurfaceVariant }]}>{formatVND(Number(item.lineTotal))}</Text>
+              </View>
+            ))}
+          </View>
+        )) : <EmptyState title="Chưa có đơn hàng trong kỳ" description="Đơn hàng sẽ xuất hiện tại đây khi có hoạt động tại nhà hàng." />}
+      </Card>
       <Text style={[styles.muted, { color: theme.colors.onSurfaceVariant }]}>Kỳ báo cáo: {report.from} đến {report.to}. Doanh thu chỉ tính các khoản thanh toán PAID.</Text>
     </ScrollView>
   );
@@ -99,6 +123,9 @@ const styles = StyleSheet.create({
   cardFlex: { flex: 1, minWidth: 260, gap: 10 },
   title: { fontSize: 15, fontWeight: '700' },
   listRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderBottomWidth: StyleSheet.hairlineWidth },
+  historyOrder: { gap: 7, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  historyHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  historyItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10 },
   rank: { width: 26, fontWeight: '700' },
   itemName: { flex: 1, fontSize: 13, fontWeight: '600' },
   itemInfo: { flex: 1, gap: 2 },
