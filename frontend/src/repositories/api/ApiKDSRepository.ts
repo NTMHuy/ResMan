@@ -74,12 +74,12 @@ export class ApiKDSRepository implements KDSRepository {
     return items;
   }
 
-  async updateItemStatus(itemId: string, status: KdsItemStatus): Promise<KdsItem> {
+  async updateItemStatus(itemId: string, status: KdsItemStatus, reason?: string): Promise<KdsItem> {
     const before = (await this.getKitchenQueue()).find((item) => item.id === itemId);
     if (!before) throw new Error('Món không còn trong hàng đợi. Vui lòng tải lại KDS.');
     await apiClient.patch(`/kitchen/items/${itemId}/status`, {
       status: toBackendStatus(status),
-      ...(status === 'VOIDED' ? { reason: 'Hủy món từ màn hình KDS' } : {}),
+      ...(status === 'VOIDED' ? { reason: reason?.trim() } : {}),
     });
     return { ...before, status };
   }
