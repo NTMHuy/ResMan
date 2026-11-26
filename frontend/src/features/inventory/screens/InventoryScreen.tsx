@@ -392,7 +392,7 @@ export function InventoryScreen() {
             <Card key={record.id} padding="md" style={styles.movCard}>
               <View style={styles.movTop}>
                 <View style={styles.rowGap}>
-                  <Badge label="Kiểm kê" tone="neutral" />
+                  <Badge label={record.countType === "OPENING" ? "Đầu ca" : record.countType === "CLOSING" ? "Cuối ca" : "Kiểm kê cũ"} tone="neutral" />
                   <Text style={[styles.movName, { color: theme.colors.onSurface }]}>
                     {record.ingredientName}
                   </Text>
@@ -433,13 +433,13 @@ export function InventoryScreen() {
         ingredient={opModal?.ing || null}
         loading={mutating}
         onClose={() => setOpModal(null)}
-        onSubmit={async (qty, reason) => {
+        onSubmit={async (qty, reason, countType) => {
           if (!opModal) return;
           if (opModal.mode === 'IMPORT') {
             await stockIn(opModal.ing.id, qty, reason);
             showToast('Đã nhập kho thành công', 'success', `+${qty} ${opModal.ing.unit}`);
           } else {
-            await countStock(opModal.ing.id, qty, reason);
+            await countStock(opModal.ing.id, qty, reason, countType ?? 'CLOSING');
             showToast('Đã kiểm kê và cập nhật tồn kho', 'success', `${qty} ${opModal.ing.unit}`);
           }
         }}
