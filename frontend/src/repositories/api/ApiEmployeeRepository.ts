@@ -53,7 +53,9 @@ export class ApiEmployeeRepository implements EmployeeRepository {
   async getEmployees(params?: EmployeeFilterParams): Promise<Employee[]> {
     const { data } = await apiClient.get("/users", { params: { page: 1, limit: 100 } });
     const payload = unwrap<UsersResponse>(data);
-    let employees = (payload.data ?? []).map(mapEmployee);
+    let employees = (payload.data ?? [])
+      .filter((user) => user.role.code !== "CUSTOMER")
+      .map(mapEmployee);
     if (params?.role && params.role !== "ALL") {
       employees = employees.filter((employee) => employee.role === params.role);
     }
