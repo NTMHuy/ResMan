@@ -10,12 +10,18 @@ const roleDefinitions = [
   { code: "ORDER_STAFF", name: "Nhân viên Order" },
   { code: "KITCHEN_STAFF", name: "Nhân viên Bếp" },
   { code: "INVENTORY_STAFF", name: "Nhân viên Kho" },
+  { code: "CUSTOMER", name: "Khách hàng" },
 ];
 
 const permissionDefinitions = [
   ["users:read", "Xem người dùng", "users"],
   ["users:create", "Tạo người dùng", "users"],
   ["users:update", "Cập nhật người dùng", "users"],
+
+  ["customer:session:start", "Bắt đầu phiên bàn được gán", "customer"],
+  ["customer:session:read", "Xem phiên bàn được gán", "customer"],
+  ["customer:order:create-item", "Gọi món cho bàn được gán", "customer"],
+  ["customer:order:cancel-item", "Hủy món chưa được bếp tiếp nhận", "customer"],
 
   ["menu:read", "Xem thực đơn", "menu"],
   ["menu:manage", "Quản lý thực đơn", "menu"],
@@ -60,6 +66,14 @@ const rolePermissions: Record<string, string[]> = {
   ],
   KITCHEN_STAFF: ["kitchen:read", "kitchen:update-item"],
   INVENTORY_STAFF: ["inventory:read", "inventory:manage", "inventory:count"],
+  CUSTOMER: [
+    "menu.category.read",
+    "menu.item.read",
+    "customer:session:start",
+    "customer:session:read",
+    "customer:order:create-item",
+    "customer:order:cancel-item",
+  ],
 };
 
 async function main(): Promise<void> {
