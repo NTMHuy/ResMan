@@ -148,12 +148,19 @@ export class ApiOrderRepository implements OrderRepository {
   }
 
   async addOrderItem(
-    _orderId: string,
-    _input: AddOrderItemInput,
+    orderId: string,
+    input: AddOrderItemInput,
     _actorName: string,
     _actorRole: UserRole,
   ): Promise<Order> {
-    throw new Error('Thêm món từ POS chưa được backend hỗ trợ. Vui lòng gọi món qua phiên QR.');
+    const menuItemId = Number(input.menuItemId);
+    if (!Number.isSafeInteger(menuItemId) || menuItemId < 1) {
+      throw new Error('Mã món ăn không hợp lệ.');
+    }
+    await apiClient.post(`/orders/${orderId}/items`, {
+      items: [{ menuItemId, quantity: input.quantity, note: input.note.trim() }],
+    });
+    return this.getOrderById(orderId);
   }
 
   async cancelOrder(id: string, reason: string, _actorName: string, _actorRole: UserRole): Promise<Order> {
