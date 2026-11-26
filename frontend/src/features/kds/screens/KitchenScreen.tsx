@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import {
   AlertTriangle,
@@ -14,12 +14,13 @@ import { useToast } from '@/src/contexts/ToastContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { formatElapsed, getElapsedMinutes } from '@/src/utils/formatters';
 import { useKds } from '@/src/features/kds/hooks/useKds';
-import type { KitchenStation } from '@/src/types/common';
 import type { KdsItem, KdsItemStatus } from '@/src/features/kds/types/kds.types';
 import { Card } from '@/src/components/common/Card';
 import { Badge } from '@/src/components/common/Badge';
 import { Button } from '@/src/components/common/Button';
 import { SegmentedTabs } from '@/src/components/common/SegmentedTabs';
+import { ModalDialog } from '@/src/components/common/ModalDialog';
+import { Input } from '@/src/components/common/Input';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/common/StateViews';
 
 const ITEM_STATUS_META: Record<
@@ -33,14 +34,11 @@ const ITEM_STATUS_META: Record<
   VOIDED: { label: 'Đã hủy', tone: 'danger' },
 };
 
-const STATION_LABELS: Record<KitchenStation, string> = {
-  HOT_KITCHEN: 'Bếp Nóng',
-  COLD_KITCHEN: 'Bếp Nguội',
-  BAR: 'Quầy Bar',
-};
-
 export function KitchenScreen() {
   const { theme } = useTheme();
+  const [cancelTarget, setCancelTarget] = useState<KdsItem | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const { isMobile } = useResponsive();
   const { showToast } = useToast();
   const { hasPermission } = useAuth();
@@ -51,8 +49,6 @@ export function KitchenScreen() {
     loading,
     mutating,
     error,
-    stationFilter,
-    setStationFilter,
     statusFilter,
     setStatusFilter,
     urgentOnly,
@@ -106,15 +102,6 @@ export function KitchenScreen() {
       {/* Top Station Bar & Controls */}
       <Card padding="md" style={styles.toolbarCard}>
         <View style={styles.toolbarTop}>
-          <SegmentedTabs<KitchenStation | 'ALL'>
-            value={stationFilter}
-            onChange={setStationFilter}
-            options={[
-              { key: 'ALL', label: 'Tất cả bếp', count: counts.ALL },
-              { key: 'HOT_KITCHEN', label: 'Bếp Nóng', count: counts.HOT_KITCHEN },
-            ]}
-          />
-
           <View style={styles.controlActions}>
             <View style={styles.syncToggle}>
               <Text style={[styles.syncLabel, { color: theme.colors.onSurfaceVariant }]}>
@@ -183,7 +170,6 @@ export function KitchenScreen() {
           description="Không có món nào đang chờ chế biến theo bộ lọc hiện tại."
           actionLabel="Hiển thị tất cả món"
           onAction={() => {
-            setStationFilter('ALL');
             setStatusFilter('ALL');
             setUrgentOnly(false);
           }}
@@ -319,9 +305,6 @@ export function KitchenScreen() {
                             <Text style={[styles.itemName, { color: theme.colors.onSurface }]}>
                               {item.menuItemName}
                             </Text>
-                            <Text style={[styles.stationMeta, { color: theme.colors.outline }]}>
-                              {STATION_LABELS[item.station]}
-                            </Text>
                           </View>
                           <Badge label={statusMeta.label} tone={statusMeta.tone} />
                         </View>
@@ -350,30 +333,45 @@ export function KitchenScreen() {
                           </Text>
                         ) : null}
 
-                        {actionLabel ? (
+                        {actionLabel || (item.status !== 'COMPLETED' && hasPermission('KDS_ACCEPT_ITEM')) ? (
                           <View style={styles.itemActionRow}>
-                            <Button
-                              label={actionLabel}
-                              size="sm"
-                              variant={
-                                item.status === 'COOKING'
-                                  ? 'success'
-                                  : item.status === 'ACCEPTED'
-                                    ? 'primary'
-                                    : 'secondary'
-                              }
-                              loading={mutating}
-                              leftIcon={
-                                item.status === 'QUEUED' ? (
-                                  <Check size={13} color={theme.colors.onSurface} />
-                                ) : item.status === 'ACCEPTED' ? (
-                                  <Flame size={13} color={theme.colors.onPrimary} />
-                                ) : (
-                                  <CheckCircle2 size={13} color={theme.colors.onSuccess} />
-                                )
-                              }
-                              onPress={() => void advanceItem(item)}
-                            />
+                            {actionLabel ? (
+                              <Button
+                                label={actionLabel}
+                                size="sm"
+                                variant={
+                                  item.status === 'COOKING'
+                                    ? 'success'
+                                    : item.status === 'ACCEPTED'
+                                      ? 'primary'
+                                      : 'secondary'
+                                }
+                                loading={mutating}
+                                leftIcon={
+                                  item.status === 'QUEUED' ? (
+                                    <Check size={13} color={theme.colors.onSurface} />
+                                  ) : item.status === 'ACCEPTED' ? (
+                                    <Flame size={13} color={theme.colors.onPrimary} />
+                                  ) : (
+                                    <CheckCircle2 size={13} color={theme.colors.onSuccess} />
+                                  )
+                                }
+                                onPress={() => void advanceItem(item)}
+                              />
+                            ) : null}
+                            {item.status !== 'COMPLETED' && hasPermission('KDS_ACCEPT_ITEM') ? (
+                              <Button
+                                label="Hủy món"
+                                size="sm"
+                                variant="danger"
+                                disabled={mutating}
+                                onPress={() => {
+                                  setCancelTarget(item);
+                                  setCancelReason('');
+                                  setCancelError(null);
+                                }}
+                              />
+                            ) : null}
                           </View>
                         ) : null}
                       </View>
@@ -387,6 +385,46 @@ export function KitchenScreen() {
         </View>
       )}
     </ScrollView>
+      <ModalDialog
+        visible={Boolean(cancelTarget)}
+        title={cancelTarget ? `Hủy món · ${cancelTarget.menuItemName}` : 'Hủy món'}
+        subtitle={cancelTarget ? `${cancelTarget.tableNumber} · ${cancelTarget.quantity} phần` : undefined}
+        onClose={() => { if (!mutating) setCancelTarget(null); }}
+        maxWidth={440}
+        footer={
+          <>
+            <Button label="Quay lại" variant="secondary" onPress={() => setCancelTarget(null)} disabled={mutating} />
+            <Button
+              label="Xác nhận hủy món"
+              variant="danger"
+              loading={mutating}
+              onPress={() => {
+                const reason = cancelReason.trim();
+                if (reason.length < 4) {
+                  setCancelError('Vui lòng nhập lý do hủy (ít nhất 4 ký tự).');
+                  return;
+                }
+                if (!cancelTarget) return;
+                void updateItemStatus(cancelTarget.id, 'VOIDED', reason)
+                  .then(() => {
+                    showToast('Đã hủy món', 'success', cancelTarget.menuItemName);
+                    setCancelTarget(null);
+                  })
+                  .catch((err) => setCancelError(err instanceof Error ? err.message : 'Không thể hủy món.'));
+              }}
+            />
+          </>
+        }
+      >
+        <Input
+          label="Lý do hủy *"
+          value={cancelReason}
+          onChangeText={(value) => { setCancelReason(value); setCancelError(null); }}
+          placeholder="VD: Hết nguyên liệu, khách đổi món..."
+          multiline
+          error={cancelError ?? undefined}
+        />
+      </ModalDialog>
   );
 }
 
