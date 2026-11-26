@@ -466,7 +466,7 @@ export class OrdersService {
         });
         const byId = new Map(menuItems.map((item) => [item.id.toString(), item]));
         if (byId.size !== menuIds.length) throw new ConflictException("Một hoặc nhiều món không còn khả dụng");
-        const created = [];
+        const created: string[] = [];
         for (const requested of requestedItems) {
           const menuItem = byId.get(String(requested.menuItemId));
           if (!menuItem || menuItem.price === null || menuItem.pricingType === "MARKET_PRICE" || menuItem.pricingType === "UNSET") {
