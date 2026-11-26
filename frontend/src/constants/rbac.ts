@@ -128,7 +128,7 @@ export const ROLE_ALLOWED_ROUTES: Record<UserRole, AppRoute[]> = {
 
 export const ROLE_DEFAULT_ROUTE: Record<UserRole, AppRoute> = {
   MANAGER: "dashboard",
-  ORDER_STAFF: "orders",
+  ORDER_STAFF: "tables",
   KITCHEN_STAFF: "kitchen",
   INVENTORY_STAFF: "inventory",
   GUEST: "customer-order",
