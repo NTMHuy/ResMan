@@ -205,7 +205,7 @@ export class InventoryService {
     }
   }
 
-  async recordCount(ingredientId: bigint, input: { actualQuantity: string; note?: string }, actorId: bigint) {
+  async recordCount(ingredientId: bigint, input: { actualQuantity: string; countType: "OPENING" | "CLOSING"; note?: string }, actorId: bigint) {
     const actual = this.decimal(input.actualQuantity, "actualQuantity");
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -225,6 +225,7 @@ export class InventoryService {
           data: {
             ingredientId,
             actualQuantity: actual,
+            countType: input.countType,
             countedBy: actorId,
             note: input.note?.trim() || null,
           },
