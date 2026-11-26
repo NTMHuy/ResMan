@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
@@ -23,7 +24,6 @@ export const TABLE_OPTIONS = [
 const USE_MOCK_CUSTOMER_ORDER = false;
 
 export function useCustomerOrder() {
-  const sessionStarted = useRef(false);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -47,10 +47,6 @@ export function useCustomerOrder() {
         setError(null);
       }
       try {
-        if (!USE_MOCK_CUSTOMER_ORDER && !sessionStarted.current) {
-          await repositories.customerOrder.startSession();
-          sessionStarted.current = true;
-        }
         const menu = await repositories.customerOrder.getCustomerMenu();
         setCategories(menu.categories);
         setItems(menu.items);
@@ -71,26 +67,34 @@ export function useCustomerOrder() {
     [],
   );
 
-  useEffect(() => {
-    let mounted = true;
-    const restore = async () => {
-      try {
-        const savedCart = await storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART);
-        if (!mounted) return;
-        if (Array.isArray(savedCart)) setCart(savedCart);
-        await loadCustomerData(false);
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Không thể khôi phục dữ liệu gọi món.');
-          setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      const activateCustomerOrdering = async () => {
+        try {
+          const savedCart = await storageService.getJson<CartItem[]>(storageService.KEYS.CUSTOMER_CART);
+          if (!mounted) return;
+          if (Array.isArray(savedCart)) setCart(savedCart);
+
+          // Each time the customer enters the ordering feature, start or reuse
+          // the session belonging to this tablet's assigned table.
+          if (!USE_MOCK_CUSTOMER_ORDER) {
+            await repositories.customerOrder.startSession();
+          }
+          if (mounted) await loadCustomerData(false);
+        } catch (err) {
+          if (mounted) {
+            setError(err instanceof Error ? err.message : 'Không thể khởi động phiên bàn.');
+            setLoading(false);
+          }
         }
-      }
-    };
-    void restore();
-    return () => {
-      mounted = false;
-    };
-  }, [loadCustomerData]);
+      };
+      void activateCustomerOrdering();
+      return () => {
+        mounted = false;
+      };
+    }, [loadCustomerData]),
+  );
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
