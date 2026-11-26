@@ -270,6 +270,7 @@ model InventoryCountRecord {
   id             BigInt     @id @default(autoincrement())
   ingredientId   BigInt     @map("ingredient_id")
   actualQuantity Decimal    @map("actual_quantity") @db.Decimal(14, 3)
+  countType      String     @default("GENERAL") @map("count_type") @db.VarChar(20)
   countedAt      DateTime   @default(now()) @map("counted_at") @db.Timestamptz(6)
   countedBy      BigInt     @map("counted_by")
   note           String?
