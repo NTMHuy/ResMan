@@ -144,8 +144,11 @@ function mapGuestOrder(data: GuestSessionResponse): CustomerOrderTracking {
 }
 
 export class ApiCustomerOrderRepository implements CustomerOrderRepository {
-  async startSession(): Promise<void> {
-    await apiClient.post('/sessions/customer/open');
+  async startSession(): Promise<string> {
+    const response = await apiClient.post('/sessions/customer/open');
+    const session = unwrapData<{ id: string }>(response.data);
+    if (!session?.id) throw new Error('Không nhận được mã phiên bàn từ máy chủ.');
+    return String(session.id);
   }
 
   private async getCustomerSession(): Promise<GuestSessionResponse> {
