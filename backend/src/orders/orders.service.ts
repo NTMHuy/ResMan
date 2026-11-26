@@ -11,6 +11,37 @@ import { GuestOrderItemDto } from "./dto/create-guest-order-items.dto.js";
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async getCustomerSessionCode(userId: bigint): Promise<string> {
+    const device = await this.prisma.tableDevice.findUnique({
+      where: { userId },
+      select: { diningTableId: true, isActive: true },
+    });
+    if (!device || !device.isActive) {
+      throw new NotFoundException("Tài khoản khách hàng chưa được gán với tablet và bàn hoạt động");
+    }
+
+    const session = await this.prisma.diningSession.findFirst({
+      where: { tableId: device.diningTableId, status: "OPEN" },
+      select: { sessionCode: true },
+    });
+    if (!session) {
+      throw new ConflictException("Phiên bàn chưa được khởi động. Hãy bắt đầu chức năng gọi món trên tablet.");
+    }
+    return session.sessionCode;
+  }
+
+  async getCustomerSession(userId: bigint) {
+    return this.getGuestSession(await this.getCustomerSessionCode(userId));
+  }
+
+  async addCustomerItems(userId: bigint, items: GuestOrderItemDto[]) {
+    return this.addGuestItems(await this.getCustomerSessionCode(userId), items);
+  }
+
+  async cancelCustomerItem(userId: bigint, itemId: bigint) {
+    return this.cancelGuestItem(await this.getCustomerSessionCode(userId), itemId);
+  }
+
   async findGuestTables() {
     const fixedCodes = Array.from(
       { length: 20 },
