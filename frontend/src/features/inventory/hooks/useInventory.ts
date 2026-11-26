@@ -148,11 +148,10 @@ export function useInventory() {
     async (ingredientId: string, quantity: number, reason: string) => {
       setMutating(true);
       try {
-        const updated = await repositories.inventory.auditStock({
+        const updated = await repositories.inventory.countStock({
           ingredientId,
           quantity,
           reason,
-          actorName,
         });
         await fetchInventory(true);
         return updated;
