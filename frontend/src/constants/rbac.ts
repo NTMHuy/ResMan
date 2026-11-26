@@ -178,8 +178,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ReadonlySet<Permission>> = {
 
   ORDER_STAFF: new Set<Permission>([
     "MENU_VIEW",
-    "CUSTOMER_ORDER_VIEW",
-    "CUSTOMER_ORDER_SUBMIT",
     "ORDER_VIEW",
     "ORDER_CREATE",
     "ORDER_ACCEPT",
