@@ -144,6 +144,12 @@ function mapGuestOrder(data: GuestSessionResponse): CustomerOrderTracking {
 }
 
 export class ApiCustomerOrderRepository implements CustomerOrderRepository {
+  async getActiveSession(): Promise<{ id: string; tableNumber: string } | null> {
+    const response = await apiClient.get('/sessions/customer/active');
+    const session = unwrapData<{ id: string; tableNumber: string } | null>(response.data);
+    return session ? { id: String(session.id), tableNumber: session.tableNumber } : null;
+  }
+
   async startSession(): Promise<string> {
     const response = await apiClient.post('/sessions/customer/open');
     const session = unwrapData<{ id: string }>(response.data);
