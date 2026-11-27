@@ -134,7 +134,7 @@ export function useCustomerOrder() {
     } finally {
       setStartingSession(false);
     }
-  }, [activeSessionId, loadCustomerData]);
+  }, [activeSessionId, cart, loadCustomerData]);
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
