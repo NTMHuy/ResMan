@@ -216,7 +216,6 @@ export function useCustomerOrder() {
 
   const addToCart = useCallback(
     (menuItem: MenuItem, quantity: number, selectedModifiers: string[], note: string) => {
-      if (!USE_MOCK_CUSTOMER_ORDER && !activeSessionId) return;
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
       if (
         menuItem.price <= 0 ||
@@ -299,11 +298,13 @@ export function useCustomerOrder() {
 
   const submitOrder = useCallback(
     async (orderNote?: string) => {
-      if (!activeSessionId) throw new Error('Vui lòng mở phiên gọi món trước.');
       if (cart.length === 0) throw new Error('Giỏ hàng đang trống.');
       if (cart.length > 30) throw new Error('Mỗi lần gửi không được vượt quá 30 loại món.');
       setSubmitting(true);
       try {
+        if (!USE_MOCK_CUSTOMER_ORDER && !activeSessionId) {
+          await startCustomerSession();
+        }
         const created = await repositories.customerOrder.submitOrder({
           tableNumber,
           guestName: guestName.trim() || undefined,
@@ -324,7 +325,7 @@ export function useCustomerOrder() {
         setSubmitting(false);
       }
     },
-    [cart, tableNumber, guestName, guestCount, persistCart, activeSessionId],
+    [cart, tableNumber, guestName, guestCount, persistCart, activeSessionId, startCustomerSession],
   );
 
   const filteredItems = useMemo(() => {
