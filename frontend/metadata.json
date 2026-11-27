@@ -1,0 +1,6 @@
+{
+  "name": "ResMan",
+  "description": "Ứng dụng quản lý nhà hàng đa nền tảng (Android, iOS, Web, Tablet) xây dựng bằng React Native & Expo theo kiến trúc Feature-based & Repository Pattern.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

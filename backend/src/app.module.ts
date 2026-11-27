@@ -8,11 +8,12 @@ import { TablesModule } from "./tables/tables.module.js";
 import { UsersModule } from "./users/users.module.js";
 import { SessionsModule } from "./sessions/sessions.module.js";
 import { OrdersModule } from "./orders/orders.module.js";
-import { MenuModule } from "./menu/menu.module.js";
 import { KitchenModule } from "./kitchen/kitchen.module.js";
 import { PaymentsModule } from "./payments/payments.module.js";
 import { InventoryModule } from "./inventory/inventory.module.js";
 import { ReportsModule } from "./reports/reports.module.js";
+import { MenuCategoriesModule } from "./menu-categories/menu-categories.module.js";
+import { MenuItemsModule } from "./menu-items/menu-items.module.js";
 
 @Module({
   imports: [
@@ -23,11 +24,12 @@ import { ReportsModule } from "./reports/reports.module.js";
     UsersModule,
     SessionsModule,
     OrdersModule,
-    MenuModule,
     KitchenModule,
     PaymentsModule,
     InventoryModule,
     ReportsModule,
+    MenuCategoriesModule,
+    MenuItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

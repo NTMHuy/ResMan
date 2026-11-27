@@ -22,15 +22,22 @@ Hệ thống có năm vai trò chính: Khách hàng, Nhân viên Order, Nhân vi
 - Dữ liệu phiên bàn và đơn hàng được lưu ở server. Tablet chỉ kết nối để hiển thị và gửi thao tác; khi khởi động lại hoặc kết nối lại, tablet tải dữ liệu phiên đang hoạt động từ server.
 - Không có chức năng chuyển bàn/đổi bàn trên phần mềm trong MVP; nếu cần đổi vị trí tablet thì nhân viên di chuyển thiết bị vật lý.
 - Mỗi bàn chỉ có tối đa một phiên đang hoạt động.
-- MVP chỉ hỗ trợ khách đặt món theo chế độ guest trên tablet gắn với bàn; không xây dựng tài khoản khách hàng hoặc lưu lịch sử đặt món theo danh tính cá nhân.
+- Mỗi tablet khách hàng đăng nhập sẵn bằng một tài khoản có role CUSTOMER do Quản lý tạo.
+- Mỗi tài khoản CUSTOMER tương ứng đúng một bàn; không giới hạn số lượng bàn ở 20. Quản lý tạo bàn và gán tài khoản/tablet theo quy mô nhà hàng.
+- Tablet vẫn đăng nhập tài khoản CUSTOMER khi bàn trống; đăng nhập không đồng nghĩa phiên ăn đang mở.
+- Khi khách mở chức năng gọi món trên tablet, hệ thống tự kích hoạt phiên của bàn được gán. Nếu bàn đã có phiên OPEN thì sử dụng lại phiên đó, không tạo phiên/order trùng.
+- Nhân viên có role ORDER_STAFF cũng có thể chọn bất kỳ bàn nào và chủ động kích hoạt phiên.
+- Khách không được tự chọn bàn hoặc truy cập phiên của bàn khác; backend xác định bàn từ tài khoản CUSTOMER đã xác thực.
 - AI gợi ý món ăn là định hướng tương lai, không thuộc MVP.
 
 ## 3. Phiên bàn và đặt món
 
 ### 3.1 Mở và kết thúc phiên
 
-- Quản lý hoặc Nhân viên Order có thể mở phiên bàn.
-- Sau khi phiên được mở, tablet tại bàn có thể được khách sử dụng để xem menu và đặt món.
+- Có hai cách mở phiên: khách mở chức năng gọi món trên tablet CUSTOMER đã gán với bàn; hoặc Nhân viên Order chọn bàn bất kỳ và kích hoạt phiên.
+- Với tablet CUSTOMER, backend tự xác định bàn từ tài khoản; không yêu cầu khách chọn bàn hoặc nhập mã phiên.
+- Nếu bàn đã có phiên OPEN, thao tác kích hoạt tiếp theo sử dụng phiên hiện tại và không tạo order mới.
+- Khi thanh toán hoàn tất, phiên đóng và bàn trở về AVAILABLE; tablet vẫn giữ tài khoản CUSTOMER để phục vụ lượt khách tiếp theo.
 - Không hỗ trợ đặt bàn trước trong MVP.
 - Phiên chỉ kết thúc sau khi khách dùng bữa xong, yêu cầu thanh toán, nhân viên nhận đủ tiền và xác nhận thanh toán trên hệ thống.
 - Yêu cầu thanh toán và xác nhận thanh toán là hai hành động khác nhau.
@@ -221,3 +228,14 @@ Các nội dung đã xác định không thuộc MVP:
 
 
 Các điểm OQ cũ liên quan đến Kitchen Station (nếu xuất hiện trong PRD/System Analysis) và mô hình kiểm kê đầu ngày/cuối ngày đã được giải quyết theo các quyết định trên. Không tiếp tục giữ chúng dưới dạng câu hỏi mở.
+
+
+## 12. Quyết định bổ sung đã xác nhận ngày 26/11/2026 — CUSTOMER account và kích hoạt phiên
+
+- Một tài khoản CUSTOMER tương ứng đúng một bàn; không có giới hạn cứng 20 bàn.
+- Mỗi tablet được đăng nhập sẵn bằng tài khoản CUSTOMER do Quản lý tạo và gán với bàn tương ứng.
+- Tablet giữ trạng thái đăng nhập kể cả khi bàn trống; DiningSession chỉ tồn tại khi bàn thực sự bắt đầu phục vụ.
+- Khách mở chức năng gọi món trên tablet thì backend tự mở phiên của bàn đã gán. Nếu đã có phiên OPEN, backend trả về phiên hiện tại, không tạo thêm phiên hoặc Order.
+- Nhân viên ORDER_STAFF có thể chọn bất kỳ bàn nào và mở phiên thay khách.
+- Customer API không nhận tableId/sessionCode từ client; không có danh sách bàn công khai hoặc chức năng khách tự kết nối/chọn bàn.
+- Quyết định guest-only cũ tại Mục 2 đã được thay thế bởi quyết định này.

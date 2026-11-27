@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "tertiary-fixed": "#ffdcc3", "surface-container-lowest": "#ffffff", "surface-variant": "#d3e4fe", "surface": "#f8f9ff", "primary-container": "#131b2e", "secondary-fixed": "#dbe1ff", "inverse-on-surface": "#eaf1ff", "tertiary": "#000000", "background": "#f8f9ff", "on-tertiary-container": "#c76c00", "on-error": "#ffffff", "inverse-surface": "#213145", "on-secondary-fixed-variant": "#003ea8", "error-container": "#ffdad6", "secondary": "#0051d5", "surface-container-high": "#dce9ff", "outline-variant": "#c6c6cd", "on-error-container": "#93000a", "tertiary-container": "#2f1500", "on-primary-container": "#7c839b", "surface-container": "#e5eeff", "primary": "#000000", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#2f1500", "on-primary-fixed": "#131b2e", "on-surface": "#0b1c30", "on-primary-fixed-variant": "#3f465c", "inverse-primary": "#bec6e0", "surface-dim": "#cbdbf5", "surface-bright": "#f8f9ff", "on-primary": "#ffffff", "surface-container-low": "#eff4ff", "surface-tint": "#565e74", "on-background": "#0b1c30", "surface-container-highest": "#d3e4fe", "on-secondary-container": "#fefcff", "outline": "#76777d", "secondary-fixed-dim": "#b4c5ff", "on-surface-variant": "#45464d", "on-secondary-fixed": "#00174b", "tertiary-fixed-dim": "#ffb77d", "on-secondary": "#ffffff", "primary-fixed": "#dae2fd", "secondary-container": "#316bf3", "primary-fixed-dim": "#bec6e0", "on-tertiary-fixed-variant": "#6e3900" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-md": "0.75rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "gutter": "1rem", "space-xl": "1.5rem", "margin": "1rem", "space-lg": "1rem" }, "fontFamily": { "tabular-data": [ "JetBrains Mono" ], "headline-xl": [ "Inter" ], "label-sm": [ "JetBrains Mono" ], "headline-sm": [ "Inter" ], "body-lg": [ "Inter" ], "headline-md": [ "Inter" ], "body-md": [ "Inter" ], "headline-xl-mobile": [ "Inter" ], "label-lg": [ "JetBrains Mono" ], "label-md": [ "JetBrains Mono" ], "body-sm": [ "Inter" ], "headline-lg": [ "Inter" ] }, "fontSize": { "tabular-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "-0.02em", "fontWeight": "500" } ], "headline-xl": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" } ], "body-lg": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-xl-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-gutter flex items-center justify-between bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 bg-primary rounded flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">restaurant_menu</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">ResMan</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none mt-1">ENTERPRISE OPS</span></div></div><span class="font-label-sm text-label-sm px-space-xs py-0.5 bg-surface-container-high text-on-surface-variant rounded">v2.4</span></div><div class="px-gutter py-space-sm"><div class="p-space-sm bg-surface-container-low rounded flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-secondary text-[18px]">dns</span><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Core Sync</span><span class="font-tabular-data text-tabular-data text-on-surface">ONLINE (14ms)</span></div></div><div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div></div></div><div class="px-gutter pt-space-sm pb-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Operations Rail</span></div><nav class="flex-1 px-space-sm flex flex-col gap-1 overflow-y-auto" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded"><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="menu-catalog" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-label-md text-label-md">Menu Catalog</span></div><span class="font-label-sm text-label-sm text-outline">F-001</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="customer-order" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">point_of_sale</span><span class="font-label-md text-label-md">Customer Order</span></div><span class="font-label-sm text-label-sm text-outline">F-002</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="live-orders" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-md text-label-md">Live Orders</span></div><span class="font-label-sm text-label-sm px-1 bg-surface-container-high text-on-surface rounded font-tabular-data">14</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="kds-kitchen-display" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">soup_kitchen</span><span class="font-label-md text-label-md">KDS Display</span></div><span class="font-label-sm text-label-sm text-outline">F-008</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="inventory-audit" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-label-md text-label-md">Inventory Audit</span></div><span class="font-label-sm text-label-sm text-outline">F-010</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="staff-shifts" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">badge</span><span class="font-label-md text-label-md">Staff &amp; Shifts</span></div><span class="font-label-sm text-label-sm text-outline">F-013</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="reports-telemetry" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-label-md text-label-md">Reports &amp; Telemetry</span></div><span class="font-label-sm text-label-sm text-outline">F-014</span></a></nav><div class="p-space-md bg-surface-container-lowest mt-auto"><div class="p-space-sm rounded bg-surface-container-low flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Terminal Node</span><span class="font-tabular-data text-tabular-data text-on-surface font-semibold">POS-DESK-02</span></div><span class="material-symbols-outlined text-outline text-[18px]">devices</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 z-40 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-gutter flex items-center justify-between"><div class="flex items-center gap-gutter"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-1.5 rounded"><span class="material-symbols-outlined text-secondary text-[18px]">storefront</span><div class="flex flex-col text-left"><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">ACTIVE BRANCH</span><span class="font-label-md text-label-md text-on-surface font-semibold leading-none mt-0.5">Downtown #04</span></div><span class="material-symbols-outlined text-outline text-[16px] ml-1">expand_more</span></div><div class="h-6 w-[1px] bg-surface-container-high hidden sm:block"></div><div class="hidden md:flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-1.5 rounded"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">System:</span><span class="font-tabular-data text-tabular-data text-on-surface">Orders Active (23)</span></div><div class="hidden lg:flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="font-tabular-data text-tabular-data text-on-surface">14:38:09 EST</span></div></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-sm bg-surface-container px-space-md py-1 rounded"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Role:</span><span class="font-label-sm text-label-sm font-semibold text-secondary-container">LEAD SHIFT MANAGER</span></div><div class="flex items-center gap-1"><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">help</span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-surface px-gutter min-h-screen"><div class="flex flex-col w-full pb-12">
+<!-- Top Operational Banner & Direct Shift Dispatch Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-gutter mt-space-sm">
+<!-- Active Headcount Tile -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tổng Nhân Lực Ca Hiện Tại</span>
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+</div>
+<div class="my-space-xs flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface">18</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 22 định biên</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 81.8%"></div>
+</div>
+<span class="font-tabular-data text-tabular-data text-on-surface font-semibold text-[11px]">82%</span>
+</div>
+</div>
+<!-- Station Readiness Status -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Trạm Sẵn Sàng (Live Floor)</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">table_restaurant</span>
+</div>
+<div class="my-space-xs flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface">9</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 10 vị trí mở</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Khu Tầng 1: Đủ 100% bàn tiếp nhận</span>
+</div>
+</div>
+<!-- Kitchen Line Allocation -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Trạm KDS Bếp Trực</span>
+<span class="material-symbols-outlined text-[18px] text-on-tertiary-container">soup_kitchen</span>
+</div>
+<div class="my-space-xs flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface">5</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">đầu bếp chính</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="font-tabular-data text-tabular-data text-on-surface font-semibold">T1 Bếp Nóng: 3</span>
+<span>•</span>
+<span class="font-tabular-data text-tabular-data text-on-surface font-semibold">T2 Pha Chế: 2</span>
+</div>
+</div>
+<!-- Inventory / Logistics Node -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Điều Phối Kho / Nhận Hàng</span>
+<span class="material-symbols-outlined text-[18px] text-outline">inventory_2</span>
+</div>
+<div class="my-space-xs flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface">2</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">nhân sự trực kho lạnh</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-secondary">sync</span>
+<span>Audit F-010 sẵn sàng</span>
+</div>
+</div>
+</div>
+<!-- Operational Action Toolbar & Shift Filters -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm mb-gutter flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Left: Filter by Roles -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mr-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Vai Trò:
+      </span>
+<button class="px-space-md py-1 rounded-full text-label-sm font-label-sm bg-primary text-on-primary shadow-sm transition-colors" id="btn-filter-all" onclick="filterStaff('all')">
+        Tất Cả (18)
+      </button>
+<button class="px-space-md py-1 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors" id="btn-filter-manager" onclick="filterStaff('manager')">
+        Quản Lý (2)
+      </button>
+<button class="px-space-md py-1 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors" id="btn-filter-server" onclick="filterStaff('server')">
+        Order &amp; Phục Vụ (8)
+      </button>
+<button class="px-space-md py-1 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors" id="btn-filter-kitchen" onclick="filterStaff('kitchen')">
+        Nhân Viên Bếp (6)
+      </button>
+<button class="px-space-md py-1 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors" id="btn-filter-inventory" onclick="filterStaff('inventory')">
+        Kho &amp; Tiếp Vận (2)
+      </button>
+</div>
+<!-- Right: Tactical Dispatch Actions -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<!-- Search Input -->
+<div class="relative flex-1 sm:w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-outline">search</span>
+<input class="w-full pl-8 pr-space-md py-1.5 bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all" id="staff-search-input" onkeyup="searchStaff()" placeholder="Tìm tên, mã NV, khu vực..." type="text"/>
+</div>
+<!-- Quick Shift Swap Trigger -->
+<button class="h-9 px-space-md bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-label-md text-label-md flex items-center gap-1.5 transition-colors" onclick="openShiftReassignModal()">
+<span class="material-symbols-outlined text-[18px]">swap_horiz</span>
+<span>Đổi Ca Làm Việc</span>
+</button>
+<!-- Add Staff Trigger -->
+<button class="h-9 px-space-md bg-primary hover:bg-inverse-surface text-on-primary rounded font-label-md text-label-md flex items-center gap-1.5 shadow-sm transition-colors" onclick="openAddStaffModal()">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>Thêm Nhân Viên</span>
+</button>
+</div>
+</div>
+<!-- Primary Roster Table -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header Toolbar / Summary Info -->
+<div class="px-gutter py-space-sm bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<span class="font-headline-sm text-headline-sm text-on-surface">Danh Sách Phân Bổ Nhân Sự &amp; Điểm Trực</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-tabular-data">F-013 OPS RAIL</span>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Đang trực tuyến: 14</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sẵn sàng nhận bàn: 3</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nghỉ ca / Ra ngoài: 1</span>
+</div>
+</div>
+</div>
+<!-- Table Contents -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse" id="staff-table">
+<thead>
+<tr class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-space-sm px-gutter font-semibold">Mã NV</th>
+<th class="py-space-sm px-space-md font-semibold">Họ và Tên</th>
+<th class="py-space-sm px-space-md font-semibold">Vai Trò &amp; Quyền Hạn</th>
+<th class="py-space-sm px-space-md font-semibold">Ca Làm Việc</th>
+<th class="py-space-sm px-space-md font-semibold">Vị Trí / Trạm Trực Phụ Trách</th>
+<th class="py-space-sm px-space-md font-semibold">Trạng Thái</th>
+<th class="py-space-sm px-gutter text-right font-semibold">Thao Tác</th>
+</tr>
+</thead>
+<tbody class="divide-y-0" id="staff-table-body">
+<!-- Row 1: Manager -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-001" data-name="Nguyễn Minh Quân" data-role="manager">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-001</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  MQ
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Nguyễn Minh Quân</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">quan.nm@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined text-[13px]">admin_panel_settings</span>
+                Quản Lý Ca Trực
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]">domain</span>
+<span class="font-body-sm text-body-sm text-on-surface">Toàn bộ nhà hàng &amp; Quầy Thu Ngân</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Đang làm việc
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-001', 'Nguyễn Minh Quân', 'Quản Lý Ca Trực', 'Ca Sáng (06:00 - 14:00)', 'Toàn bộ nhà hàng', 'Đang làm việc')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-001', 'Nguyễn Minh Quân')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Lead Server -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-014" data-name="Trần Thị Lan Chi" data-role="server">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-014</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  LC
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Trần Thị Lan Chi</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">chi.ttl@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-variant text-on-surface">
+<span class="material-symbols-outlined text-[13px]">room_service</span>
+                Trưởng Phục Vụ / POS
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">pin_drop</span>
+<span class="font-body-sm text-body-sm text-on-surface">Tầng 1 - Khu VIP &amp; Sân Vườn</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Đang phục vụ (Bàn 04, 07)
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-014', 'Trần Thị Lan Chi', 'Trưởng Phục Vụ / POS', 'Ca Sáng (06:00 - 14:00)', 'Tầng 1 - Khu VIP', 'Đang làm việc')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-014', 'Trần Thị Lan Chi')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Server Floor -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-022" data-name="Lê Hoàng Sơn" data-role="server">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-022</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  HS
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Lê Hoàng Sơn</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">son.lh@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface">
+<span class="material-symbols-outlined text-[13px]">point_of_sale</span>
+                Nhân Viên Order
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">pin_drop</span>
+<span class="font-body-sm text-body-sm text-on-surface">Tầng 1 - Khu Trong Nhà</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+                Sẵn sàng nhận bàn
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-022', 'Lê Hoàng Sơn', 'Nhân Viên Order', 'Ca Sáng (06:00 - 14:00)', 'Tầng 1 - Trong Nhà', 'Sẵn sàng nhận bàn')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-022', 'Lê Hoàng Sơn')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Head Chef Kitchen -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-005" data-name="Phạm Đăng Khoa" data-role="kitchen">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-005</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  ĐK
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Phạm Đăng Khoa</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">khoa.pd@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-tertiary-container text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined text-[13px]">skillet</span>
+                Bếp Trưởng Ca
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">soup_kitchen</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Trạm Bếp Nóng 01 (KDS-H1)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Đang trực KDS
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-005', 'Phạm Đăng Khoa', 'Bếp Trưởng Ca', 'Ca Sáng (06:00 - 14:00)', 'Trạm Bếp Nóng 01', 'Đang làm việc')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-005', 'Phạm Đăng Khoa')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Kitchen Prep / Cold Station -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-019" data-name="Đặng Thảo Vy" data-role="kitchen">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-019</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  TV
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Đặng Thảo Vy</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">vy.dt@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-variant text-on-surface">
+<span class="material-symbols-outlined text-[13px]">cookie</span>
+                Bếp Lạnh &amp; Tráng Miệng
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">soup_kitchen</span>
+<span class="font-body-sm text-body-sm text-on-surface">Trạm Bếp Lạnh &amp; Pha Chế Bar</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Đang làm việc
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-019', 'Đặng Thảo Vy', 'Bếp Lạnh &amp; Tráng Miệng', 'Ca Sáng (06:00 - 14:00)', 'Trạm Bếp Lạnh &amp; Bar', 'Đang làm việc')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-019', 'Đặng Thảo Vy')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Inventory Staff -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-031" data-name="Bùi Tuấn Kiệt" data-role="inventory">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-secondary">NV-031</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  TK
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Bùi Tuấn Kiệt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">kiet.bt@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface">
+<span class="material-symbols-outlined text-[13px]">inventory</span>
+                Thủ Kho &amp; Tiếp Vận
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Sáng (06:00 - 14:00)</span>
+<span class="font-tabular-data text-tabular-data text-on-surface-variant text-[11px]">Còn 01h 42m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">warehouse</span>
+<span class="font-body-sm text-body-sm text-on-surface">Kho Trung Tâm B1 &amp; Cửa Nhận Hàng</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Đang kiểm kê F-010
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-031', 'Bùi Tuấn Kiệt', 'Thủ Kho &amp; Tiếp Vận', 'Ca Sáng (06:00 - 14:00)', 'Kho Trung Tâm B1', 'Đang làm việc')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-031', 'Bùi Tuấn Kiệt')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 7: Upcoming / Break Shift -->
+<tr class="staff-row hover:bg-surface-container-low transition-colors group" data-code="NV-042" data-name="Hoàng Thị Mai Anh" data-role="server">
+<td class="py-space-md px-gutter">
+<span class="font-tabular-data text-tabular-data font-semibold text-outline">NV-042</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-low text-on-surface-variant flex items-center justify-center font-tabular-data text-label-sm font-semibold">
+                  MA
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Hoàng Thị Mai Anh</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">anh.htm@resman.vn</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[13px]">person</span>
+                Phục Vụ Bàn (Runner)
+              </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Ca Chiều (14:00 - 22:00)</span>
+<span class="font-tabular-data text-tabular-data text-outline text-[11px]">Bắt đầu sau 01h 18m</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">pending_actions</span>
+<span class="font-body-sm text-body-sm">Đã gán: Tầng 2 Khu VIP</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface-variant font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                Nghỉ ca (Chuẩn bị vào ca)
+              </span>
+</td>
+<td class="py-space-md px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded hover:bg-surface-container" onclick="viewStaffDetail('NV-042', 'Hoàng Thị Mai Anh', 'Phục Vụ Bàn', 'Ca Chiều (14:00 - 22:00)', 'Tầng 2 Khu VIP', 'Nghỉ ca')" title="Chi tiết &amp; Phân quyền">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" onclick="openQuickShiftSwap('NV-042', 'Hoàng Thị Mai Anh')" title="Đổi trạm / ca">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination / Status Rail -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hiển thị <span class="font-tabular-data font-semibold text-on-surface">7 / 18</span> nhân sự đang điều phối tại trạm Downtown #04</span>
+<div class="flex items-center gap-1">
+<button class="px-space-sm py-1 bg-surface-container-low text-on-surface-variant rounded font-label-sm text-label-sm hover:bg-surface-container cursor-not-allowed" disabled="">
+          Trang Trước
+        </button>
+<span class="px-space-md py-1 bg-primary text-on-primary rounded font-label-sm text-label-sm font-semibold">1</span>
+<button class="px-space-sm py-1 bg-surface-container-low text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-container">
+          Trang Tiếp (2)
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL 1: Staff Details & Role Permission Matrix (Panel Chi Tiết & Quyền Hạn) -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-xs" id="modal-staff-detail">
+<div class="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-xl overflow-hidden flex flex-col m-gutter">
+<!-- Modal Header -->
+<div class="px-gutter py-space-md bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">badge</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Hồ Sơ Vận Hành &amp; Gán Quyền ResMan</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface" onclick="closeModal('modal-staff-detail')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-gutter flex flex-col gap-space-lg max-h-[768px] overflow-y-auto">
+<!-- Personnel Overview Strip -->
+<div class="p-space-md bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center font-tabular-data text-headline-sm font-semibold" id="modal-avatar">
+              MQ
+            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface" id="modal-staff-name">Nguyễn Minh Quân</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-secondary font-tabular-data" id="modal-staff-code">NV-001</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="modal-staff-role-text">Quản Lý Ca Trực • Ca Sáng (06:00 - 14:00)</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed-variant font-medium" id="modal-staff-status">
+            Đang làm việc
+          </span>
+</div>
+<!-- Station Assignment Selector -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Phân Bổ Vị Trí / Trạm Trực (Operational Station)</label>
+<select class="w-full h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary">
+<option value="all">Toàn bộ nhà hàng &amp; Quầy Thu Ngân (Storewide / Cashier)</option>
+<option value="floor_1">Tầng 1 - Khu Trong Nhà (Tables 1-12)</option>
+<option value="floor_1_vip">Tầng 1 - Khu VIP &amp; Sân Vườn (Tables 14-20)</option>
+<option value="kitchen_hot_1">Bếp Nóng Trạm 01 (KDS Line 1)</option>
+<option value="kitchen_cold">Bếp Lạnh &amp; Quầy Pha Chế Bar</option>
+<option value="inventory_b1">Kho Trung Tâm B1 &amp; Giao Nhận</option>
+</select>
+</div>
+<!-- Permission Matrix (PRD Scope F-013) -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Quyền Hạn Hệ Thống ResMan Theo Vị Trí</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<!-- Perm 1: Void Ticket -->
+<label class="p-space-sm bg-surface-container-low rounded flex items-start gap-space-sm cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="mt-0.5 rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Hủy Món / Void Phiếu Bếp</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cần mã PIN quản lý duyệt hủy món trên KDS</span>
+</div>
+</label>
+<!-- Perm 2: Floor Reassign -->
+<label class="p-space-sm bg-surface-container-low rounded flex items-start gap-space-sm cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="mt-0.5 rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Gán &amp; Chuyển Bàn (Table Swap)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tự do điều phối khách giữa các zone</span>
+</div>
+</label>
+<!-- Perm 3: 86 Items Stock -->
+<label class="p-space-sm bg-surface-container-low rounded flex items-start gap-space-sm cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="mt-0.5 rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Khai Báo 86 (Hết Nguyên Liệu)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Khóa tức thì món trên toàn bộ POS và Tablet</span>
+</div>
+</label>
+<!-- Perm 4: Inventory Intake -->
+<label class="p-space-sm bg-surface-container-low rounded flex items-start gap-space-sm cursor-pointer hover:bg-surface-container transition-colors">
+<input class="mt-0.5 rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Xác Nhận Nhập Kho F-010</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Ký duyệt chứng từ giao nhận nhà cung cấp</span>
+</div>
+</label>
+</div>
+</div>
+<!-- System Activity Stamp -->
+<div class="p-space-sm bg-surface-container rounded flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">fingerprint</span>
+<span>Đăng nhập qua thẻ từ: POS-DESK-02</span>
+</div>
+<span class="font-tabular-data">06:02:11 EST</span>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-gutter py-space-sm bg-surface-container-low flex items-center justify-between">
+<button class="h-9 px-space-md bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md" onclick="closeModal('modal-staff-detail')">
+          Hủy Bỏ
+        </button>
+<button class="h-9 px-space-md bg-primary hover:bg-inverse-surface text-on-primary rounded font-label-md text-label-md flex items-center gap-1.5 shadow-sm" onclick="saveStaffPermissions()">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Cập Nhật Quyền &amp; Vị Trí</span>
+</button>
+</div>
+</div>
+</div>
+<!-- MODAL 2: Add New Staff Form (Thêm Nhân Viên Mới) -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-xs" id="modal-add-staff">
+<div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-xl overflow-hidden flex flex-col m-gutter">
+<!-- Modal Header -->
+<div class="px-gutter py-space-md bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">person_add</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Thêm Nhân Sự Vào Ca Làm Việc</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface" onclick="closeModal('modal-add-staff')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Form Body -->
+<div class="p-gutter flex flex-col gap-space-md">
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Mã Nhân Viên</label>
+<input class="h-10 px-space-md bg-surface-container font-tabular-data text-tabular-data text-on-surface rounded outline-none" readonly="" type="text" value="NV-053"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Họ Và Tên</label>
+<input class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary" id="new-staff-name" placeholder="VD: Võ Thành Luân" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Vai Trò Vận Hành</label>
+<select class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary" id="new-staff-role">
+<option value="server">Order &amp; Phục Vụ</option>
+<option value="kitchen">Nhân Viên Bếp (KDS)</option>
+<option value="inventory">Thủ Kho &amp; Tiếp Vận</option>
+<option value="manager">Quản Lý Ca</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Ca Làm Việc</label>
+<select class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary">
+<option value="shift_morning">Ca Sáng (06:00 - 14:00)</option>
+<option value="shift_afternoon">Ca Chiều (14:00 - 22:00)</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Trạm Trực Phụ Trách Ban Đầu</label>
+<input class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary" id="new-staff-station" placeholder="VD: Tầng 1 Khu VIP, Bếp Nóng 2..." type="text"/>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded text-on-surface-variant font-label-sm text-label-sm flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">info</span>
+<span>Nhân sự mới sẽ được phân bổ thẻ từ tạm thời để truy cập vào hệ thống POS và KDS theo chuẩn F-013.</span>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-gutter py-space-sm bg-surface-container-low flex items-center justify-end gap-space-sm">
+<button class="h-9 px-space-md bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md" onclick="closeModal('modal-add-staff')">
+          Hủy Bỏ
+        </button>
+<button class="h-9 px-space-md bg-primary hover:bg-inverse-surface text-on-primary rounded font-label-md text-label-md flex items-center gap-1.5 shadow-sm" onclick="createNewStaffRecord()">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Thêm Vào Danh Sách</span>
+</button>
+</div>
+</div>
+</div>
+<!-- MODAL 3: Shift Reassign Modal (Đổi Ca Làm Việc Hàng Loạt) -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-xs" id="modal-shift-reassign">
+<div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-xl overflow-hidden flex flex-col m-gutter">
+<div class="px-gutter py-space-md bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">swap_horiz</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Hoán Đổi Ca Trực Vận Hành</span>
+</div>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface" onclick="closeModal('modal-shift-reassign')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-gutter flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Nhân Sự Yêu Cầu Chuyển</label>
+<select class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none" id="swap-source-staff">
+<option value="NV-014">NV-014 - Trần Thị Lan Chi (Ca Sáng: 06:00 - 14:00)</option>
+<option value="NV-022">NV-022 - Lê Hoàng Sơn (Ca Sáng: 06:00 - 14:00)</option>
+<option value="NV-042">NV-042 - Hoàng Thị Mai Anh (Ca Chiều: 14:00 - 22:00)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Chuyển Sang Hoặc Đổi Cho</label>
+<select class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none" id="swap-target-action">
+<option value="shift_afternoon">Chuyển thẳng sang Ca Chiều (14:00 - 22:00)</option>
+<option value="swap_with_mai_anh">Đổi chéo ca với NV-042 (Hoàng Thị Mai Anh)</option>
+<option value="leave_early">Xin ra về sớm (Dưới sự chuẩn y của Quản lý)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Ghi Chú Vận Hành</label>
+<input class="h-10 px-space-md bg-surface-container-low text-on-surface rounded font-body-md text-body-md outline-none" placeholder="Lý do: Hỗ trợ bàn đông giờ cao điểm chiều..." type="text"/>
+</div>
+</div>
+<div class="px-gutter py-space-sm bg-surface-container-low flex items-center justify-end gap-space-sm">
+<button class="h-9 px-space-md bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md" onclick="closeModal('modal-shift-reassign')">
+          Hủy Bỏ
+        </button>
+<button class="h-9 px-space-md bg-primary hover:bg-inverse-surface text-on-primary rounded font-label-md text-label-md shadow-sm" onclick="confirmShiftSwap()">
+          Xác Nhận Đổi Ca
+        </button>
+</div>
+</div>
+</div>
+<!-- Notification Toast Indicator -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-200 bg-inverse-surface text-inverse-on-surface px-space-md py-space-sm rounded-lg shadow-xl flex items-center gap-space-sm" id="toast-notification">
+<span class="material-symbols-outlined text-secondary text-[20px]" id="toast-icon">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-message">Đã cập nhật hệ thống</span>
+</div>
+</div>
+<script>
+  // Simple client-side handlers for F-013 Store Manager Shift Rail
+  function filterStaff(role) {
+    const rows = document.querySelectorAll('.staff-row');
+    const buttons = ['all', 'manager', 'server', 'kitchen', 'inventory'];
+    
+    // Update active button state
+    buttons.forEach(b => {
+      const btn = document.getElementById('btn-filter-' + b);
+      if (btn) {
+        if (b === role) {
+          btn.classList.remove('bg-surface-container-low', 'text-on-surface');
+          btn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+          btn.classList.add('bg-surface-container-low', 'text-on-surface');
+        }
+      }
+    });
+
+    // Toggle row visibility
+    rows.forEach(row => {
+      if (role === 'all' || row.getAttribute('data-role') === role) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  function searchStaff() {
+    const query = document.getElementById('staff-search-input').value.toLowerCase();
+    const rows = document.querySelectorAll('.staff-row');
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      if (text.includes(query)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  function viewStaffDetail(code, name, role, shift, station, status) {
+    document.getElementById('modal-staff-code').innerText = code;
+    document.getElementById('modal-staff-name').innerText = name;
+    document.getElementById('modal-avatar').innerText = name.split(' ').map(n => n[0]).slice(-2).join('');
+    document.getElementById('modal-staff-role-text').innerText = `${role} • ${shift}`;
+    document.getElementById('modal-staff-status').innerText = status;
+    
+    document.getElementById('modal-staff-detail').classList.remove('hidden');
+  }
+
+  function openAddStaffModal() {
+    document.getElementById('modal-add-staff').classList.remove('hidden');
+  }
+
+  function openShiftReassignModal() {
+    document.getElementById('modal-shift-reassign').classList.remove('hidden');
+  }
+
+  function openQuickShiftSwap(code, name) {
+    const select = document.getElementById('swap-source-staff');
+    if (select) {
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === code) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    openShiftReassignModal();
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msg = document.getElementById('toast-message');
+    msg.innerText = message;
+    toast.classList.remove('translate-y-24', 'opacity-0');
+    setTimeout(() => {
+      toast.classList.add('translate-y-24', 'opacity-0');
+    }, 2500);
+  }
+
+  function saveStaffPermissions() {
+    closeModal('modal-staff-detail');
+    showToast('Đã lưu quyền hạn & phân bổ trạm mới thành công.');
+  }
+
+  function createNewStaffRecord() {
+    const name = document.getElementById('new-staff-name').value;
+    if (!name) {
+      alert('Vui lòng nhập họ và tên nhân viên');
+      return;
+    }
+    closeModal('modal-add-staff');
+    showToast('Đã thêm nhân sự vào danh sách ca sáng.');
+  }
+
+  function confirmShiftSwap() {
+    closeModal('modal-shift-reassign');
+    showToast('Đã gửi thông báo xác nhận đổi ca trực.');
+  }
+</script></main></div></body></html>

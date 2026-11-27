@@ -1,0 +1,160 @@
+@startuml
+hide methods
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class Role {
+  +id: BigInt
+  +code: String
+  +name: String
+}
+class Permission {
+  +id: BigInt
+  +code: String
+  +module: String
+}
+class RolePermission {
+  +roleId: BigInt
+  +permissionId: BigInt
+}
+class User {
+  +id: BigInt
+  +roleId: BigInt
+  +username: String
+  +isActive: Boolean
+}
+class Employee {
+  +id: BigInt
+  +userId: BigInt
+  +employeeCode: String
+  +fullName: String
+}
+class MenuCategory {
+  +id: BigInt
+  +code: String
+  +name: String
+  +isActive: Boolean
+}
+class MenuItem {
+  +id: BigInt
+  +categoryId: BigInt
+  +name: String
+  +price: Decimal?
+  +pricingType: MenuPricingType
+  +availabilityStatus: String
+}
+enum MenuPricingType {
+  FIXED
+  PER_UNIT
+  MARKET_PRICE
+  UNSET
+}
+class DiningTable {
+  +id: BigInt
+  +code: String
+  +status: String
+}
+class TableDevice {
+  +id: BigInt
+  +diningTableId: BigInt
+  +userId: BigInt?
+  +isActive: Boolean
+}
+class DiningSession {
+  +id: BigInt
+  +tableId: BigInt
+  +openedBy: BigInt?
+  +closedBy: BigInt?
+  +sessionCode: String
+  +status: String
+}
+class Order {
+  +id: BigInt
+  +orderCode: String
+  +diningSessionId: BigInt
+}
+class OrderItem {
+  +id: BigInt
+  +orderId: BigInt
+  +menuItemId: BigInt
+  +quantity: Int
+  +unitPrice: Decimal
+  +lineTotal: Decimal
+  +status: String
+}
+class OrderItemStatusHistory {
+  +id: BigInt
+  +orderItemId: BigInt
+  +actorId: BigInt?
+  +fromStatus: String?
+  +toStatus: String
+}
+class Ingredient {
+  +id: BigInt
+  +code: String
+  +name: String
+  +unit: String
+}
+class InventoryBalance {
+  +ingredientId: BigInt
+  +quantityOnHand: Decimal
+}
+class StockMovement {
+  +id: BigInt
+  +ingredientId: BigInt
+  +createdBy: BigInt
+  +movementType: String
+  +quantityDelta: Decimal
+}
+class InventoryCountRecord {
+  +id: BigInt
+  +ingredientId: BigInt
+  +countedBy: BigInt
+  +actualQuantity: Decimal
+}
+class PaymentRequest {
+  +id: BigInt
+  +diningSessionId: BigInt
+  +status: String
+}
+class Payment {
+  +id: BigInt
+  +orderId: BigInt
+  +recordedBy: BigInt
+  +amount: Decimal
+  +status: String
+}
+class AuditLog {
+  +id: BigInt
+  +actorId: BigInt?
+  +action: String
+  +entityType: String
+  +entityId: String
+}
+
+Role "1" -- "0..*" User
+Role "1" -- "0..*" RolePermission
+Permission "1" -- "0..*" RolePermission
+User "1" -- "0..1" Employee
+User "0..1" -- "0..1" TableDevice
+DiningTable "1" -- "0..1" TableDevice
+DiningTable "1" -- "0..*" DiningSession
+User "0..1" -- "0..*" DiningSession : openedSessions
+User "0..1" -- "0..*" DiningSession : closedSessions
+DiningSession "1" -- "0..1" Order
+Order "1" -- "0..*" OrderItem
+MenuCategory "1" -- "0..*" MenuItem
+MenuItem "1" -- "0..*" OrderItem
+OrderItem "1" -- "0..*" OrderItemStatusHistory
+User "0..1" -- "0..*" OrderItemStatusHistory : actor
+Ingredient "1" -- "0..1" InventoryBalance
+Ingredient "1" -- "0..*" StockMovement
+Ingredient "1" -- "0..*" InventoryCountRecord
+User "1" -- "0..*" StockMovement : createdBy
+User "1" -- "0..*" InventoryCountRecord : countedBy
+DiningSession "1" -- "0..1" PaymentRequest
+Order "1" -- "0..1" Payment
+User "1" -- "0..*" Payment : recordedBy
+User "0..1" -- "0..*" AuditLog : actor
+MenuItem ..> MenuPricingType
+@enduml

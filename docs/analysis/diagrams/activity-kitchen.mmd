@@ -1,0 +1,16 @@
+flowchart TD
+  A([Bắt đầu]) --> B["GET /kitchen/queue"]
+  B --> C["Hiển thị món thuộc phiên OPEN"]
+  C --> D["Chọn món và trạng thái tiếp theo"]
+  D --> E["PATCH /kitchen/items/:itemId/status"]
+  E --> F{"Phiên OPEN và chuyển trạng thái hợp lệ?"}
+  F -- Không --> G["Trả Conflict / Not Found"]
+  G --> H([Kết thúc không cập nhật])
+  F -- Có --> I{"Trạng thái mới CANCELLED?"}
+  I -- Có --> J{"Có lý do hủy?"}
+  J -- Không --> G
+  J -- Có --> K["Cập nhật OrderItem"]
+  I -- Không --> K
+  K --> L["Ghi StatusHistory + AuditLog"]
+  L --> M["Trả trạng thái mới"]
+  M --> N([Kết thúc])

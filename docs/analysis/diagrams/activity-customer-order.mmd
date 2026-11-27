@@ -1,0 +1,18 @@
+flowchart TD
+  A([Bắt đầu]) --> B["GET /menu-items/customer/menu"]
+  B --> C["Khách chọn món, số lượng, ghi chú"]
+  C --> D["POST /sessions/customer/open"]
+  D --> E{"TableDevice hoạt động?"}
+  E -- Không --> X["Trả lỗi gán tablet/bàn"]
+  X --> Z([Kết thúc thất bại])
+  E -- Có --> F{"Đã có phiên OPEN?"}
+  F -- Có --> G["Tái sử dụng phiên"]
+  F -- Không --> H["Tạo DiningSession + Order<br/>và cập nhật DiningTable"]
+  G --> I["POST /customer/session/items"]
+  H --> I
+  I --> J{"Phiên mở, món khả dụng<br/>và giá hợp lệ?"}
+  J -- Không --> K["Trả lỗi nghiệp vụ"]
+  K --> Z
+  J -- Có --> L["Tạo OrderItem + History + AuditLog"]
+  L --> M["Trả kết quả đặt món"]
+  M --> N([Kết thúc])

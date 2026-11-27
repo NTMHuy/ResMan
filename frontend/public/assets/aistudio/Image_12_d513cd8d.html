@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "tertiary-fixed": "#ffdcc3", "surface-container-lowest": "#ffffff", "surface-variant": "#d3e4fe", "surface": "#f8f9ff", "primary-container": "#131b2e", "secondary-fixed": "#dbe1ff", "inverse-on-surface": "#eaf1ff", "tertiary": "#000000", "background": "#f8f9ff", "on-tertiary-container": "#c76c00", "on-error": "#ffffff", "inverse-surface": "#213145", "on-secondary-fixed-variant": "#003ea8", "error-container": "#ffdad6", "secondary": "#0051d5", "surface-container-high": "#dce9ff", "outline-variant": "#c6c6cd", "on-error-container": "#93000a", "tertiary-container": "#2f1500", "on-primary-container": "#7c839b", "surface-container": "#e5eeff", "primary": "#000000", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#2f1500", "on-primary-fixed": "#131b2e", "on-surface": "#0b1c30", "on-primary-fixed-variant": "#3f465c", "inverse-primary": "#bec6e0", "surface-dim": "#cbdbf5", "surface-bright": "#f8f9ff", "on-primary": "#ffffff", "surface-container-low": "#eff4ff", "surface-tint": "#565e74", "on-background": "#0b1c30", "surface-container-highest": "#d3e4fe", "on-secondary-container": "#fefcff", "outline": "#76777d", "secondary-fixed-dim": "#b4c5ff", "on-surface-variant": "#45464d", "on-secondary-fixed": "#00174b", "tertiary-fixed-dim": "#ffb77d", "on-secondary": "#ffffff", "primary-fixed": "#dae2fd", "secondary-container": "#316bf3", "primary-fixed-dim": "#bec6e0", "on-tertiary-fixed-variant": "#6e3900" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-md": "0.75rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "gutter": "1rem", "space-xl": "1.5rem", "margin": "1rem", "space-lg": "1rem" }, "fontFamily": { "tabular-data": [ "JetBrains Mono" ], "headline-xl": [ "Inter" ], "label-sm": [ "JetBrains Mono" ], "headline-sm": [ "Inter" ], "body-lg": [ "Inter" ], "headline-md": [ "Inter" ], "body-md": [ "Inter" ], "headline-xl-mobile": [ "Inter" ], "label-lg": [ "JetBrains Mono" ], "label-md": [ "JetBrains Mono" ], "body-sm": [ "Inter" ], "headline-lg": [ "Inter" ] }, "fontSize": { "tabular-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "-0.02em", "fontWeight": "500" } ], "headline-xl": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" } ], "body-lg": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-xl-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-gutter flex items-center justify-between bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 bg-primary rounded flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">restaurant_menu</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">ResMan</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none mt-1">ENTERPRISE OPS</span></div></div><span class="font-label-sm text-label-sm px-space-xs py-0.5 bg-surface-container-high text-on-surface-variant rounded">v2.4</span></div><div class="px-gutter py-space-sm"><div class="p-space-sm bg-surface-container-low rounded flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-secondary text-[18px]">dns</span><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Core Sync</span><span class="font-tabular-data text-tabular-data text-on-surface">ONLINE (14ms)</span></div></div><div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div></div></div><div class="px-gutter pt-space-sm pb-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Operations Rail</span></div><nav class="flex-1 px-space-sm flex flex-col gap-1 overflow-y-auto" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded"><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="menu-catalog" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-label-md text-label-md">Menu Catalog</span></div><span class="font-label-sm text-label-sm text-outline">F-001</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="customer-order" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">point_of_sale</span><span class="font-label-md text-label-md">Customer Order</span></div><span class="font-label-sm text-label-sm text-outline">F-002</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="live-orders" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-md text-label-md">Live Orders</span></div><span class="font-label-sm text-label-sm px-1 bg-surface-container-high text-on-surface rounded font-tabular-data">14</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="kds-kitchen-display" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">soup_kitchen</span><span class="font-label-md text-label-md">KDS Display</span></div><span class="font-label-sm text-label-sm text-outline">F-008</span></a><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm transition-colors bg-primary-container text-on-primary-container font-semibold rounded" data-path="inventory-audit" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-label-md text-label-md">Inventory Audit</span></div><span class="font-label-sm text-label-sm text-outline">F-010</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="staff-shifts" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">badge</span><span class="font-label-md text-label-md">Staff &amp; Shifts</span></div><span class="font-label-sm text-label-sm text-outline">F-013</span></a><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors rounded" data-path="reports-telemetry" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-label-md text-label-md">Reports &amp; Telemetry</span></div><span class="font-label-sm text-label-sm text-outline">F-014</span></a></nav><div class="p-space-md bg-surface-container-lowest mt-auto"><div class="p-space-sm rounded bg-surface-container-low flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Terminal Node</span><span class="font-tabular-data text-tabular-data text-on-surface font-semibold">POS-DESK-02</span></div><span class="material-symbols-outlined text-outline text-[18px]">devices</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 z-40 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-gutter flex items-center justify-between"><div class="flex items-center gap-gutter"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-1.5 rounded"><span class="material-symbols-outlined text-secondary text-[18px]">storefront</span><div class="flex flex-col text-left"><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">ACTIVE BRANCH</span><span class="font-label-md text-label-md text-on-surface font-semibold leading-none mt-0.5">Downtown #04</span></div><span class="material-symbols-outlined text-outline text-[16px] ml-1">expand_more</span></div><div class="h-6 w-[1px] bg-surface-container-high hidden sm:block"></div><div class="hidden md:flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-1.5 rounded"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">System:</span><span class="font-tabular-data text-tabular-data text-on-surface">Orders Active (23)</span></div><div class="hidden lg:flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="font-tabular-data text-tabular-data text-on-surface">14:38:09 EST</span></div></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-sm bg-surface-container px-space-md py-1 rounded"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Role:</span><span class="font-label-sm text-label-sm font-semibold text-secondary-container">LEAD SHIFT MANAGER</span></div><div class="flex items-center gap-1"><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">help</span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-surface px-gutter min-h-screen"><div class="flex flex-col w-full pb-12">
+<!-- Operational Sub-Header & Telemetry Strip -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-semibold tracking-wide">MODULE F-010 / F-011</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> CORE ENGINE ACTIVE
+        </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Giám Sát &amp; Kiểm Kê Tồn Kho</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Hệ thống điều vận nguyên vật liệu theo thời gian thực. Tự động liên kết khóa món (86'd) F-001 &amp; POS F-002 khi cạn kho.</p>
+</div>
+<!-- Quick Telemetry Chips -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="bg-surface-container-lowest shadow-sm rounded p-space-sm flex items-center gap-space-md min-w-[130px]">
+<div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Tổng SKU</span>
+<span class="font-tabular-data text-headline-sm text-on-surface">148</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest shadow-sm rounded p-space-sm flex items-center gap-space-md min-w-[140px]">
+<div class="w-8 h-8 rounded bg-tertiary-fixed text-on-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cận Tồn (&lt; Min)</span>
+<span class="font-tabular-data text-headline-sm text-on-tertiary-container" id="metric-low-stock">2</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest shadow-sm rounded p-space-sm flex items-center gap-space-md min-w-[130px]">
+<div class="w-8 h-8 rounded bg-error-container text-on-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">block</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">86'd Cạn Kho</span>
+<span class="font-tabular-data text-headline-sm text-error" id="metric-out-stock">1</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest shadow-sm rounded p-space-sm flex items-center gap-space-md min-w-[150px]">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">published_with_changes</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Kiểm Kê Gần Nhất</span>
+<span class="font-tabular-data text-tabular-data text-on-surface">13:45 (Tổ 1)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Visual Banners: High Velocity Stock Health & Active Auto-Lock Warning -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-space-lg">
+<!-- Automated BR Alert Panel -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded shadow-sm p-space-md flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-ping"></span>
+<span class="font-label-md text-label-md text-error font-semibold uppercase tracking-wider">Cảnh Báo Thực Thi Nghiệp Vụ BR-008 &amp; BR-010</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">AUTO-ENFORCED</span>
+</div>
+<div class="my-space-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+<div class="max-w-xl">
+<p class="font-body-md text-body-md text-on-surface">
+            Mặt hàng <span class="font-semibold text-error">[SKU-0091] Bò Wagyu A5</span> chạm ngưỡng <span class="font-tabular-data font-bold">0.0 kg</span>. Đã tự động kích hoạt trạng thái <strong>86'd</strong> tại toàn bộ máy POS Downtown #04 và App Thực Khách.
+          </p>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1 block">Ràng buộc BR-009: Hệ thống kiên quyết ngăn nhập giá trị âm vào sổ cái kho.</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="px-space-md py-2 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-inverse-surface transition-colors flex items-center gap-1 shadow-sm" onclick="openAdjustmentModal('SKU-0091', 'Thịt Bò Wagyu A5 Tươi (Nhập)', 0.0, 'kg', 5.0)">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+            Nhập Hàng Khẩn
+          </button>
+</div>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 78%;"></div>
+</div>
+</div>
+<!-- Mini Real-time Audit Metric Widget -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded shadow-sm p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Tỷ Lệ Sẵn Sàng Bếp Nóng</span>
+<span class="font-tabular-data text-label-sm text-secondary font-semibold">94.2%</span>
+</div>
+<div class="flex items-center justify-center my-2 gap-space-lg">
+<!-- Compact SVG Gauge -->
+<svg class="w-20 h-20 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="94, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tiêu chuẩn vận hành</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">&gt; 90.0% Đạt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Chu kỳ kiểm tra: 15p/lần</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pt-space-xs">
+<span>3 Trạm lưu kho</span>
+<span class="text-on-surface font-semibold">Đồng bộ SAP: OK</span>
+</div>
+</div>
+</div>
+<!-- Main Action & Filtering Workspace -->
+<div class="bg-surface-container-lowest rounded shadow-sm flex flex-col overflow-hidden mb-space-lg">
+<!-- Filter Toolbar -->
+<div class="p-space-md flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md bg-surface-container-low">
+<!-- Zone / Location Tabs -->
+<div class="flex items-center gap-1 bg-surface-container-lowest p-1 rounded">
+<button class="zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md bg-primary text-on-primary font-semibold transition-colors" onclick="setZoneFilter('ALL', this)">Tất Cả Kho (148)</button>
+<button class="zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="setZoneFilter('BEP_NONG', this)">Kho Lạnh Bếp Nóng (64)</button>
+<button class="zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="setZoneFilter('KHO_MAT', this)">Kho Mát Tổng (52)</button>
+<button class="zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="setZoneFilter('PHA_CHE', this)">Quầy Pha Chế (32)</button>
+</div>
+<!-- Search and Audit Operations -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="relative flex-1 sm:w-72">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-outline">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 bg-surface-container-lowest text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary" id="search-input" onkeyup="handleFilterSearch()" placeholder="Tìm theo tên nguyên liệu, mã SKU..." type="text"/>
+</div>
+<select class="px-space-md py-2 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded outline-none focus:ring-2 focus:ring-secondary" id="status-filter" onchange="handleFilterSearch()">
+<option value="ALL">Mọi trạng thái</option>
+<option value="OUT_OF_STOCK">Hết hàng (86'd)</option>
+<option value="LOW_STOCK">Cận tồn (Cảnh báo vàng)</option>
+<option value="IN_STOCK">Đủ hàng</option>
+</select>
+<button class="px-space-md py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded font-label-md text-label-md flex items-center gap-1 transition-colors" onclick="openFullAuditModal()">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+          Kiểm Kê Toàn Trạm
+        </button>
+<button class="px-space-md py-2 bg-secondary text-on-secondary rounded font-label-md text-label-md flex items-center gap-1 shadow-sm hover:opacity-95 transition-opacity" onclick="triggerBarCodeScan()">
+<span class="material-symbols-outlined text-[18px]">barcode_scanner</span>
+          Quét Barcode
+        </button>
+</div>
+</div>
+<!-- Primary Utilitarian High-Density Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-2.5 px-gutter w-24">MÃ SKU</th>
+<th class="py-2.5 px-gutter">TÊN NGUYÊN VẬT LIỆU</th>
+<th class="py-2.5 px-gutter w-36">VỊ TRÍ LƯU TRỮ</th>
+<th class="py-2.5 px-gutter w-20 text-center">ĐVT</th>
+<th class="py-2.5 px-gutter w-32 text-right">TỒN THỰC TẾ</th>
+<th class="py-2.5 px-gutter w-28 text-right">MỨC MIN</th>
+<th class="py-2.5 px-gutter w-40 text-center">TRẠNG THÁI</th>
+<th class="py-2.5 px-gutter w-32 text-right">CẬP NHẬT</th>
+<th class="py-2.5 px-gutter w-44 text-right">THAO TÁC</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y-0" id="inventory-table-body">
+<!-- Row 1: 86'd Critical item -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0091" data-status="OUT_OF_STOCK" data-zone="BEP_NONG">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0091</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Bò Wagyu A5 Nhập Khẩu</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-sm bg-error-container text-on-error-container uppercase font-bold">86'D AUTO-LOCKED</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Phục vụ: Bò áp chảo sốt tiêu, Wagyu nướng đá</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">ac_unit</span> Kho Lạnh Bếp Nóng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">kg</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-bold text-error">
+              0.00
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">5.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> Hết Hàng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">14:15:20</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-primary text-on-primary hover:bg-inverse-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0091', 'Bò Wagyu A5 Nhập Khẩu', 0.0, 'kg', 5.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[14px]" onclick="quickIncrement('SKU-0091', 1)" title="Cộng nhanh 1 đơn vị">+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Low Stock item -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0044" data-status="LOW_STOCK" data-zone="BEP_NONG">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0044</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Tôm Sú Biển Sống Tươi</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-sm bg-tertiary-fixed text-on-tertiary-container uppercase font-bold">BR-008 CẬN TỒN</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Bảo quản bể oxy số 02</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">water_drop</span> Kho Lạnh Bếp Nóng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">kg</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-bold text-on-tertiary-container">
+              3.40
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">8.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Sắp Hết Hàng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">14:02:11</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0044', 'Tôm Sú Biển Sống Tươi', 3.4, 'kg', 8.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[14px]" onclick="quickIncrement('SKU-0044', 1)">+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Normal In-Stock -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0102" data-status="IN_STOCK" data-zone="BEP_NONG">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0102</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Nước Cốt Hầm Xương Bò (24h)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nấu nồi hơi trung tâm 100L</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">soup_kitchen</span> Kho Lạnh Bếp Nóng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">lít</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-semibold text-on-surface">
+              42.50
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">15.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đủ Tồn Kho
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">13:30:00</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0102', 'Nước Cốt Hầm Xương Bò (24h)', 42.5, 'lít', 15.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[14px]" onclick="quickIncrement('SKU-0102', 1)">+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Low stock (Kho Mát) -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0215" data-status="LOW_STOCK" data-zone="KHO_MAT">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0215</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Bánh Phở Tươi Hà Nội</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-sm bg-tertiary-fixed text-on-tertiary-container uppercase font-bold">HSD: TRONG NGÀY</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nhà cung cấp Làng Nghề Cự Đà</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">kitchen</span> Kho Mát Tổng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">kg</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-bold text-on-tertiary-container">
+              6.20
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">10.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Sắp Hết Hàng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">12:50:44</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0215', 'Bánh Phở Tươi Hà Nội', 6.2, 'kg', 10.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[12px]" onclick="quickIncrement('SKU-0215', 5)">+5</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Normal In-Stock (Kho Mát) -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0318" data-status="IN_STOCK" data-zone="KHO_MAT">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0318</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Rau Thơm Tổng Hợp (Ngò gai, Húng quế, Rau mùi)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hộp cấp đông rau mầm chuyên dụng #08</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">eco</span> Kho Mát Tổng
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">kg</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-semibold text-on-surface">
+              18.50
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">4.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đủ Tồn Kho
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">11:10:05</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0318', 'Rau Thơm Tổng Hợp', 18.5, 'kg', 4.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[14px]" onclick="quickIncrement('SKU-0318', 1)">+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Bar Barista Stock -->
+<tr class="item-row hover:bg-surface-container-low transition-colors bg-surface-container-lowest" data-sku="SKU-0504" data-status="IN_STOCK" data-zone="PHA_CHE">
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-on-surface font-semibold">SKU-0504</td>
+<td class="py-2.5 px-gutter">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface font-semibold">Trà Ô Long Rang Đặc Biệt (Loại 1)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Lon nhôm hút chân không 1kg</span>
+</div>
+</td>
+<td class="py-2.5 px-gutter font-label-md text-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">local_cafe</span> Quầy Pha Chế
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-center text-on-surface">hộp</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-semibold text-on-surface">
+              12.00
+            </td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">3.00</td>
+<td class="py-2.5 px-gutter text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đủ Tồn Kho
+              </span>
+</td>
+<td class="py-2.5 px-gutter font-tabular-data text-tabular-data text-right text-on-surface-variant">09:15:30</td>
+<td class="py-2.5 px-gutter text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openAdjustmentModal('SKU-0504', 'Trà Ô Long Rang Đặc Biệt', 12.0, 'hộp', 3.0)">
+<span class="material-symbols-outlined text-[14px]">edit_note</span> Điều Chỉnh
+                </button>
+<button class="w-7 h-7 bg-surface-container hover:bg-surface-container-high rounded text-on-surface flex items-center justify-center font-bold font-tabular-data text-[14px]" onclick="quickIncrement('SKU-0504', 1)">+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination & Monospaced Hash -->
+<div class="p-space-sm bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-space-md">
+<span>Hiển thị <strong class="text-on-surface font-tabular-data">6</strong> / 148 nguyên vật liệu hoạt động</span>
+<span class="hidden md:inline text-outline">|</span>
+<span class="hidden md:inline font-tabular-data">LEDGER_HASH: 0x8892A_TXN_AUDIT</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface" disabled="">Trước</button>
+<span class="px-2 py-1 font-bold text-on-surface">1</span>
+<button class="px-2 py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface">2</button>
+<button class="px-2 py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface">3</button>
+<button class="px-2 py-1 rounded bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors">Tiếp</button>
+</div>
+</div>
+</div>
+<!-- Operational Visual Section: Critical Ingredient Storage Map & Shift Log -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Visual Asset: Storage Layout & Temperature Inspection -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded shadow-sm p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">severe_cold</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Bản Đồ Kiểm Soát Nhiệt Độ Kho Lạnh</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 bg-surface-container text-on-surface font-tabular-data">SENSOR ID: CHILL-04</span>
+</div>
+<div class="relative w-full h-48 rounded overflow-hidden mb-space-sm">
+<img class="w-full h-full object-cover" data-alt="A clean, industrial commercial restaurant walk-in refrigerator and storage shelf with stainless steel trays, vacuum-sealed meats, fresh herbs, clear labeling, ambient cool lighting with high contrast systematically arranged for inventory auditing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqiUmb1mgMKlzMmZzMPeyXz8NNxJ_uh30_lLN8niIDSWYYhO2WbE46QqphTW06BEn2QXUfcsI1cVh9WA5i9KRPvD3xpvdmllMHKhrSFj2UL1ys-kT0Ef-hWhYUkCNqhWLqKyCxNqDQynsvOuXKK7V6MFOVT0Z-bynApujbGIpiydlgMcT0ZfuEdMev775VfVPNTQJBBBt6B_gFvdzOs-gQEQr6oDLcTYxwiJgg_cYDAS5fm_FyE54BcQ"/>
+<div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px] flex items-center justify-between p-space-md text-on-primary">
+<div class="bg-primary/90 p-space-sm rounded max-w-xs shadow-md">
+<span class="font-label-sm text-label-sm uppercase font-semibold text-secondary-fixed">Khu A - Bếp Nóng</span>
+<p class="font-tabular-data text-headline-md font-bold leading-tight mt-0.5">-18.4 °C</p>
+<span class="font-label-sm text-label-sm text-inverse-on-surface">Đạt tiêu chuẩn thịt đỏ Wagyu &amp; Tôm sú</span>
+</div>
+<div class="bg-primary/90 p-space-sm rounded max-w-xs shadow-md text-right">
+<span class="font-label-sm text-label-sm uppercase font-semibold text-tertiary-fixed">Khu B - Kho Mát</span>
+<p class="font-tabular-data text-headline-md font-bold leading-tight mt-0.5">+3.2 °C</p>
+<span class="font-label-sm text-label-sm text-inverse-on-surface">Bánh phở &amp; Thảo mộc chuẩn ẩm 85%</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Cảm biến IoT kết nối tự động</span>
+<span class="text-secondary font-semibold">Tất cả thông số bảo quản đạt chuẩn HACCP</span>
+</div>
+</div>
+<!-- Live Audit Log Feed -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded shadow-sm p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">history</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Nhật Ký Cập Nhật Thực Tế</span>
+</div>
+<button class="font-label-sm text-label-sm text-outline hover:text-on-surface transition-colors" onclick="clearAuditLog()">Làm mới</button>
+</div>
+<div class="flex-1 flex flex-col gap-2 overflow-y-auto max-h-48 pr-1" id="live-audit-feed">
+<div class="p-2 rounded bg-surface-container-low flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">[SKU-0091] Bò Wagyu A5</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Xuất order bàn #12, #14 → Tồn về 0.0kg</span>
+</div>
+<div class="text-right">
+<span class="font-tabular-data text-label-sm text-error font-semibold">86'd Tự Động</span>
+<span class="font-tabular-data text-label-sm text-outline block">14:15</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">[SKU-0102] Nước Cốt Xương Bò</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bếp châm thêm 20L từ nồi ninh trung tâm</span>
+</div>
+<div class="text-right">
+<span class="font-tabular-data text-label-sm text-secondary font-semibold">+20.0 L</span>
+<span class="font-tabular-data text-label-sm text-outline block">13:30</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">[SKU-0044] Tôm Sú Biển Sống</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hao hụt/Hỏng: 0.6kg tôm yếu sau kiểm ca</span>
+</div>
+<div class="text-right">
+<span class="font-tabular-data text-label-sm text-on-tertiary-container font-semibold">-0.60 kg</span>
+<span class="font-tabular-data text-label-sm text-outline block">12:40</span>
+</div>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Ghi nhận bởi: NV Kho (POS-DESK-02)</span>
+<span class="font-tabular-data">CHỨNG TỪ: #TXN-8094</span>
+</div>
+</div>
+</div>
+<!-- MODAL: F-011 Điều Chỉnh Tồn Kho Thực Tế (Modal Overlay Level 3) -->
+<div class="fixed inset-0 z-50 bg-primary/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="modal-adjustment">
+<div class="bg-surface-container-lowest rounded shadow-xl max-w-lg w-full p-space-lg flex flex-col gap-space-md transform transition-all">
+<!-- Modal Header -->
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-semibold" id="modal-sku-badge">SKU-0000</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase">F-011 SỔ CÁI KHO</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1" id="modal-item-title">Điều Chỉnh Nguyên Vật Liệu</h2>
+</div>
+<button class="w-8 h-8 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center transition-colors" onclick="closeAdjustmentModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Current vs New Readout -->
+<div class="grid grid-cols-2 gap-space-sm bg-surface-container-low p-space-md rounded">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Tồn Sổ Sách Hiện Tại</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-tabular-data text-headline-lg font-bold text-on-surface" id="modal-current-stock">0.00</span>
+<span class="font-tabular-data text-body-md text-on-surface-variant" id="modal-unit-label-1">kg</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Mức Cảnh Báo Min</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-tabular-data text-headline-lg font-bold text-on-tertiary-container" id="modal-min-stock">0.00</span>
+<span class="font-tabular-data text-body-md text-on-surface-variant" id="modal-unit-label-2">kg</span>
+</div>
+</div>
+</div>
+<!-- Input Adjust Form -->
+<div class="flex flex-col gap-space-md">
+<!-- Adjustment Type Selector -->
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold block mb-1">Lý Do Điều Chỉnh / Kiểm Kê</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="reason-btn px-2 py-2 text-center rounded font-label-md text-label-md bg-primary text-on-primary font-semibold transition-colors" onclick="selectReason('IMPORT', this)" type="button">
+              Nhập Hàng Mới
+            </button>
+<button class="reason-btn px-2 py-2 text-center rounded font-label-md text-label-md bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" onclick="selectReason('LOSS', this)" type="button">
+              Hao Hụt / Hỏng
+            </button>
+<button class="reason-btn px-2 py-2 text-center rounded font-label-md text-label-md bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" onclick="selectReason('AUDIT', this)" type="button">
+              Chốt Ca Kiểm Kê
+            </button>
+</div>
+</div>
+<!-- Quantity Input with BR-009 Enforcement -->
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Số Lượng Thực Tế Sau Điều Chỉnh</label>
+<span class="font-label-sm text-label-sm text-error font-semibold">BR-009: Nghiêm cấm số âm (≥ 0)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="h-10 w-12 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-tabular-data text-headline-sm font-bold flex items-center justify-center" onclick="adjustModalInput(-1)" type="button">-</button>
+<input class="flex-1 h-10 px-3 bg-surface-container-lowest text-on-surface font-tabular-data text-headline-sm font-semibold rounded text-center outline-none focus:ring-2 focus:ring-secondary" id="modal-stock-input" min="0" oninput="validateStockInput()" step="0.1" type="number" value="0.0"/>
+<button class="h-10 w-12 bg-surface-container hover:bg-surface-container-high text-on-surface rounded font-tabular-data text-headline-sm font-bold flex items-center justify-center" onclick="adjustModalInput(1)" type="button">+</button>
+</div>
+<p class="font-label-sm text-label-sm text-error hidden mt-1 flex items-center gap-1" id="negative-error-msg">
+<span class="material-symbols-outlined text-[14px]">error</span> Lỗi: Tồn kho không thể mang giá trị âm theo quy định BR-009.
+          </p>
+</div>
+<!-- Memo Note -->
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold block mb-1">Ghi Chú Kiểm Kê / Số Hóa Đơn Vận Chuyển</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest text-on-surface rounded font-body-md text-body-md outline-none focus:ring-2 focus:ring-secondary" id="modal-note-input" placeholder="Ví dụ: Nhập từ NCC Nam Thái, số HĐ: 9942A..." type="text"/>
+</div>
+</div>
+<!-- Action Bottom Bar -->
+<div class="pt-space-sm flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors" onclick="closeAdjustmentModal()" type="button">
+          Hủy Bỏ
+        </button>
+<button class="px-space-lg py-2 rounded bg-primary text-on-primary hover:bg-inverse-surface font-label-md text-label-md flex items-center gap-1 transition-colors shadow-sm" id="modal-submit-btn" onclick="submitAdjustment()" type="button">
+<span class="material-symbols-outlined text-[18px]">save</span>
+          Xác Nhận Cập Nhật
+        </button>
+</div>
+</div>
+</div>
+<!-- Notification Toast (System Feedback) -->
+<div class="fixed bottom-6 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-space-md py- space-sm py-2 rounded shadow-xl flex items-center gap-space-sm transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="action-toast">
+<span class="material-symbols-outlined text-secondary text-[20px]" id="toast-icon">check_circle</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-inverse-on-surface" id="toast-title">Đã cập nhật</span>
+<span class="font-label-sm text-label-sm text-surface-variant" id="toast-desc">Sổ cái tồn kho đã được đồng bộ.</span>
+</div>
+</div>
+</div>
+<script>
+  // Current active modal data context
+  let activeSku = null;
+  let activeUnit = 'kg';
+  let activeMin = 0;
+  let currentSelectedReason = 'IMPORT';
+
+  function setZoneFilter(zone, btnElement) {
+    // Update active tab buttons visually
+    document.querySelectorAll('.zone-tab-btn').forEach(btn => {
+      btn.className = 'zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors';
+    });
+    btnElement.className = 'zone-tab-btn px-space-md py-1.5 rounded font-label-md text-label-md bg-primary text-on-primary font-semibold transition-colors';
+
+    // Filter table rows
+    const rows = document.querySelectorAll('.item-row');
+    rows.forEach(row => {
+      const itemZone = row.getAttribute('data-zone');
+      const matchesZone = (zone === 'ALL' || itemZone === zone);
+      row.style.display = matchesZone ? '' : 'none';
+    });
+    handleFilterSearch();
+  }
+
+  function handleFilterSearch() {
+    const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+    const statusVal = document.getElementById('status-filter').value;
+    const rows = document.querySelectorAll('.item-row');
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      const status = row.getAttribute('data-status');
+      
+      const matchSearch = text.includes(searchVal);
+      const matchStatus = (statusVal === 'ALL' || status === statusVal);
+
+      if (matchSearch && matchStatus) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  function selectReason(reason, btnEl) {
+    currentSelectedReason = reason;
+    document.querySelectorAll('.reason-btn').forEach(b => {
+      b.className = 'reason-btn px-2 py-2 text-center rounded font-label-md text-label-md bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors';
+    });
+    btnEl.className = 'reason-btn px-2 py-2 text-center rounded font-label-md text-label-md bg-primary text-on-primary font-semibold transition-colors';
+  }
+
+  function openAdjustmentModal(sku, name, currentStock, unit, min) {
+    activeSku = sku;
+    activeUnit = unit;
+    activeMin = min;
+
+    document.getElementById('modal-sku-badge').innerText = sku;
+    document.getElementById('modal-item-title').innerText = name;
+    document.getElementById('modal-current-stock').innerText = parseFloat(currentStock).toFixed(2);
+    document.getElementById('modal-unit-label-1').innerText = unit;
+    document.getElementById('modal-unit-label-2').innerText = unit;
+    document.getElementById('modal-min-stock').innerText = parseFloat(min).toFixed(2);
+    document.getElementById('modal-stock-input').value = currentStock;
+    document.getElementById('modal-note-input').value = '';
+
+    validateStockInput();
+    document.getElementById('modal-adjustment').classList.remove('hidden');
+  }
+
+  function closeAdjustmentModal() {
+    document.getElementById('modal-adjustment').classList.add('hidden');
+    activeSku = null;
+  }
+
+  function adjustModalInput(delta) {
+    const input = document.getElementById('modal-stock-input');
+    let val = parseFloat(input.value) || 0;
+    val = Math.max(0, val + delta);
+    input.value = val.toFixed(1);
+    validateStockInput();
+  }
+
+  function validateStockInput() {
+    const input = document.getElementById('modal-stock-input');
+    const submitBtn = document.getElementById('modal-submit-btn');
+    const errorMsg = document.getElementById('negative-error-msg');
+    const val = parseFloat(input.value);
+
+    // BR-009 Enforcement: Prevent negative stock
+    if (isNaN(val) || val < 0) {
+      errorMsg.classList.remove('hidden');
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      errorMsg.classList.add('hidden');
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+
+  function submitAdjustment() {
+    const input = document.getElementById('modal-stock-input');
+    const newStock = parseFloat(input.value);
+
+    if (isNaN(newStock) || newStock < 0) {
+      return;
+    }
+
+    // Apply change to target table row
+    const targetRow = document.querySelector(`.item-row[data-sku="${activeSku}"]`);
+    if (targetRow) {
+      const stockCell = targetRow.querySelector('td:nth-child(5)');
+      const statusCell = targetRow.querySelector('td:nth-child(7)');
+      const timeCell = targetRow.querySelector('td:nth-child(8)');
+      
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0];
+
+      stockCell.innerText = newStock.toFixed(2);
+      timeCell.innerText = timeString;
+
+      // BR-008 & BR-010 Automatic Status & 86'd Resolution
+      if (newStock === 0) {
+        targetRow.setAttribute('data-status', 'OUT_OF_STOCK');
+        stockCell.className = 'py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-bold text-error';
+        statusCell.innerHTML = `
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-error"></span> Hết Hàng
+          </span>
+        `;
+        showToast('Cảnh Báo 86\'d Kích Hoạt', `Nguyên liệu ${activeSku} cạn kho (0.00). Đã khóa món POS.`);
+      } else if (newStock <= activeMin) {
+        targetRow.setAttribute('data-status', 'LOW_STOCK');
+        stockCell.className = 'py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-bold text-on-tertiary-container';
+        statusCell.innerHTML = `
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container font-label-sm text-label-sm font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Sắp Hết Hàng
+          </span>
+        `;
+        showToast('Cận Tồn Kho', `SKU ${activeSku} dưới mức tối thiểu (${activeMin} ${activeUnit}).`);
+      } else {
+        targetRow.setAttribute('data-status', 'IN_STOCK');
+        stockCell.className = 'py-2.5 px-gutter font-tabular-data text-tabular-data text-right font-semibold text-on-surface';
+        statusCell.innerHTML = `
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đủ Tồn Kho
+          </span>
+        `;
+        showToast('Cập Nhật Thành Công', `SKU ${activeSku} tồn hiện tại: ${newStock.toFixed(2)} ${activeUnit}`);
+      }
+
+      // Add to live audit feed
+      appendAuditFeed(activeSku, newStock, activeUnit, currentSelectedReason, timeString);
+    }
+
+    closeAdjustmentModal();
+    updateTelemetryCounters();
+  }
+
+  function quickIncrement(sku, delta) {
+    const row = document.querySelector(`.item-row[data-sku="${sku}"]`);
+    if (!row) return;
+    const stockCell = row.querySelector('td:nth-child(5)');
+    let current = parseFloat(stockCell.innerText) || 0;
+    let nextVal = current + delta;
+    stockCell.innerText = nextVal.toFixed(2);
+    
+    const timeCell = row.querySelector('td:nth-child(8)');
+    const timeStr = new Date().toTimeString().split(' ')[0];
+    timeCell.innerText = timeStr;
+
+    showToast('Tăng Nhanh Kho', `Đã cộng +${delta} vào mã ${sku}`);
+    appendAuditFeed(sku, nextVal, 'đơn vị', 'QUICK_ADD', timeStr);
+  }
+
+  function appendAuditFeed(sku, stock, unit, reason, time) {
+    const feed = document.getElementById('live-audit-feed');
+    const newEntry = document.createElement('div');
+    newEntry.className = 'p-2 rounded bg-surface-container flex items-start justify-between transform transition-all';
+    
+    let reasonText = 'Điều chỉnh chốt ca';
+    if (reason === 'IMPORT') reasonText = 'Nhập lô hàng mới';
+    if (reason === 'LOSS') reasonText = 'Hao hụt & hủy hỏng';
+    if (reason === 'QUICK_ADD') reasonText = 'Cộng nhanh thao tác kho';
+
+    newEntry.innerHTML = `
+      <div class="flex flex-col">
+        <span class="font-label-sm text-label-sm text-on-surface font-semibold">[${sku}]</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">${reasonText} &rarr; Mới: ${stock} ${unit}</span>
+      </div>
+      <div class="text-right">
+        <span class="font-tabular-data text-label-sm text-secondary font-semibold">OK</span>
+        <span class="font-tabular-data text-label-sm text-outline block">${time}</span>
+      </div>
+    `;
+    feed.insertBefore(newEntry, feed.firstChild);
+  }
+
+  function updateTelemetryCounters() {
+    const lowCount = document.querySelectorAll('.item-row[data-status="LOW_STOCK"]').length;
+    const outCount = document.querySelectorAll('.item-row[data-status="OUT_OF_STOCK"]').length;
+    document.getElementById('metric-low-stock').innerText = lowCount;
+    document.getElementById('metric-out-stock').innerText = outCount;
+  }
+
+  function triggerBarCodeScan() {
+    showToast('Sẵn Sàng Quét', 'Đầu đọc mã vạch Zebra/Honeywell đã kích hoạt trên cổng USB.');
+  }
+
+  function openFullAuditModal() {
+    showToast('Kiểm Kê Toàn Trạm', 'Đã xuất phiếu kiểm kê tự động cho Tổ trưởng Kho Downtown #04.');
+  }
+
+  function clearAuditLog() {
+    showToast('Đồng Bộ Hoàn Tất', 'Nhật ký đã xác thực với máy chủ trung tâm ResMan.');
+  }
+
+  function showToast(title, msg) {
+    const toast = document.getElementById('action-toast');
+    document.getElementById('toast-title').innerText = title;
+    document.getElementById('toast-desc').innerText = msg;
+
+    toast.classList.remove('translate-y-24', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    setTimeout(() => {
+      toast.classList.add('translate-y-24', 'opacity-0');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 3500);
+  }
+</script></main></div></body></html>

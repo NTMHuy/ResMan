@@ -1,36 +1,46 @@
-import { Body, Controller, Delete, Get, Headers, Param, ParseIntPipe, Post, UnauthorizedException } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Permissions } from "../auth/decorators/permissions.decorator.js";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
+import { PermissionsGuard } from "../auth/guards/permissions.guard.js";
 import { CreateGuestOrderItemsDto } from "./dto/create-guest-order-items.dto.js";
 import { OrdersService } from "./orders.service.js";
 
-@Controller("guest/session")
+@Controller("customer/session")
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 
-  private requireSessionCode(sessionCode?: string): string {
-    if (!sessionCode || !/^[a-f0-9]{64}$/.test(sessionCode)) {
-      throw new UnauthorizedException("Thiếu hoặc sai mã truy cập phiên bàn");
-    }
-    return sessionCode;
-  }
-
   @Get()
-  getGuestSession(@Headers("x-session-code") sessionCode?: string) {
-    return this.orders.getGuestSession(this.requireSessionCode(sessionCode));
+  @Permissions("customer:session:read")
+  getCustomerSession(@CurrentUser() user: { id: string }) {
+    return this.orders.getCustomerSession(BigInt(user.id));
   }
 
   @Delete("items/:itemId")
+  @Permissions("customer:order:cancel-item")
   cancelItem(
-    @Headers("x-session-code") sessionCode: string | undefined,
+    @CurrentUser() user: { id: string },
     @Param("itemId", ParseIntPipe) itemId: number,
   ) {
-    return this.orders.cancelGuestItem(this.requireSessionCode(sessionCode), BigInt(itemId));
+    return this.orders.cancelCustomerItem(BigInt(user.id), BigInt(itemId));
   }
 
   @Post("items")
+  @Permissions("customer:order:create-item")
   addItems(
-    @Headers("x-session-code") sessionCode: string | undefined,
+    @CurrentUser() user: { id: string },
     @Body() dto: CreateGuestOrderItemsDto,
   ) {
-    return this.orders.addGuestItems(this.requireSessionCode(sessionCode), dto.items);
+    return this.orders.addCustomerItems(BigInt(user.id), dto.items);
   }
 }
