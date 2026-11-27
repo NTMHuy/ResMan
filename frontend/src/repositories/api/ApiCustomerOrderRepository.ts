@@ -188,7 +188,16 @@ export class ApiCustomerOrderRepository implements CustomerOrderRepository {
   }
 
   async getRecentTableOrders(_tableNumber: string): Promise<CustomerOrderTracking[]> {
-    return [mapGuestOrder(await this.getCustomerSession())];
+    try {
+      return [mapGuestOrder(await this.getCustomerSession())];
+    } catch (error) {
+      // The customer has not opened a dining session yet. The API currently
+      // reports this expected state as HTTP 409; show no order history rather
+      // than treating it as a failed customer screen load.
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 409) return [];
+      throw error;
+    }
   }
 
   async cancelGuestItem(itemId: string): Promise<void> {
