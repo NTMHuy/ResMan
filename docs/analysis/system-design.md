@@ -727,6 +727,12 @@ Các trạng thái như `DiningSession.status`, `DiningTable.status`, `OrderItem
 
 Các migration hiện có trong `prisma/migrations` gồm migration khởi tạo và các thay đổi sau đó như ràng buộc một phiên đang mở trên mỗi bàn, loại giá thực đơn, public ID ảnh, liên kết tài khoản khách với TableDevice, PaymentRequest và loại kiểm kê. Nội dung thiết kế trong báo cáo lấy Prisma schema hiện tại làm mô hình dữ liệu khai báo; không khẳng định database ở mọi môi trường đã được migrate đồng bộ nếu chưa kiểm tra trạng thái migration thực tế.
 
+### 3.6.5. Lịch sử migration và lưu ý triển khai
+
+Thư mục `prisma/migrations` thể hiện quá trình chuyển đổi từ mô hình dữ liệu ban đầu sang mô hình hiện tại. Migration `202610280001_initial_schema` tạo một số cấu trúc cũ như `customers`, `kitchen_stations`, `kitchen_tickets`, `menu_item_ingredients` và `daily_inventory_records`. Migration tiếp theo `20261107135637_init_resman` có các cảnh báo và thao tác xóa một số bảng/cột cũ, đồng thời thay đổi quan hệ đơn hàng để `orders.dining_session_id` trở thành bắt buộc và duy nhất. Vì vậy, đây là migration có khả năng làm mất dữ liệu thuộc mô hình cũ; không nên áp dụng vào database đang có dữ liệu quan trọng nếu chưa sao lưu và đánh giá tác động.
+
+Các migration sau bổ sung những ràng buộc quan trọng: chỉ một phiên OPEN trên mỗi bàn bằng partial unique index; loại giá `MenuPricingType` cùng các CHECK constraint về giá; liên kết duy nhất giữa TableDevice với bàn/tài khoản; PaymentRequest; và giới hạn giá trị `count_type`. Một số CHECK constraint được khai báo trực tiếp trong SQL migration, không thể hiện đầy đủ dưới dạng thuộc tính trong Prisma schema. Do đó, khi triển khai cần kiểm tra cả lịch sử migration đã áp dụng và cấu trúc database thực tế, không chỉ dựa vào `schema.prisma`.
+
 ## 3.7. Thiết kế giao diện
 
 ### 3.7.1. Nguyên tắc tổ chức giao diện
