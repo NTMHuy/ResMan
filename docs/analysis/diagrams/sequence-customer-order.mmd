@@ -1,0 +1,35 @@
+sequenceDiagram
+  actor Customer as Khách hàng
+  participant UI as CustomerOrderScreen
+  participant Repo as ApiCustomerOrderRepository
+  participant Menu as GuestMenuController
+  participant Session as SessionsController
+  participant SessionSvc as SessionsService
+  participant Order as OrdersController
+  participant OrderSvc as OrdersService
+  participant DB as PrismaService
+  Customer->>UI: Mở gọi món
+  UI->>Repo: getCustomerMenu()
+  Repo->>Menu: GET /menu-items/customer/menu
+  Menu->>DB: MenuItemsService.findCustomerMenu()
+  DB-->>UI: Menu categories/items
+  Customer->>UI: Chọn món
+  UI->>Repo: startSession()
+  Repo->>Session: POST /sessions/customer/open [JWT]
+  Session->>SessionSvc: openForCustomer(userId)
+  SessionSvc->>DB: Tìm TableDevice + phiên OPEN
+  alt Chưa có phiên và bàn AVAILABLE
+    SessionSvc->>DB: Transaction tạo DiningSession, Order, cập nhật bàn
+  else Đã có phiên
+    SessionSvc->>DB: Trả phiên hiện tại
+  end
+  SessionSvc-->>Repo: Thông tin phiên, không trả sessionCode
+  UI->>Repo: submitOrder(items)
+  Repo->>Order: POST /customer/session/items [JWT]
+  Order->>OrderSvc: addCustomerItems(userId, items)
+  OrderSvc->>DB: Tìm TableDevice và phiên nội bộ
+  OrderSvc->>DB: Transaction kiểm tra và tạo OrderItem/History/AuditLog
+  DB-->>OrderSvc: Các item mới
+  OrderSvc-->>Repo: orderCode + items
+  Repo-->>UI: Kết quả
+  UI-->>Customer: Hiển thị trạng thái chờ tiếp nhận
