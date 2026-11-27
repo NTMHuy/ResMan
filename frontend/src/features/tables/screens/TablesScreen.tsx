@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   refresh: { width: 42, height: 42, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   summary: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 10, padding: 14, borderWidth: 1, borderRadius: 12 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  tableCard: { width: "31%", minWidth: 125, flexGrow: 1, minHeight: 160, padding: 10, borderWidth: 1, borderRadius: 12, gap: 8 },
+  tableCard: { width: "31%", minWidth: 125, flexGrow: 0, flexShrink: 0, minHeight: 160, padding: 10, borderWidth: 1, borderRadius: 12, gap: 8 },
   tableMain: { alignItems: "center", justifyContent: "center", gap: 7, flex: 1, minHeight: 105 },
   tableName: { fontSize: 15, fontWeight: "800" },
   actions: { flexDirection: "row", justifyContent: "center", gap: 8, paddingTop: 6 },
