@@ -417,8 +417,8 @@ export function CustomerOrderScreen() {
               variant="primary"
               size="lg"
               fullWidth
-              loading={submitting}
-              disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && (!activeSessionId || tableNumber === 'Chưa kết nối')}
+              loading={submitting || startingSession}
+              disabled={!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && (tableNumber === 'Chưa kết nối' || startingSession)}
               leftIcon={<Send size={16} color={theme.colors.onPrimary} />}
               onPress={() => void handleSubmitOrder()}
             />
