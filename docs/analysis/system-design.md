@@ -291,10 +291,17 @@ sequenceDiagram
     OrderCtrl->>OrderSvc: addCustomerItems(userId, items)
     OrderSvc->>DB: Xác định TableDevice và sessionCode nội bộ
     OrderSvc->>DB: Transaction kiểm tra phiên/món/giá; tạo OrderItem, History, AuditLog
-    DB-->>OrderSvc: Các OrderItem vừa tạo
-    OrderSvc-->>Repo: orderCode + items
-    Repo-->>UI: Kết quả gọi món
-    UI-->>Customer: Hiển thị món chờ bếp tiếp nhận
+    DB-->>OrderSvc: Kết quả tạo món
+    OrderSvc-->>OrderCtrl: orderCode + items
+    OrderCtrl-->>Repo: HTTP 201 + kết quả
+    Repo->>OrderCtrl: GET /api/v1/customer/session [Bearer JWT]
+    OrderCtrl->>OrderSvc: getCustomerSession(userId)
+    OrderSvc->>DB: Đọc phiên OPEN, Order và OrderItems
+    DB-->>OrderSvc: Dữ liệu phiên/đơn/món
+    OrderSvc-->>OrderCtrl: Thông tin phiên và danh sách món
+    OrderCtrl-->>Repo: HTTP 200 + session snapshot
+    Repo-->>UI: CustomerOrderTracking
+    UI-->>Customer: Hiển thị trạng thái món
 ```
 
 ### 3.4.3. Sequence Diagram – Xác nhận thanh toán
