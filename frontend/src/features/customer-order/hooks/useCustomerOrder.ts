@@ -123,8 +123,12 @@ export function useCustomerOrder() {
         setTableNumber(session.tableNumber);
       }
       setActiveSessionId(sessionId);
-      setCart([]);
-      await storageService.setJson(storageService.KEYS.CUSTOMER_CART, { sessionId, items: [] });
+      // Keep items selected before the first session was opened. Rebind the
+      // local cart to the newly-created session instead of discarding it.
+      await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+        sessionId,
+        items: cart,
+      });
       await loadCustomerData(false);
       return sessionId;
     } finally {
