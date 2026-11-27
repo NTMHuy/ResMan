@@ -131,7 +131,10 @@ flowchart TD
     X --> Z([Kết thúc - không đặt được])
     G -- "Có" --> H{"Bàn đang có phiên OPEN?"}
     H -- "Có" --> I["Tái sử dụng phiên hiện tại"]
-    H -- "Không" --> J["Tạo DiningSession + Order<br/>và cập nhật bàn OCCUPIED"]
+    H -- "Không" --> H2{"Bàn đang AVAILABLE?"}
+    H2 -- "Không" --> X2["Trả lỗi: bàn OCCUPIED nhưng không tìm thấy phiên OPEN"]
+    X2 --> Z
+    H2 -- "Có" --> J["Tạo DiningSession + Order<br/>và cập nhật bàn OCCUPIED"]
     I --> K["POST yêu cầu thêm món"]
     J --> K
     K --> L{"Phiên mở và món còn khả dụng,<br/>có giá hợp lệ?"}
