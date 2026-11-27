@@ -490,7 +490,7 @@ User "1" -- "0..1" Employee
 User "0..1" -- "0..1" TableDevice
 DiningTable "1" -- "0..1" TableDevice
 DiningTable "1" -- "0..*" DiningSession
-User "1" -- "0..*" DiningSession : openedSessions
+User "0..1" -- "0..*" DiningSession : openedSessions
 User "0..1" -- "0..*" DiningSession : closedSessions
 DiningSession "1" -- "0..1" Order
 Order "1" -- "0..*" OrderItem
