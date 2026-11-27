@@ -273,12 +273,17 @@ sequenceDiagram
     UI->>Repo: openCustomerSession()
     Repo->>SessionCtrl: POST /api/v1/sessions/customer/open [Bearer JWT]
     SessionCtrl->>SessionSvc: openForCustomer(userId)
-    SessionSvc->>DB: Tìm TableDevice và phiên OPEN
-    alt Đã có phiên
-        DB-->>SessionSvc: TableDevice + phiên hiện tại
-    else Chưa có phiên, bàn AVAILABLE
+    SessionSvc->>DB: Tìm TableDevice và trạng thái DiningTable
+    alt Bàn OCCUPIED và có phiên OPEN
+        SessionSvc->>DB: Tìm phiên hiện tại theo tableId
+        DB-->>SessionSvc: Phiên và Order hiện tại
+    else Bàn AVAILABLE
         SessionSvc->>DB: Transaction tạo DiningSession + Order, cập nhật DiningTable
         DB-->>SessionSvc: Phiên và Order mới
+    else Không có TableDevice hoặc bàn OCCUPIED nhưng không có phiên OPEN
+        SessionSvc-->>SessionCtrl: NotFoundException / ConflictException
+        SessionCtrl-->>Repo: HTTP lỗi
+        Repo-->>UI: Hiển thị lỗi
     end
     SessionSvc-->>Repo: Thông tin phiên (không trả sessionCode)
     UI->>Repo: addItems(items)
