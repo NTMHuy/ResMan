@@ -550,6 +550,7 @@ erDiagram
     MENU_CATEGORY ||--o{ MENU_ITEM : groups
     MENU_ITEM ||--o{ ORDER_ITEM : selected_as
     ORDER_ITEM ||--o{ ORDER_ITEM_STATUS_HISTORY : records
+    USER o|--o{ ORDER_ITEM_STATUS_HISTORY : actor
     INGREDIENT ||--o| INVENTORY_BALANCE : balance
     INGREDIENT ||--o{ STOCK_MOVEMENT : movement
     INGREDIENT ||--o{ INVENTORY_COUNT_RECORD : counted
