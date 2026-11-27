@@ -658,7 +658,7 @@ erDiagram
     ORDER_ITEM_STATUS_HISTORY {
       bigint id PK
       bigint orderItemId FK
-      bigint actorId FK
+      bigint actorId FK?
       string fromStatus
       string toStatus
     }
