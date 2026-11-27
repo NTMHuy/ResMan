@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
+import { UpdateCustomerAccountDto } from "./dto/update-customer-account.dto.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { CreateUserDto } from "./dto/create-user.dto.js";
 import { UpdateUserDto } from "./dto/update-user.dto.js";
@@ -191,6 +192,121 @@ export class UsersService {
     }
 
     return this.findById(id);
+  }
+
+  async updateCustomerAccount(id: bigint, dto: UpdateCustomerAccountDto) {
+    const current = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        role: { select: { code: true } },
+        tableDevice: { select: { id: true, diningTableId: true } },
+      },
+    });
+    if (!current) throw new NotFoundException("Tài khoản không tồn tại");
+    if (current.role.code !== "CUSTOMER" || !current.tableDevice) {
+      throw new BadRequestException("Chỉ có thể sửa tài khoản tablet CUSTOMER đã được gán thiết bị");
+    }
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        if (dto.tableId !== undefined && BigInt(dto.tableId) !== current.tableDevice!.diningTableId) {
+          const target = await tx.diningTable.findUnique({
+            where: { id: BigInt(dto.tableId) },
+            select: { id: true, status: true, devices: { select: { id: true } } },
+          });
+          if (!target) throw new NotFoundException("Bàn được chọn không tồn tại");
+          if (target.status !== "AVAILABLE" || target.devices.length > 0) {
+            throw new ConflictException("Chỉ có thể chuyển tablet sang bàn trống chưa được gán thiết bị");
+          }
+          await tx.tableDevice.update({
+            where: { id: current.tableDevice!.id },
+            data: { diningTableId: target.id },
+          });
+        }
+
+        await tx.user.update({
+          where: { id },
+          data: {
+            ...(dto.username !== undefined ? { username: dto.username.trim() } : {}),
+            ...(dto.email !== undefined ? { email: dto.email.trim().toLowerCase() || null } : {}),
+            ...(dto.password ? { passwordHash: await bcrypt.hash(dto.password, 12) } : {}),
+          },
+        });
+
+        await tx.tableDevice.update({
+          where: { id: current.tableDevice!.id },
+          data: {
+            ...(dto.deviceCode !== undefined ? { deviceCode: dto.deviceCode.trim() } : {}),
+            ...(dto.deviceName !== undefined ? { deviceName: dto.deviceName.trim() } : {}),
+          },
+        });
+      });
+    } catch (error) {
+      if (this.isUniqueViolation(error)) {
+        throw new ConflictException("Tên đăng nhập, email hoặc mã thiết bị đã được sử dụng");
+      }
+      throw error;
+    }
+    return this.findCustomerAccount(id);
+  }
+
+  async deleteCustomerAccount(id: bigint) {
+    const current = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        role: { select: { code: true } },
+        tableDevice: {
+          select: {
+            id: true,
+            diningTableId: true,
+            table: { select: { sessions: { where: { status: "OPEN" }, select: { id: true } } } },
+          },
+        },
+      },
+    });
+    if (!current) throw new NotFoundException("Tài khoản không tồn tại");
+    if (current.role.code !== "CUSTOMER" || !current.tableDevice) {
+      throw new BadRequestException("Chỉ có thể xóa tài khoản tablet CUSTOMER");
+    }
+    if (current.tableDevice.table.sessions.length > 0) {
+      throw new ConflictException("Không thể xóa tài khoản tablet khi bàn đang có phiên phục vụ mở");
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id }, data: { isActive: false } });
+      await tx.tableDevice.delete({ where: { id: current.tableDevice!.id } });
+    });
+    return { message: "Đã xóa tài khoản tablet và gỡ liên kết thiết bị; lịch sử dữ liệu được giữ lại" };
+  }
+
+  private async findCustomerAccount(id: bigint) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true, username: true, email: true, isActive: true, createdAt: true,
+        role: { select: { id: true, code: true, name: true } },
+        employee: { select: { employeeCode: true, fullName: true, phone: true } },
+        tableDevice: {
+          select: {
+            id: true, diningTableId: true, deviceCode: true, deviceName: true, isActive: true,
+            table: { select: { code: true, name: true } },
+          },
+        },
+      },
+    });
+    if (!user) throw new NotFoundException("Tài khoản không tồn tại");
+    return {
+      ...user,
+      id: user.id.toString(),
+      role: { ...user.role, id: user.role.id.toString() },
+      tableDevice: user.tableDevice ? {
+        ...user.tableDevice,
+        id: user.tableDevice.id.toString(),
+        diningTableId: user.tableDevice.diningTableId.toString(),
+      } : null,
+    };
   }
 
   async assignRole(id: bigint, roleCode: string) {
