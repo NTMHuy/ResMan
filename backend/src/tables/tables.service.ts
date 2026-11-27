@@ -31,6 +31,10 @@ export class TablesService {
         ...session,
         id: session.id.toString(),
       })),
+      devices: table.devices.map((device) => ({
+        ...device,
+        id: device.id.toString(),
+      })),
     }));
   }
 
