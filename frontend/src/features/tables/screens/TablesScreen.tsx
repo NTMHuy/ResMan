@@ -20,6 +20,7 @@ type DiningTable = {
   capacity: number | null;
   status: "AVAILABLE" | "OCCUPIED";
   sessions?: Array<{ id: string; status: string; openedAt: string }>;
+  devices?: Array<{ id: string; deviceCode: string; deviceName: string; isActive: boolean }>;
 };
 type TableForm = { code: string; name: string; capacity: string };
 type SessionItem = {
@@ -183,6 +184,10 @@ export function TablesScreen() {
   };
   const deleteTable = (table: DiningTable) => {
     if (table.status === "OCCUPIED") { Alert.alert("Không thể xóa bàn", "Bàn đang có khách."); return; }
+    if (table.devices?.length) {
+      Alert.alert("Không thể xóa bàn", "Bàn đang được gán với tài khoản hoặc thiết bị tablet. Hãy xóa tài khoản tablet hoặc gỡ liên kết thiết bị trước.");
+      return;
+    }
     Alert.alert("Xóa bàn", `Bạn có chắc muốn xóa ${table.code} - ${table.name}? Bàn đã có lịch sử phiên hoặc thiết bị gán sẽ không thể xóa.`, [
       { text: "Hủy", style: "cancel" },
       { text: "Xóa", style: "destructive", onPress: () => {
