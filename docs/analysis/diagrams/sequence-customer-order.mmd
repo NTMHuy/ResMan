@@ -12,16 +12,24 @@ sequenceDiagram
   UI->>Repo: getCustomerMenu()
   Repo->>Menu: GET /menu-items/customer/menu
   Menu->>DB: MenuItemsService.findCustomerMenu()
-  DB-->>UI: Menu categories/items
+  DB-->>Menu: Menu categories/items
+  Menu-->>Repo: HTTP 200 + menu
+  Repo-->>UI: Menu categories/items
   Customer->>UI: Chọn món
   UI->>Repo: startSession()
   Repo->>Session: POST /sessions/customer/open [JWT]
   Session->>SessionSvc: openForCustomer(userId)
-  SessionSvc->>DB: Tìm TableDevice + phiên OPEN
-  alt Chưa có phiên và bàn AVAILABLE
+  SessionSvc->>DB: Tìm TableDevice + trạng thái DiningTable
+  alt Bàn OCCUPIED và có phiên OPEN
+    SessionSvc->>DB: Tìm phiên hiện tại theo tableId
+    DB-->>SessionSvc: Phiên hiện tại
+  else Bàn AVAILABLE
     SessionSvc->>DB: Transaction tạo DiningSession, Order, cập nhật bàn
-  else Đã có phiên
-    SessionSvc->>DB: Trả phiên hiện tại
+    DB-->>SessionSvc: Phiên và Order mới
+  else Không có TableDevice hoặc OCCUPIED nhưng thiếu phiên OPEN
+    SessionSvc-->>Session: NotFoundException / ConflictException
+    Session-->>Repo: HTTP lỗi
+    Repo-->>UI: Hiển thị lỗi
   end
   SessionSvc-->>Repo: Thông tin phiên, không trả sessionCode
   UI->>Repo: submitOrder(items)
@@ -30,6 +38,13 @@ sequenceDiagram
   OrderSvc->>DB: Tìm TableDevice và phiên nội bộ
   OrderSvc->>DB: Transaction kiểm tra và tạo OrderItem/History/AuditLog
   DB-->>OrderSvc: Các item mới
-  OrderSvc-->>Repo: orderCode + items
-  Repo-->>UI: Kết quả
-  UI-->>Customer: Hiển thị trạng thái chờ tiếp nhận
+  OrderSvc-->>Order: orderCode + items
+  Order-->>Repo: HTTP 201 + kết quả
+  Repo->>Order: GET /customer/session [JWT]
+  Order->>OrderSvc: getCustomerSession(userId)
+  OrderSvc->>DB: Đọc phiên OPEN, Order và OrderItems
+  DB-->>OrderSvc: Dữ liệu phiên/đơn/món
+  OrderSvc-->>Order: Session snapshot
+  Order-->>Repo: HTTP 200 + session
+  Repo-->>UI: CustomerOrderTracking
+  UI-->>Customer: Hiển thị trạng thái món
