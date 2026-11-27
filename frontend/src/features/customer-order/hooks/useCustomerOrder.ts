@@ -86,8 +86,18 @@ export function useCustomerOrder() {
           items: CartItem[];
         }>(storageService.KEYS.CUSTOMER_CART);
         if (!mounted) return;
-        if (session && savedCart?.sessionId === session.id && Array.isArray(savedCart.items)) {
+        // A cart created before the first dining session has sessionId=null.
+        // Keep it when no session exists, and bind it to the session if one was
+        // just opened. Only discard carts belonging to a different old session.
+        if (Array.isArray(savedCart?.items) &&
+          (!session || savedCart.sessionId === session.id || savedCart.sessionId == null)) {
           setCart(savedCart.items);
+          if (session && savedCart.sessionId !== session.id) {
+            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
+              sessionId: session.id,
+              items: savedCart.items,
+            });
+          }
         } else {
           setCart([]);
           await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
@@ -150,7 +160,10 @@ export function useCustomerOrder() {
             const savedCart = await storageService.getJson<{ sessionId: string; items: CartItem[] }>(
               storageService.KEYS.CUSTOMER_CART,
             );
-            const restored = savedCart?.sessionId === session.id && Array.isArray(savedCart.items)
+            // Preserve a pre-session cart (sessionId=null) when the first
+            // session appears; bind it instead of clearing the customer's choices.
+            const restored = Array.isArray(savedCart?.items) &&
+              (savedCart.sessionId === session.id || savedCart.sessionId == null)
               ? savedCart.items
               : [];
             setCart(restored);
