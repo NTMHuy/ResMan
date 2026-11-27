@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEmail, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength, ValidateIf } from "class-validator";
+import { IsEmail, IsInt, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf } from "class-validator";
 
 export class UpdateCustomerAccountDto {
   @IsOptional() @IsString() @MinLength(3) @MaxLength(80) username?: string;
