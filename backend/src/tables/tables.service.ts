@@ -19,6 +19,9 @@ export class TablesService {
           where: { status: "OPEN" },
           select: { id: true, status: true, openedAt: true },
         },
+        devices: {
+          select: { id: true, deviceCode: true, deviceName: true, isActive: true },
+        },
       },
     });
     return tables.map((table) => ({
