@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Banknote, CreditCard, Minus, Plus, QrCode } from 'lucide-react-native';
+import { Banknote, CreditCard, Minus, Plus, QrCode, Search } from 'lucide-react-native';
 import { z } from 'zod';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { formatVND } from '@/src/utils/formatters';
@@ -138,6 +138,7 @@ export function AddOrderItemModal({
 }: AddOrderItemModalProps) {
   const { theme } = useTheme();
   const [selectedDishId, setSelectedDishId] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState('');
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -145,10 +146,15 @@ export function AddOrderItemModal({
   useEffect(() => {
     if (!visible) return;
     setSelectedDishId(availableItems[0]?.id ?? '');
+    setSearchQuery('');
     setQuantity(1);
     setNote('');
     setErrMsg(null);
   }, [visible, availableItems]);
+
+  const filteredItems = availableItems.filter((dish) =>
+    dish.name.toLocaleLowerCase().includes(searchQuery.trim().toLocaleLowerCase()),
+  );
 
   const handleAdd = async () => {
     if (!selectedDishId) {
@@ -187,8 +193,14 @@ export function AddOrderItemModal({
         </>
       }
     >
+      <Input
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Tìm món theo tên..."
+        leftIcon={<Search size={16} color={theme.colors.outline} />}
+      />
       <View style={styles.dishList}>
-        {availableItems.map((dish) => {
+        {filteredItems.map((dish) => {
           const active = dish.id === selectedDishId;
           return (
             <Pressable
@@ -217,6 +229,9 @@ export function AddOrderItemModal({
             </Pressable>
           );
         })}
+        {filteredItems.length === 0 ? (
+          <Text style={[styles.errText, { color: theme.colors.onSurfaceVariant }]}>Không tìm thấy món phù hợp.</Text>
+        ) : null}
       </View>
 
       <View style={styles.qtyRow}>
