@@ -113,6 +113,49 @@ export function CustomerTabletAccountsPanel() {
     setFormOpen(true);
   };
 
+  const createAccount = async () => {
+    setFormError(null);
+    if (form.username.trim().length < 3) { setFormError("Tên đăng nhập phải có ít nhất 3 ký tự."); return; }
+    if (form.password.length < 12) { setFormError("Mật khẩu phải có ít nhất 12 ký tự."); return; }
+    if (form.deviceCode.trim().length < 2 || form.deviceName.trim().length < 2) {
+      setFormError("Mã thiết bị và tên thiết bị phải có ít nhất 2 ký tự."); return;
+    }
+    if (!selectedTableId) { setFormError("Vui lòng chọn bàn được gán."); return; }
+
+    setMutating(true);
+    try {
+      await apiClient.post("/users", {
+        username: form.username.trim(),
+        password: form.password,
+        email: form.email.trim(),
+        roleCode: "CUSTOMER",
+        tableId: Number(selectedTableId),
+        deviceCode: form.deviceCode.trim(),
+        deviceName: form.deviceName.trim(),
+      });
+      setFormOpen(false);
+      showToast("Đã tạo tài khoản tablet", "success", form.username.trim());
+      await load();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Không thể tạo tài khoản tablet.");
+    } finally {
+      setMutating(false);
+    }
+  };
+
+  const toggleAccount = async (account: CustomerAccount, isActive: boolean) => {
+    setMutating(true);
+    try {
+      await apiClient.patch(`/users/${account.id}/status`, { isActive });
+      showToast(isActive ? "Đã mở tài khoản tablet" : "Đã khóa tài khoản tablet", "success", account.username);
+      await load();
+    } catch (err) {
+      showToast("Không thể cập nhật trạng thái tài khoản", "error", err instanceof Error ? err.message : undefined);
+    } finally {
+      setMutating(false);
+    }
+  };
+
   const saveAccount = async () => {
     if (!editingAccount) return createAccount();
     setFormError(null);
