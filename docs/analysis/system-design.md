@@ -52,7 +52,7 @@ ResMan được tổ chức theo kiến trúc frontend – backend – database,
 
 **Hình 3.1. Kiến trúc logic tổng thể của ResMan.** Sơ đồ biểu diễn luồng gọi API và lưu trữ dữ liệu, không khẳng định số lượng máy chủ hay topology triển khai thực tế.
 
-![Kiến trúc logic](diagrams/architecture.mmd)
+**Kiến trúc logic – mã nguồn:** [architecture.mmd](diagrams/architecture.mmd).
 
 Frontend gọi API thông qua repository. Với API được bảo vệ, request mang Bearer JWT; backend xác minh token, tải lại user và permission từ database, sau đó kiểm tra permission được khai báo trên endpoint. Service thao tác với Prisma trong database; các nghiệp vụ có nhiều thay đổi liên quan được đóng gói trong transaction. Khi tải ảnh món, backend kiểm tra file, upload lên Cloudinary rồi lưu `imageUrl` và `imagePublicId` vào MenuItem.
 
@@ -60,7 +60,7 @@ Frontend gọi API thông qua repository. Với API được bảo vệ, request
 
 **Hình 3.2. Mô hình triển khai khái niệm.** Đây là mô hình logic dựa trên các thành phần trong repository; không thay thế sơ đồ hạ tầng triển khai production.
 
-![Mô hình triển khai](diagrams/deployment.puml)
+**Mô hình triển khai – mã nguồn:** [deployment.puml](diagrams/deployment.puml).
 
 ## 3.3. Thiết kế phân hệ và ranh giới module
 
@@ -84,7 +84,7 @@ Frontend gọi API thông qua repository. Với API được bảo vệ, request
 
 **Hình 3.3. Quan hệ phụ thuộc module NestJS theo khai báo hiện tại.**
 
-![Module dependency](diagrams/module-dependencies.mmd)
+**Module dependency – mã nguồn:** [module-dependencies.mmd](diagrams/module-dependencies.mmd).
 
 ### 3.3.3. Nguyên tắc phân tách trách nhiệm
 
@@ -127,7 +127,7 @@ Danh sách giữ nguyên mã UC đã xác định trong Chương 2 để đảm 
 
 **Hình 3.4. Use Case tổng quát theo năm tác nhân nghiệp vụ.**
 
-![Use Case tổng quát](diagrams/use-cases.puml)
+**Use Case tổng quát – mã nguồn:** [use-cases.puml](diagrams/use-cases.puml).
 
 ### 3.4.4. Truy vết FR – UC – phân hệ
 
@@ -150,7 +150,7 @@ Khách hàng đăng nhập bằng tài khoản CUSTOMER đã gán với TableDev
 
 **Hình 3.5. Activity – Khách hàng gọi món, thể hiện các lane theo vai trò và hệ thống.**
 
-![Activity customer order](diagrams/activity-customer-order.mmd)
+**Activity customer order – mã nguồn:** [activity-customer-order.mmd](diagrams/activity-customer-order.mmd).
 
 ### 3.5.2. Quy trình xử lý tại bếp
 
@@ -158,7 +158,7 @@ KDS truy vấn các OrderItem ở trạng thái AWAITING_ACCEPTANCE, ACCEPTED ho
 
 **Hình 3.6. Activity – Xử lý món tại KDS.**
 
-![Activity kitchen](diagrams/activity-kitchen.mmd)
+**Activity kitchen – mã nguồn:** [activity-kitchen.mmd](diagrams/activity-kitchen.mmd).
 
 ### 3.5.3. Quy trình yêu cầu và xác nhận thanh toán
 
@@ -166,7 +166,7 @@ Khách hàng gửi yêu cầu thanh toán; backend tạo hoặc tái sử dụng
 
 **Hình 3.7. Activity – Xác nhận thanh toán và đóng phiên.**
 
-![Activity payment](diagrams/activity-payment.mmd)
+**Activity payment – mã nguồn:** [activity-payment.mmd](diagrams/activity-payment.mmd).
 
 ## 3.6. Thiết kế tương tác – Sequence Diagram
 
@@ -174,19 +174,19 @@ Khách hàng gửi yêu cầu thanh toán; backend tạo hoặc tái sử dụng
 
 **Hình 3.8. Sequence – Đăng nhập và tải quyền.** Login endpoint không gắn JwtAuthGuard vì đây là điểm cấp token. AuthService tìm user theo username, kiểm tra isActive và bcrypt password, cập nhật lastLoginAt, ký JWT thời hạn một ngày và trả role/permissions. JwtStrategy tải lại user và permission khi xác thực các request sau đó.
 
-![Sequence login](diagrams/sequence-login.mmd)
+**Sequence login – mã nguồn:** [sequence-login.mmd](diagrams/sequence-login.mmd).
 
 ### 3.6.2. Khách hàng mở phiên và gửi món
 
 **Hình 3.9. Sequence – Khách hàng xem menu, mở phiên và gửi món.** Menu GET hiện không gắn guard; các thao tác mở phiên, đọc phiên và gửi món yêu cầu JWT cùng permission CUSTOMER tương ứng. Customer API lấy bàn từ TableDevice, không nhận tableId/sessionCode từ client.
 
-![Sequence customer](diagrams/sequence-customer-order.mmd)
+**Sequence customer – mã nguồn:** [sequence-customer-order.mmd](diagrams/sequence-customer-order.mmd).
 
 ### 3.6.3. Nhân viên xác nhận thanh toán
 
 **Hình 3.10. Sequence – Xác nhận thanh toán.** Mọi thay đổi payment/session/table trong transaction; lỗi điều kiện hoặc xung đột dẫn đến rollback và trả lỗi nghiệp vụ.
 
-![Sequence payment](diagrams/sequence-payment.mmd)
+**Sequence payment – mã nguồn:** [sequence-payment.mmd](diagrams/sequence-payment.mmd).
 
 ## 3.7. Thiết kế trạng thái và điều kiện chuyển đổi
 
@@ -206,7 +206,7 @@ Các trạng thái lưu trong `OrderItem.status` là String và được giới 
 
 **Hình 3.11. State/transition diagram – OrderItem.** Mũi tên nét đứt thể hiện chuyển trạng thái có trong quy tắc nghiệp vụ nhưng chưa có trong KitchenService.
 
-![Order item state machine](diagrams/state-order-item.mmd)
+**Order item state machine – mã nguồn:** [state-order-item.mmd](diagrams/state-order-item.mmd).
 
 ### 3.7.2. Sai khác liên quan đến hủy món
 
@@ -234,13 +234,13 @@ Prisma schema dùng PostgreSQL. Phần lớn khóa chính là BigInt tự tăng;
 
 **Hình 3.12. ERD tổng quan.** Sơ đồ thể hiện các nhóm tài khoản, menu, phiên/đơn, kho và thanh toán; thuộc tính chi tiết được tách sang ba ERD nhóm để giữ khả năng đọc.
 
-![ERD overview](diagrams/erd-overview.mmd)
+**ERD overview – mã nguồn:** [erd-overview.mmd](diagrams/erd-overview.mmd).
 
 ### 3.8.3. ERD tài khoản và RBAC
 
 **Hình 3.13. ERD – Tài khoản, vai trò, quyền và thiết bị khách.**
 
-![ERD account](diagrams/erd-account-rbac.mmd)
+**ERD account – mã nguồn:** [erd-account-rbac.mmd](diagrams/erd-account-rbac.mmd).
 
 - Role – User: một Role có nhiều User; mỗi User có một roleId bắt buộc.
 - Role – Permission: quan hệ nhiều-nhiều qua RolePermission với khóa chính ghép.
@@ -252,7 +252,7 @@ Prisma schema dùng PostgreSQL. Phần lớn khóa chính là BigInt tự tăng;
 
 **Hình 3.14. ERD – Phiên phục vụ, Order, OrderItem và Payment.**
 
-![ERD sessions orders](diagrams/erd-session-order-payment.mmd)
+**ERD sessions orders – mã nguồn:** [erd-session-order-payment.mmd](diagrams/erd-session-order-payment.mmd).
 
 DiningTable có nhiều DiningSession theo thời gian; Order.diningSessionId unique nên một phiên có tối đa một Order. Order có nhiều OrderItem và mỗi OrderItem tham chiếu MenuItem. OrderItemStatusHistory lưu trạng thái trước/sau, tác nhân, thời điểm và reason. PaymentRequest gắn một-một tùy chọn với DiningSession; Payment gắn một-một tùy chọn với Order.
 
@@ -260,7 +260,7 @@ DiningTable có nhiều DiningSession theo thời gian; Order.diningSessionId un
 
 **Hình 3.15. ERD – Danh mục, món ăn và dữ liệu tồn kho.**
 
-![ERD menu inventory](diagrams/erd-menu-inventory.mmd)
+**ERD menu inventory – mã nguồn:** [erd-menu-inventory.mmd](diagrams/erd-menu-inventory.mmd).
 
 MenuCategory có nhiều MenuItem. Ingredient có tối đa một InventoryBalance, đồng thời có nhiều StockMovement và InventoryCountRecord. MVP không có quan hệ công thức/định mức nguyên liệu giữa MenuItem và Ingredient; không mô hình hóa tự động trừ kho theo đơn bán.
 
@@ -274,4 +274,205 @@ Migration khởi tạo mới có thao tác loại bỏ một số cấu trúc c�
 
 **Hình 3.16. Class Diagram – Các thành phần điều phối nghiệp vụ cốt lõi.** DTO là cấu trúc request; Prisma model là cấu trúc dữ liệu; Controller và Service là các class xử lý của NestJS.
 
-![Class diagram](diagrams/class-domain.puml)
+**Class diagram – mã nguồn:** [class-domain.puml](diagrams/class-domain.puml).
+
+
+## 3.9. Thiết kế API và hợp đồng giao tiếp
+
+### 3.9.1. Quy ước chung
+
+Base path là `/api/v1` theo `backend/src/main.ts`. Request/response sử dụng JSON; upload ảnh thực đơn dùng multipart field `file`. Các endpoint được bảo vệ sử dụng `Authorization: Bearer <accessToken>`. Global ValidationPipe bật `whitelist`, `forbidNonWhitelisted` và `transform`. NestJS exception mapping trả các HTTP status phù hợp như 400 (dữ liệu không hợp lệ), 401 (chưa xác thực), 403 (thiếu quyền), 404 (không tìm thấy), 409 (xung đột/vi phạm điều kiện) và 5xx (lỗi máy chủ). Hình dạng response cụ thể phụ thuộc interceptor/filter hiện có; không áp đặt một envelope chưa được xác minh.
+
+### 3.9.2. API theo phân hệ
+
+Bảng sau tổng hợp route được khai báo trong Controller, không phải endpoint đề xuất từ tài liệu API cũ.
+
+| Phân hệ | Method | Endpoint | Permission / xác thực |
+|---|---|---|---|
+| Auth | POST | `/auth/login` | Public |
+| Auth | GET | `/auth/profile` | Bearer JWT |
+| Users | GET / POST | `/users` | `users:read` / `users:create` |
+| Users | PATCH | `/users/:id` | `users:update` |
+| Users | PATCH / DELETE | `/users/:id/tablet` | `users:update` |
+| Users | PATCH | `/users/:id/role`, `/users/:id/status` | `users:update` |
+| Menu categories | GET / POST | `/menu-categories` | `menu.category.read/create` |
+| Menu categories | GET / PATCH / DELETE | `/menu-categories/:id` | `menu.category.read/update/delete` |
+| Menu items | GET / POST | `/menu-items` | `menu.item.read/create` |
+| Menu items | GET / PATCH / DELETE | `/menu-items/:id` | `menu.item.read/update/delete` |
+| Menu items | PATCH | `/menu-items/:id/status` | `menu.item.update` |
+| Menu images | POST / DELETE | `/menu-items/:id/image` | `menu.item.update`; POST multipart `file` |
+| Customer menu | GET | `/menu-items/customer/menu` | Public trong code hiện tại |
+| Tables | GET / POST | `/tables` | `tables:read/manage` |
+| Tables | GET / PATCH / DELETE | `/tables/:id` | `tables:read/manage` |
+| Sessions | POST | `/sessions` | `sessions:open` |
+| Sessions | GET / POST | `/sessions/customer/active`, `/sessions/customer/open` | `customer:session:start` |
+| Sessions | GET | `/sessions/table/:tableId/active` | `tables:read` |
+| Sessions | GET / PATCH | `/sessions/:id`, `/sessions/:id/close` | `orders:read` / `sessions:close` |
+| Customer orders | GET | `/customer/session` | `customer:session:read` |
+| Customer orders | POST | `/customer/session/items` | `customer:order:create-item` |
+| Customer orders | DELETE | `/customer/session/items/:itemId` | `customer:order:cancel-item` |
+| Staff orders | GET | `/orders/active` | `orders:read` |
+| Staff orders | POST | `/orders/:orderId/items` | `orders:create-item` |
+| Staff orders | PATCH / DELETE | `/orders/items/:itemId/note`, `/orders/items/:itemId` | `orders:manage-item` |
+| Kitchen | GET | `/kitchen/queue` | `kitchen:read` |
+| Kitchen | PATCH | `/kitchen/items/:itemId/status` | `kitchen:update-item` |
+| Payments | POST | `/payments/customer/request` | `payments:request` |
+| Payments | GET | `/payments/requests` | `payments:read` |
+| Payments | GET / POST | `/payments/sessions/:sessionId/summary`, `/confirm` | `payments:read/confirm` |
+| Inventory | GET / POST | `/inventory/ingredients` | `inventory:read/manage` |
+| Inventory | PATCH | `/inventory/ingredients/:ingredientId` | `inventory:manage` |
+| Inventory | POST | `/inventory/ingredients/:ingredientId/stock-in` | `inventory:manage` |
+| Inventory | POST | `/inventory/ingredients/:ingredientId/count` | `inventory:count` |
+| Inventory | GET | `/inventory/movements`, `/inventory/counts` | `inventory:read` |
+| Reports | GET | `/reports/overview`, `/revenue`, `/best-sellers`, `/orders`, `/inventory` | `reports:read` |
+
+### 3.9.3. Request validation và ranh giới tin cậy
+
+- ID BigInt được parse tại boundary; DTO được dùng cho request body và query có kiểu dữ liệu.
+- Giá món gọi được lấy từ database; client không được quyết định giá cuối cùng.
+- Customer session/order API xác định bàn từ JWT principal và TableDevice; không nhận tableId/sessionCode từ client.
+- Upload ảnh chỉ nhận JPG/JPEG/PNG/WEBP, tối đa 5 MB theo cấu hình controller.
+- Không đưa `PATCH /orders/:id/items/status` vào API hợp lệ: frontend ApiOrderRepository đang gọi route này nhưng StaffOrdersController không khai báo. Đây là sai khác hợp đồng, chi tiết ở TD-01.
+
+## 3.10. Thiết kế phân quyền RBAC
+
+### 3.10.1. Mô hình
+
+RBAC được triển khai bằng Role, Permission và RolePermission. Một User có một Role; Role liên kết nhiều Permission qua bảng nối. AuthService trả permission codes lúc đăng nhập. Với request được bảo vệ, JwtStrategy xác minh chữ ký/hạn JWT, tải lại user đang active cùng role/permission từ database; PermissionsGuard kiểm tra toàn bộ permission được khai báo bằng decorator `@Permissions`. Do đó thay đổi role/permission trong database có hiệu lực ở request tiếp theo sau khi JWT được xác minh.
+
+### 3.10.2. Ma trận permission theo role
+
+| Nhóm permission | CUSTOMER | ORDER_STAFF | KITCHEN_STAFF | INVENTORY_STAFF | MANAGER |
+|---|---:|---:|---:|---:|---:|
+| Menu category/item read | Có | Có | Không | Không | Có |
+| Menu create/update/delete | Không | Không | Không | Không | Có |
+| Customer session start/read | Có | Không | Không | Không | Có* |
+| Customer order create/cancel | Có | Không | Không | Không | Có* |
+| Tables read | Không | Có | Không | Không | Có |
+| Tables manage | Không | Không | Không | Không | Có |
+| Sessions open/close | Không | Có | Không | Không | Có |
+| Orders read/create/manage item | Không | Có | Không | Không | Có |
+| Kitchen read/update item | Không | Không | Có | Không | Có |
+| Inventory read/manage/count | Không | Không | Không | Có | Có |
+| Payments request | Có | Không | Không | Không | Có |
+| Payments read/confirm | Không | Có | Không | Không | Có |
+| Reports read | Không | Không | Không | Không | Có |
+| Users read/create/update | Không | Không | Không | Không | Có |
+
+* MANAGER được seed toàn bộ permission nghiệp vụ nội bộ, bao gồm permission customer; điều này phản ánh cấu hình seed, không có nghĩa Quản lý phải dùng giao diện tablet khách.
+
+### 3.10.3. Phân quyền frontend và backend
+
+Frontend có `ROLE_ALLOWED_ROUTES`, `BACKEND_PERMISSION_MAP` và ánh xạ role `CUSTOMER` sang alias giao diện `GUEST`. Alias GUEST không phải role thứ sáu trong database. Frontend dùng permission để điều khiển điều hướng và hiển thị thao tác; backend vẫn là ranh giới bảo mật có thẩm quyền. Không xem việc ẩn nút hoặc chặn route frontend là thay thế cho guard phía server.
+
+## 3.11. Thiết kế giao diện và điều hướng
+
+### 3.11.1. Nguyên tắc theo vai trò và thiết bị
+
+| Màn hình | Người dùng / thiết bị đích | Thành phần được đối chiếu trong source |
+|---|---|---|
+| Login | Mọi vai trò; mobile/tablet/desktop | `LoginScreen`: username, password, nút đăng nhập |
+| Customer Order | Khách hàng; tablet ngang | `CustomerOrderScreen`: danh mục, món, giỏ, theo dõi món, yêu cầu thanh toán |
+| Orders + PaymentModal | Order/Manager; tablet hoặc desktop | `OrdersScreen`, `OrderModals.PaymentModal`: KPI, lọc đơn, chi tiết, xác nhận thu tiền |
+| KDS | Bếp/Manager; desktop display | `KitchenScreen`: toolbar, filter trạng thái, thẻ món, thao tác trạng thái |
+| Inventory | Kho/Manager; desktop | `InventoryScreen`: KPI nguyên liệu, tìm kiếm, bộ lọc, nhập kho, kiểm kê, lịch sử |
+| Reports | Manager; desktop | `ReportsScreen`: kỳ báo cáo, KPI, biểu đồ doanh thu, cảnh báo tồn, đơn |
+| Tables / Sessions | Order/Manager; tablet hoặc desktop | `TablesScreen`: lưới bàn, trạng thái, mở phiên, chi tiết phiên |
+| Menu | Manager; desktop | `MenuScreen`: KPI món, lọc danh mục/trạng thái, danh sách món, preview, form |
+| Employees | Manager; desktop | `EmployeesScreen`, `CustomerTabletAccountsPanel`: nhân viên và tài khoản tablet |
+
+### 3.11.2. Điều hướng
+
+Expo Router đưa người dùng chưa đăng nhập tới `/login`; nhóm `(main)` được điều khiển bởi AuthContext/AppShell. `FeatureRouteView` ánh xạ route dashboard, menu, customer-order, tables, orders, kitchen, inventory, employees và reports tới màn hình tương ứng. Role-based route gating ở frontend là lớp hỗ trợ UX; backend guard vẫn kiểm tra quyền tại API.
+
+### 3.11.3. Wireframe thiết kế minh họa
+
+Các wireframe dưới đây được dựng từ cấu trúc component và thao tác thực tế của feature screens; đây là bố cục minh họa, không phải ảnh chụp runtime. Kích thước chỉ mang tính bố cục, không khẳng định pixel-perfect với mọi breakpoint.
+
+**Hình 3.17. Login – mobile/tablet responsive.**
+
+![Login wireframe](diagrams/wireframes/login.svg)
+
+**Hình 3.18. Customer Order – tablet ngang.**
+
+![Customer order wireframe](diagrams/wireframes/customer-order-tablet.svg)
+
+**Hình 3.19. Orders và PaymentModal – desktop/tablet.**
+
+![Orders payment wireframe](diagrams/wireframes/orders-payment.svg)
+
+**Hình 3.20. KDS – màn hình bếp desktop.**
+
+![KDS wireframe](diagrams/wireframes/kds.svg)
+
+**Hình 3.21. Inventory – desktop.**
+
+![Inventory wireframe](diagrams/wireframes/inventory.svg)
+
+**Hình 3.22. Reports – desktop.**
+
+![Reports wireframe](diagrams/wireframes/reports.svg)
+
+**Hình 3.23. Tables / Sessions – tablet hoặc desktop (phụ lục).**
+
+![Tables wireframe](diagrams/wireframes/tables-sessions.svg)
+
+**Hình 3.24. Menu Management – desktop (phụ lục).**
+
+![Menu wireframe](diagrams/wireframes/menu-management.svg)
+
+**Hình 3.25. Employees – desktop (phụ lục).**
+
+![Employees wireframe](diagrams/wireframes/employees.svg)
+
+> Chú thích áp dụng cho toàn bộ wireframe: **Wireframe thiết kế minh họa, không phải ảnh chụp giao diện sản phẩm**.
+
+## 3.12. Thiết kế yêu cầu phi chức năng
+
+| Mã | Yêu cầu | Thiết kế / bằng chứng hiện có | Cách kiểm chứng cần thực hiện |
+|---|---|---|---|
+| NFR-01 | Bảo mật và xác thực | bcrypt hash; JWT Bearer; tài khoản inactive bị từ chối; Helmet | Kiểm thử token sai/hết hạn, user bị khóa, kiểm tra secrets và HTTPS khi triển khai |
+| NFR-02 | Phân quyền | Role–Permission–RolePermission; JwtAuthGuard và PermissionsGuard | Kiểm thử ma trận 5 role trên toàn bộ endpoint |
+| NFR-03 | Validation | Global ValidationPipe whitelist, forbidNonWhitelisted, transform; DTO | Kiểm thử dữ liệu thiếu/sai kiểu, trường ngoài DTO, giới hạn file |
+| NFR-04 | Hiệu năng | Có index và giới hạn/phân trang ở một số API; chưa có SLO/thời gian phản hồi được xác nhận | Benchmark với dữ liệu đại diện và tải đồng thời |
+| NFR-05 | Nhất quán dữ liệu | Transaction; một số luồng Serializable; conditional update để tránh ghi đè trạng thái | Kiểm thử cạnh tranh, retry, rollback và duplicate requests |
+| NFR-06 | Truy vết | OrderItemStatusHistory và AuditLog | Đối chiếu lịch sử và audit; bổ sung API đọc audit nếu yêu cầu |
+| NFR-07 | Khả dụng | Feature screen theo role, loading/empty/error state và toast | Kiểm thử tác vụ với người dùng đại diện; chưa có usability study |
+| NFR-08 | Tương thích nền tảng | Expo cấu hình Android/iOS/Web | Build và kiểm thử luồng trên thiết bị thật/emulator/browser |
+| NFR-09 | Bảo trì | NestJS modules; frontend features/repositories; Prisma schema | Review dependency, API contract và độ phủ test |
+| NFR-10 | Vận hành an toàn | CORS allowlist qua FRONTEND_ORIGIN, Helmet, global prefix, static upload | Kiểm tra CORS production, HTTPS, rate limit, log/monitoring và secret rotation |
+
+Không đặt chỉ tiêu hiệu năng hoặc availability dạng số vì tài liệu yêu cầu hiện tại chưa xác nhận các ngưỡng này. Các cơ chế được nhìn thấy trong code không đồng nghĩa đã đạt yêu cầu khi chưa chạy kiểm thử.
+
+## 3.13. Đánh giá tồn tại và hướng hoàn thiện
+
+Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữa Business Rules, frontend, backend và migration. Cột ưu tiên là **Ưu tiên đề xuất**, không phải mức độ nghiêm trọng đã được chủ dự án phê duyệt.
+
+| Mã | Tồn tại / bằng chứng | Ảnh hưởng | Hướng xử lý đề xuất | Ưu tiên đề xuất |
+|---|---|---|---|---|
+| TD-01 | ApiOrderRepository gọi `PATCH /orders/:id/items/status`; StaffOrdersController không khai báo route này | Một số thao tác accept/reject/update order từ màn hình Order không khớp API hiện tại | Chốt contract; đổi frontend gọi API từng item hiện có hoặc thiết kế endpoint mới có kiểm soát trạng thái và quyền | Cao |
+| TD-02 | Business Rules 4.1 cho phép `IN_PREPARATION → ACCEPTED`; KitchenService.allowed chưa có chuyển đổi này | Không thực hiện được thao tác trả món về bước đã tiếp nhận | Bổ sung transition sau khi thống nhất test case và cập nhật state history | Cao |
+| TD-03 | Business Rules 4.2 nói bếp không cần lý do hủy; KitchenService yêu cầu reason và KDS UI cũng đánh dấu bắt buộc | Hành vi sản phẩm khác quy tắc đã xác nhận | Đồng bộ DTO, service và UI theo quy tắc không bắt buộc reason; vẫn cho lưu reason tùy chọn nếu cần | Cao |
+| TD-04 | Backend cho bếp hủy từ AWAITING_ACCEPTANCE, ACCEPTED và IN_PREPARATION; Business Rules chưa xác nhận đầy đủ trạng thái được phép hủy | Có nguy cơ cho phép hủy sai giai đoạn nghiệp vụ | Chủ dự án xác nhận ma trận trạng thái bếp được hủy; sau đó cập nhật guard và test | Trung bình |
+| TD-05 | Không tìm thấy Throttler/RateLimit implementation trong repository; AuthController login chưa có throttle | Endpoint đăng nhập có thể bị thử mật khẩu lặp lại | Bổ sung rate limit theo IP/tài khoản, backoff và audit; tránh khóa tài khoản gây DoS | Cao |
+| TD-06 | Auth không có endpoint logout/refresh/revoke; frontend logout chỉ xóa token local; JWT hết hạn sau một ngày | Token đã phát hành vẫn dùng được đến hết hạn nếu không khóa user | Xác định threat model; cân nhắc refresh rotation, token revocation hoặc session version | Trung bình |
+| TD-07 | Migration tạo PaymentRequest không có CHECK constraint cho status; schema khai báo String | Giá trị trạng thái sai có thể được ghi nếu service mới không kiểm tra | Chốt enum status và thêm CHECK constraint/migration an toàn | Trung bình |
+| TD-08 | findGuestTables() tạo cố định T01–T20 và connectGuestTable() chỉ xuất hiện ở định nghĩa service; không có route controller gọi hai hàm trong source search | Mã legacy không phù hợp quyết định không giới hạn 20 bàn và không cho khách tự chọn/kết nối bàn | Xóa/di chuyển helper sau khi xác nhận không có consumer ngoài repository; không expose thành public API | Trung bình |
+| TD-09 | GET `/menu-items/customer/menu` không gắn JwtAuthGuard; customer tablet theo Business Rules vẫn đăng nhập tài khoản CUSTOMER | Chưa rõ thực đơn có chủ ý public cho mọi client hay chỉ dành cho tablet đã xác thực | Xác nhận chính sách public read; nếu cần giới hạn, thêm guard và kiểm thử customer access | Trung bình |
+| TD-10 | CORS vẫn cho phép header `X-Session-Code`, trong khi customer flow hiện dùng Bearer JWT và không gửi sessionCode | Cấu hình dư thừa có thể gây nhầm lẫn về cơ chế xác thực cũ | Loại bỏ header khi xác nhận không còn client cũ sử dụng | Thấp |
+| TD-11 | AuditLog được ghi ở service nhưng chưa tìm thấy API/controller đọc audit | FR-24 mới đáp ứng phần lưu, chưa đáp ứng truy vấn/xem nhật ký | Xác định phạm vi audit read và bổ sung endpoint/UI nếu còn thuộc MVP | Trung bình |
+| TD-12 | ReportsService.bestSellers gom nhóm theo itemNameSnapshot | Món trùng tên hoặc đổi tên có thể gộp/tách không đúng định danh menu | Nếu báo cáo cần định danh ổn định, nhóm theo menuItemId và giữ snapshot để hiển thị lịch sử | Thấp |
+| TD-13 | `backend/.env.example` chứa merge conflict markers và các biến trùng; `INITIAL_ADMIN_PASSWORD` có giá trị không giống placeholder. Root `.env.example` hiện rỗng | Người triển khai có thể hiểu nhầm template và tái sử dụng credential mẫu | Làm sạch template, dùng placeholder rõ ràng, không commit secret; rotate credential nếu từng được dùng thật | Cao |
+
+### 3.13.1. Các điểm đã kiểm tra riêng
+
+- **PaymentRequest.status CHECK:** không có CHECK trong migration `20261126170000_add_payment_requests`; chỉ có cột VARCHAR, unique index theo session và index theo status/requested_at.
+- **Login throttling:** không tìm thấy `Throttler` hoặc `RateLimit` trong repository; AuthController không khai báo throttle.
+- **Guest menu public:** GuestMenuController chỉ khai báo GET route, không gắn guard; Business Rules yêu cầu tablet đăng nhập CUSTOMER nhưng không nói rõ menu read phải private. Đây là điểm cần chốt chính sách, không tự kết luận là lỗi bảo mật.
+- **findGuestTables/connectGuestTable:** hai method còn trong OrdersService; GitHub code search chỉ tìm thấy định nghĩa trong service, không có route/controller sử dụng.
+- **.env.example:** phát hiện conflict markers và credential bootstrap không phải placeholder rõ ràng; giá trị không được sao chép vào tài liệu. Cần kiểm tra/rotate ở môi trường sử dụng thật.
+- **SD-04:** không ghi nhận issue rollback arrow vì sơ đồ hiện tại không có sai sót ở mũi tên này.
+
+## 3.14. Tổng kết chương
+
+Chương 3 đã trình bày phạm vi và nguyên tắc thiết kế, kiến trúc frontend–backend–database, ranh giới module, Use Case, quy trình nghiệp vụ, Sequence, state transition, mô hình dữ liệu, API, RBAC, điều hướng và wireframe theo vai trò/thiết bị. Thiết kế phản ánh source code ở nhánh khảo sát và đối chiếu các quyết định nghiệp vụ đã xác nhận. Những điểm chưa đồng nhất được tách thành tồn tại kỹ thuật và hướng hoàn thiện, không mô tả như chức năng đã hoàn thành. Các sơ đồ Mermaid/PlantUML là nguồn có thể chỉnh sửa; wireframe SVG là minh họa vector, không phải ảnh chụp ứng dụng runtime.

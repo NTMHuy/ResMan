@@ -27,3 +27,18 @@
 - Đối chiếu mục 4.2 Business Rules: bếp không cần lý do hủy; code hiện bắt buộc lý do.
 - Bổ sung ERD tổng quan và ba ERD chi tiết; mỗi ERD chi tiết giới hạn số thực thể để dễ đọc.
 - Bổ sung class diagram; mô tả PaymentRequest.status không có CHECK trong migration tạo bảng.
+
+
+## Nhóm 3 – Chương 3.9–3.14
+- Bổ sung API inventory theo controller thực tế, RBAC từ seed và guards, UI/navigation, NFR và bảng technical debt.
+- Technical debt ghi rõ `Ưu tiên đề xuất`, không biến thành severity đã phê duyệt.
+- Thêm 9 wireframe SVG theo component thực tế; ghi target device và chú thích không phải ảnh chụp sản phẩm.
+- Rà soát các tham chiếu Chương 3 trong `docs/`: Chương 2 chỉ tham chiếu Chương 3 ở mức tổng quát, không có link tới các figure/section cũ; `implementation-testing.md` link tới `system-design.md` vẫn hợp lệ. Các heading “Mục 3.x” trong `07-project-plan.md` thuộc cấu trúc nội bộ tài liệu kế hoạch, không phải tham chiếu Chương 3 nên không đổi.
+- Không ghi nhận SD-04; không thay đổi backend/frontend/schema/migrations/config.
+- Giới hạn xuất bản: wireframe được tạo dạng SVG; nguồn Mermaid/PlantUML được lưu editable. Không tuyên bố đã render PNG 300 DPI cho Mermaid/PlantUML vì phiên thao tác GitHub không có Mermaid CLI/PlantUML renderer hoặc môi trường raster hóa để kiểm chứng PNG.
+
+
+## Kiểm tra tham chiếu và định dạng sơ đồ
+- Các tham chiếu Mermaid/PlantUML trong nội dung chương dùng liên kết tới tệp nguồn thay vì Markdown image, vì `.mmd`/`.puml` là mã nguồn chứ không phải ảnh raster/vector đã render.
+- Các wireframe SVG được nhúng trực tiếp bằng Markdown image và có caption trong từng SVG.
+- Chưa tạo PNG 300 DPI cho sơ đồ Mermaid/PlantUML; không ghi nhận render PNG thành công khi không có renderer trong môi trường thao tác GitHub.
