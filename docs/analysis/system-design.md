@@ -497,6 +497,7 @@ Order "1" -- "0..*" OrderItem
 MenuCategory "1" -- "0..*" MenuItem
 MenuItem "1" -- "0..*" OrderItem
 OrderItem "1" -- "0..*" OrderItemStatusHistory
+User "0..1" -- "0..*" OrderItemStatusHistory : actor
 Ingredient "1" -- "0..1" InventoryBalance
 Ingredient "1" -- "0..*" StockMovement
 Ingredient "1" -- "0..*" InventoryCountRecord
