@@ -509,7 +509,7 @@ User "0..1" -- "0..*" AuditLog
 @enduml
 ```
 
-**Giải thích:** Role và Permission liên kết nhiều-nhiều qua RolePermission. User có một Role và có thể có một Employee; tài khoản CUSTOMER có thể được gắn với TableDevice. DiningTable có nhiều DiningSession theo thời gian. Mỗi DiningSession có tối đa một Order; mỗi Order có nhiều OrderItem. OrderItem lưu tên món, đơn giá và thành tiền tại thời điểm đặt để giữ lịch sử khi thực đơn thay đổi. Ingredient có tối đa một InventoryBalance và nhiều StockMovement/InventoryCountRecord. PaymentRequest gắn một-một với phiên; Payment gắn một-một với Order theo unique key.
+**Giải thích:** Role và Permission liên kết nhiều-nhiều qua RolePermission. User có một Role và có thể có một Employee; tài khoản CUSTOMER có thể được gắn với TableDevice. Trong DiningSession, `openedBy` và `closedBy` là hai khóa ngoại nullable riêng biệt tới User, lần lượt ghi nhận người mở và người đóng phiên. DiningTable có nhiều DiningSession theo thời gian. Mỗi DiningSession có tối đa một Order; mỗi Order có nhiều OrderItem. OrderItem lưu tên món, đơn giá và thành tiền tại thời điểm đặt để giữ lịch sử khi thực đơn thay đổi. Ingredient có tối đa một InventoryBalance và nhiều StockMovement/InventoryCountRecord. PaymentRequest gắn một-một với phiên; Payment gắn một-một với Order theo unique key.
 
 ## 3.6. Thiết kế cơ sở dữ liệu
 
