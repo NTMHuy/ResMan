@@ -1,0 +1,46 @@
+@startuml
+hide methods
+skinparam classAttributeIconSize 0
+class Role { +id: BigInt; +code: String; +name: String }
+class Permission { +id: BigInt; +code: String; +module: String }
+class RolePermission { +roleId: BigInt; +permissionId: BigInt }
+class User { +id: BigInt; +roleId: BigInt; +username: String; +isActive: Boolean }
+class Employee { +id: BigInt; +userId: BigInt; +employeeCode: String; +fullName: String }
+class MenuCategory { +id: BigInt; +code: String; +name: String }
+class MenuItem { +id: BigInt; +categoryId: BigInt; +name: String; +price: Decimal?; +pricingType: MenuPricingType }
+class DiningTable { +id: BigInt; +code: String; +status: String }
+class TableDevice { +id: BigInt; +diningTableId: BigInt; +userId: BigInt? }
+class DiningSession { +id: BigInt; +tableId: BigInt; +sessionCode: String; +status: String }
+class Order { +id: BigInt; +orderCode: String; +diningSessionId: BigInt }
+class OrderItem { +id: BigInt; +orderId: BigInt; +menuItemId: BigInt; +quantity: Int; +unitPrice: Decimal; +status: String }
+class OrderItemStatusHistory { +id: BigInt; +orderItemId: BigInt; +toStatus: String }
+class Ingredient { +id: BigInt; +code: String; +name: String; +unit: String }
+class InventoryBalance { +ingredientId: BigInt; +quantityOnHand: Decimal }
+class StockMovement { +id: BigInt; +ingredientId: BigInt; +movementType: String }
+class InventoryCountRecord { +id: BigInt; +ingredientId: BigInt; +actualQuantity: Decimal }
+class PaymentRequest { +id: BigInt; +diningSessionId: BigInt; +status: String }
+class Payment { +id: BigInt; +orderId: BigInt; +amount: Decimal; +status: String }
+class AuditLog { +id: BigInt; +actorId: BigInt?; +action: String }
+Role "1" -- "0..*" User
+Role "1" -- "0..*" RolePermission
+Permission "1" -- "0..*" RolePermission
+User "1" -- "0..1" Employee
+User "0..1" -- "0..1" TableDevice
+DiningTable "1" -- "0..*" TableDevice
+DiningTable "1" -- "0..*" DiningSession
+User "0..1" -- "0..*" DiningSession
+DiningSession "1" -- "0..1" Order
+Order "1" -- "0..*" OrderItem
+MenuCategory "1" -- "0..*" MenuItem
+MenuItem "1" -- "0..*" OrderItem
+OrderItem "1" -- "0..*" OrderItemStatusHistory
+Ingredient "1" -- "0..1" InventoryBalance
+Ingredient "1" -- "0..*" StockMovement
+Ingredient "1" -- "0..*" InventoryCountRecord
+DiningSession "1" -- "0..1" PaymentRequest
+Order "1" -- "0..1" Payment
+User "1" -- "0..*" StockMovement
+User "1" -- "0..*" InventoryCountRecord
+User "1" -- "0..*" Payment
+User "0..1" -- "0..*" AuditLog
+@enduml
