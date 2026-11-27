@@ -266,7 +266,9 @@ sequenceDiagram
     UI->>Repo: getCustomerMenu()
     Repo->>MenuCtrl: GET /api/v1/menu-items/customer/menu
     MenuCtrl->>DB: MenuItemsService.findCustomerMenu()
-    DB-->>UI: Danh mục và món khả dụng
+    DB-->>MenuCtrl: Danh mục và món khả dụng
+    MenuCtrl-->>Repo: HTTP 200 + danh mục/món
+    Repo-->>UI: Dữ liệu thực đơn
     Customer->>UI: Chọn món, số lượng, ghi chú
     UI->>Repo: openCustomerSession()
     Repo->>SessionCtrl: POST /api/v1/sessions/customer/open [Bearer JWT]
