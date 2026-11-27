@@ -4,7 +4,7 @@ erDiagram
   PERMISSION ||--o{ ROLE_PERMISSION : included
   USER ||--o| EMPLOYEE : profile
   USER o|--o| TABLE_DEVICE : assigned
-  DINING_TABLE ||--o{ TABLE_DEVICE : has
+  DINING_TABLE ||--o| TABLE_DEVICE : has
   DINING_TABLE ||--o{ DINING_SESSION : serves
   USER o|--o{ DINING_SESSION : actor
   DINING_SESSION ||--o| ORDER : contains
