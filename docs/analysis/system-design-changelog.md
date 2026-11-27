@@ -18,3 +18,12 @@
 - Không đưa sơ đồ Activity đăng nhập; đăng nhập được biểu diễn bằng Sequence.
 - Không thay đổi mã nguồn sản phẩm hoặc cấu hình bí mật.
 - Các tham chiếu mục/hình ở Chương 2 sẽ được rà soát sau khi đánh số Chương 3 hoàn tất.
+
+
+## Nhóm 2 – Chương 3.5–3.8
+- Bổ sung Activity cho gọi món, KDS và thanh toán; không tạo Activity đăng nhập.
+- Bổ sung Sequence đăng nhập, gọi món và thanh toán.
+- Bổ sung bảng trạng thái và state transition; đánh dấu IN_PREPARATION → ACCEPTED là quy tắc nghiệp vụ chưa triển khai.
+- Đối chiếu mục 4.2 Business Rules: bếp không cần lý do hủy; code hiện bắt buộc lý do.
+- Bổ sung ERD tổng quan và ba ERD chi tiết; mỗi ERD chi tiết giới hạn số thực thể để dễ đọc.
+- Bổ sung class diagram; mô tả PaymentRequest.status không có CHECK trong migration tạo bảng.

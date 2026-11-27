@@ -140,3 +140,138 @@ Danh sách giữ nguyên mã UC đã xác định trong Chương 2 để đảm 
 | FR-19 – FR-24 | UC-07, UC-08, UC-12 – UC-14 | Users, Menu, Tables, Reports, Audit |
 
 **Nhận xét:** Mã FR và UC được kế thừa từ `docs/analysis/requirements-analysis.md`; bảng này chỉ ánh xạ phạm vi, không nâng trạng thái “triển khai một phần” thành “đã triển khai”. Các sai khác cụ thể giữa yêu cầu và source code được phân tích ở các mục 3.7, 3.9 và 3.13.
+
+
+## 3.5. Thiết kế quy trình nghiệp vụ
+
+### 3.5.1. Quy trình khách hàng gọi món
+
+Khách hàng đăng nhập bằng tài khoản CUSTOMER đã gán với TableDevice. Khi mở chức năng gọi món, frontend tải menu và yêu cầu backend mở/tiếp tục phiên. `SessionsService.openForCustomer()` xác định bàn từ user; nếu có phiên OPEN thì sử dụng phiên hiện tại, nếu bàn AVAILABLE thì tạo DiningSession và Order. Khi gửi món, `OrdersService` xác định phiên từ tài khoản, kiểm tra trạng thái phiên, tính khả dụng và giá từ MenuItem, sau đó tạo OrderItem cùng OrderItemStatusHistory trong transaction. Giá do server xác định, không lấy giá do client gửi làm giá có hiệu lực.
+
+**Hình 3.5. Activity – Khách hàng gọi món, thể hiện các lane theo vai trò và hệ thống.**
+
+![Activity customer order](diagrams/activity-customer-order.mmd)
+
+### 3.5.2. Quy trình xử lý tại bếp
+
+KDS truy vấn các OrderItem ở trạng thái AWAITING_ACCEPTANCE, ACCEPTED hoặc IN_PREPARATION thuộc phiên OPEN. Nhân viên Bếp chọn món và cập nhật trạng thái; backend kiểm tra trạng thái hiện tại, cập nhật có điều kiện, ghi lịch sử và AuditLog trong transaction. Theo code hiện tại, chuyển trạng thái bình thường là AWAITING_ACCEPTANCE → ACCEPTED → IN_PREPARATION → COMPLETED. Business Rules còn xác nhận khả năng quay lại IN_PREPARATION → ACCEPTED; chuyển trạng thái này chưa có trong bảng allowed của KitchenService và được đánh dấu là quy tắc chưa triển khai ở mục 3.7.
+
+**Hình 3.6. Activity – Xử lý món tại KDS.**
+
+![Activity kitchen](diagrams/activity-kitchen.mmd)
+
+### 3.5.3. Quy trình yêu cầu và xác nhận thanh toán
+
+Khách hàng gửi yêu cầu thanh toán; backend tạo hoặc tái sử dụng PaymentRequest PENDING. Nhân viên Order xem yêu cầu và tổng kết phiên. Khi xác nhận, PaymentsService kiểm tra phiên OPEN, Order tồn tại, chưa có Payment và không còn món AWAITING_ACCEPTANCE. Tổng tiền loại trừ món CANCELLED; các món ACCEPTED, IN_PREPARATION và COMPLETED vẫn được tính. Trong transaction Serializable, backend tạo Payment PAID, chuyển PaymentRequest PENDING thành COMPLETED, đóng DiningSession, đưa DiningTable về AVAILABLE và ghi AuditLog.
+
+**Hình 3.7. Activity – Xác nhận thanh toán và đóng phiên.**
+
+![Activity payment](diagrams/activity-payment.mmd)
+
+## 3.6. Thiết kế tương tác – Sequence Diagram
+
+### 3.6.1. Đăng nhập
+
+**Hình 3.8. Sequence – Đăng nhập và tải quyền.** Login endpoint không gắn JwtAuthGuard vì đây là điểm cấp token. AuthService tìm user theo username, kiểm tra isActive và bcrypt password, cập nhật lastLoginAt, ký JWT thời hạn một ngày và trả role/permissions. JwtStrategy tải lại user và permission khi xác thực các request sau đó.
+
+![Sequence login](diagrams/sequence-login.mmd)
+
+### 3.6.2. Khách hàng mở phiên và gửi món
+
+**Hình 3.9. Sequence – Khách hàng xem menu, mở phiên và gửi món.** Menu GET hiện không gắn guard; các thao tác mở phiên, đọc phiên và gửi món yêu cầu JWT cùng permission CUSTOMER tương ứng. Customer API lấy bàn từ TableDevice, không nhận tableId/sessionCode từ client.
+
+![Sequence customer](diagrams/sequence-customer-order.mmd)
+
+### 3.6.3. Nhân viên xác nhận thanh toán
+
+**Hình 3.10. Sequence – Xác nhận thanh toán.** Mọi thay đổi payment/session/table trong transaction; lỗi điều kiện hoặc xung đột dẫn đến rollback và trả lỗi nghiệp vụ.
+
+![Sequence payment](diagrams/sequence-payment.mmd)
+
+## 3.7. Thiết kế trạng thái và điều kiện chuyển đổi
+
+### 3.7.1. Trạng thái OrderItem
+
+Các trạng thái lưu trong `OrderItem.status` là String và được giới hạn bằng CHECK constraint trong migration. Bảng dưới đây phân biệt quy tắc nghiệp vụ và code:
+
+| Trạng thái hiện tại | Trạng thái tiếp theo | Tác nhân / điều kiện | Trạng thái theo code |
+|---|---|---|---|
+| AWAITING_ACCEPTANCE | ACCEPTED | Nhân viên Bếp; món thuộc phiên OPEN | Đã triển khai |
+| ACCEPTED | IN_PREPARATION | Nhân viên Bếp; món thuộc phiên OPEN | Đã triển khai |
+| IN_PREPARATION | COMPLETED | Nhân viên Bếp; món thuộc phiên OPEN | Đã triển khai |
+| IN_PREPARATION | ACCEPTED | Nhân viên Bếp; quy tắc quay lại bước tiếp nhận | **Quy tắc nghiệp vụ, chưa triển khai** |
+| AWAITING_ACCEPTANCE | CANCELLED | Khách hàng; món thuộc phiên của chính tài khoản | Đã triển khai |
+| AWAITING_ACCEPTANCE / ACCEPTED | CANCELLED | Nhân viên Order; phiên còn OPEN | Đã triển khai |
+| AWAITING_ACCEPTANCE / ACCEPTED / IN_PREPARATION | CANCELLED | Nhân viên Bếp; code cho phép nhưng quy tắc nghiệp vụ chưa chốt đầy đủ trạng thái được hủy | Có trong code; cần xác nhận phạm vi nghiệp vụ |
+
+**Hình 3.11. State/transition diagram – OrderItem.** Mũi tên nét đứt thể hiện chuyển trạng thái có trong quy tắc nghiệp vụ nhưng chưa có trong KitchenService.
+
+![Order item state machine](diagrams/state-order-item.mmd)
+
+### 3.7.2. Sai khác liên quan đến hủy món
+
+Mục 4.2 của `docs/11-confirmed-business-rules.md` xác nhận bếp không cần nhập lý do khi hủy món. Tuy nhiên, `KitchenService.updateStatus()` hiện từ chối CANCELLED nếu `reason` rỗng; KDS screen cũng hiển thị trường lý do bắt buộc. Đây là sai khác giữa nghiệp vụ đã xác nhận và triển khai. Báo cáo ghi nhận sai khác, không tự sửa backend/frontend trong phạm vi tài liệu.
+
+### 3.7.3. Trạng thái phiên, bàn và yêu cầu thanh toán
+
+| Đối tượng | Chuyển đổi chính | Tác nhân / guard | Bằng chứng |
+|---|---|---|---|
+| DiningTable | AVAILABLE → OCCUPIED | Khách bắt đầu phiên đã gán hoặc Order mở phiên; không có phiên OPEN khác | SessionsService + partial unique index |
+| DiningTable | OCCUPIED → AVAILABLE | Payment được xác nhận và phiên đóng thành công | PaymentsService transaction |
+| DiningSession | OPEN → CLOSED | Nhân viên có payments:confirm; Payment chưa tồn tại và không còn món AWAITING_ACCEPTANCE | PaymentsService |
+| PaymentRequest | PENDING → COMPLETED | Xác nhận thanh toán cho phiên | PaymentsService.updateMany |
+| Payment | tạo mới với PAID | Mỗi Order tối đa một Payment | unique Payment.orderId |
+
+Không có bằng chứng về endpoint độc lập cho phép đóng phiên mà bỏ qua điều kiện thanh toán trong luồng nghiệp vụ chính. Trạng thái PaymentRequest là String; migration tạo cột và index nhưng không tạo CHECK constraint cho miền giá trị status.
+
+## 3.8. Thiết kế cơ sở dữ liệu
+
+### 3.8.1. Nguyên tắc và nhóm dữ liệu
+
+Prisma schema dùng PostgreSQL. Phần lớn khóa chính là BigInt tự tăng; quan hệ khai báo bằng foreign key; nhiều quan hệ sử dụng onDelete Restrict. Các mã nghiệp vụ như username, email, role code, menu code, table code, sessionCode và orderCode có unique constraint. Một số trường giá trị tiền dùng Decimal; OrderItem lưu itemNameSnapshot, unitPrice và lineTotal để bảo toàn thông tin tại thời điểm đặt món.
+
+### 3.8.2. ERD tổng quan
+
+**Hình 3.12. ERD tổng quan.** Sơ đồ thể hiện các nhóm tài khoản, menu, phiên/đơn, kho và thanh toán; thuộc tính chi tiết được tách sang ba ERD nhóm để giữ khả năng đọc.
+
+![ERD overview](diagrams/erd-overview.mmd)
+
+### 3.8.3. ERD tài khoản và RBAC
+
+**Hình 3.13. ERD – Tài khoản, vai trò, quyền và thiết bị khách.**
+
+![ERD account](diagrams/erd-account-rbac.mmd)
+
+- Role – User: một Role có nhiều User; mỗi User có một roleId bắt buộc.
+- Role – Permission: quan hệ nhiều-nhiều qua RolePermission với khóa chính ghép.
+- User – Employee: một-một tùy chọn qua Employee.userId unique.
+- User – TableDevice: userId nullable unique; mỗi tài khoản CUSTOMER gắn tối đa một thiết bị.
+- DiningTable – TableDevice: diningTableId unique; mỗi bàn có tối đa một thiết bị gắn trong schema hiện tại.
+
+### 3.8.4. ERD phiên, đơn và thanh toán
+
+**Hình 3.14. ERD – Phiên phục vụ, Order, OrderItem và Payment.**
+
+![ERD sessions orders](diagrams/erd-session-order-payment.mmd)
+
+DiningTable có nhiều DiningSession theo thời gian; Order.diningSessionId unique nên một phiên có tối đa một Order. Order có nhiều OrderItem và mỗi OrderItem tham chiếu MenuItem. OrderItemStatusHistory lưu trạng thái trước/sau, tác nhân, thời điểm và reason. PaymentRequest gắn một-một tùy chọn với DiningSession; Payment gắn một-một tùy chọn với Order.
+
+### 3.8.5. ERD thực đơn và kho
+
+**Hình 3.15. ERD – Danh mục, món ăn và dữ liệu tồn kho.**
+
+![ERD menu inventory](diagrams/erd-menu-inventory.mmd)
+
+MenuCategory có nhiều MenuItem. Ingredient có tối đa một InventoryBalance, đồng thời có nhiều StockMovement và InventoryCountRecord. MVP không có quan hệ công thức/định mức nguyên liệu giữa MenuItem và Ingredient; không mô hình hóa tự động trừ kho theo đơn bán.
+
+### 3.8.6. Ràng buộc và migration
+
+Các migration bổ sung CHECK constraint cho trạng thái bàn, phiên, món, lịch sử trạng thái, giá, số lượng, tồn kho, loại movement, kiểm kê và Payment. Migration `20261117190000_one_open_session_per_table` tạo partial unique index giới hạn một phiên OPEN trên mỗi bàn. Migration `20261126170000_add_payment_requests` tạo bảng PaymentRequest, unique index theo dining_session_id và index theo status/requested_at nhưng **không tạo CHECK constraint cho PaymentRequest.status**. Vì vậy miền giá trị status hiện được kiểm soát chủ yếu ở tầng Service.
+
+Migration khởi tạo mới có thao tác loại bỏ một số cấu trúc cũ; khi áp dụng lên database có dữ liệu cần sao lưu và đánh giá trước. Không kết luận database ở môi trường chạy đã đồng bộ nếu chưa kiểm tra migration status trực tiếp.
+
+### 3.8.7. Class Diagram nhóm xử lý
+
+**Hình 3.16. Class Diagram – Các thành phần điều phối nghiệp vụ cốt lõi.** DTO là cấu trúc request; Prisma model là cấu trúc dữ liệu; Controller và Service là các class xử lý của NestJS.
+
+![Class diagram](diagrams/class-domain.puml)

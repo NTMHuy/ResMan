@@ -1,0 +1,20 @@
+erDiagram
+  ROLE ||--o{ USER : has
+  ROLE ||--o{ ROLE_PERMISSION : maps
+  PERMISSION ||--o{ ROLE_PERMISSION : maps
+  USER ||--o| EMPLOYEE : profile
+  USER o|--o| TABLE_DEVICE : assigned
+  DINING_TABLE ||--o| TABLE_DEVICE : device
+  DINING_TABLE ||--o{ DINING_SESSION : serves
+  USER o|--o{ DINING_SESSION : opens
+  DINING_SESSION ||--o| ORDER : contains
+  ORDER ||--o{ ORDER_ITEM : includes
+  MENU_CATEGORY ||--o{ MENU_ITEM : groups
+  MENU_ITEM ||--o{ ORDER_ITEM : selected
+  ORDER_ITEM ||--o{ ORDER_ITEM_STATUS_HISTORY : history
+  INGREDIENT ||--o| INVENTORY_BALANCE : balance
+  INGREDIENT ||--o{ STOCK_MOVEMENT : movement
+  INGREDIENT ||--o{ INVENTORY_COUNT_RECORD : count
+  DINING_SESSION ||--o| PAYMENT_REQUEST : requests
+  ORDER ||--o| PAYMENT : paid
+  USER o|--o{ AUDIT_LOG : actor

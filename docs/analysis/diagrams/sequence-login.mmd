@@ -1,27 +1,27 @@
 sequenceDiagram
-  actor User as Người dùng
+  actor U as Người dùng
   participant UI as LoginScreen
-  participant Repo as ApiAuthRepository
-  participant Ctrl as AuthController
-  participant Svc as AuthService
-  participant DB as PrismaService
+  participant R as ApiAuthRepository
+  participant C as AuthController
+  participant S as AuthService
+  participant DB as PrismaService / PostgreSQL
   participant JWT as JwtService
-  User->>UI: Nhập thông tin
-  UI->>Repo: login(credentials)
-  Repo->>Ctrl: POST /api/v1/auth/login
-  Ctrl->>Svc: login(LoginDto)
-  Svc->>DB: user.findUnique(username, role.permissions, employee)
-  DB-->>Svc: User + Role + Permission
-  Svc->>Svc: bcrypt.compare + isActive
-  alt Không hợp lệ
-    Svc-->>Ctrl: UnauthorizedException
-    Ctrl-->>Repo: HTTP 401
-    Repo-->>UI: Lỗi
+  U->>UI: Nhập username và password
+  UI->>R: login(credentials)
+  R->>C: POST /api/v1/auth/login
+  C->>S: login(LoginDto)
+  S->>DB: user.findUnique(username, role.permissions, employee)
+  DB-->>S: User / Role / Permission
+  S->>S: isActive && bcrypt.compare()
+  alt Tài khoản không hợp lệ
+    S-->>C: UnauthorizedException
+    C-->>R: HTTP 401
+    R-->>UI: Hiển thị lỗi
   else Hợp lệ
-    Svc->>DB: user.update(lastLoginAt)
-    Svc->>JWT: signAsync(payload)
-    JWT-->>Svc: accessToken
-    Svc-->>Ctrl: token + user + permissions
-    Ctrl-->>Repo: HTTP 200
-    Repo-->>UI: Kết quả
+    S->>DB: update(lastLoginAt)
+    S->>JWT: signAsync({sub, username})
+    JWT-->>S: accessToken (1 ngày)
+    S-->>C: token + user + role + permissions
+    C-->>R: HTTP 200
+    R-->>UI: Lưu token / user
   end

@@ -1,16 +1,33 @@
-flowchart TD
-  A([Bắt đầu]) --> B["GET /kitchen/queue"]
-  B --> C["Hiển thị món thuộc phiên OPEN"]
-  C --> D["Chọn món và trạng thái tiếp theo"]
-  D --> E["PATCH /kitchen/items/:itemId/status"]
-  E --> F{"Phiên OPEN và chuyển trạng thái hợp lệ?"}
-  F -- Không --> G["Trả Conflict / Not Found"]
-  G --> H([Kết thúc không cập nhật])
-  F -- Có --> I{"Trạng thái mới CANCELLED?"}
-  I -- Có --> J{"Có lý do hủy?"}
-  J -- Không --> G
-  J -- Có --> K["Cập nhật OrderItem"]
-  I -- Không --> K
-  K --> L["Ghi StatusHistory + AuditLog"]
-  L --> M["Trả trạng thái mới"]
-  M --> N([Kết thúc])
+flowchart TB
+  subgraph C["Khách hàng"]
+    C1["Gửi món mới"]
+    C2["Theo dõi trạng thái món"]
+  end
+  subgraph O["Nhân viên Order"]
+    O1["Theo dõi danh sách đơn"]
+    O2["Thêm món mới hoặc hỗ trợ xử lý"]
+  end
+  subgraph K["Nhân viên Bếp"]
+    K1["Mở hàng đợi KDS"]
+    K2["Chọn món AWAITING_ACCEPTANCE"]
+    K3["Xác nhận tiếp nhận"]
+    K4["Chuyển sang IN_PREPARATION"]
+    K5["Xác nhận COMPLETED"]
+    K6["Chọn Hủy món"]
+  end
+  subgraph S["Hệ thống"]
+    S1["GET /kitchen/queue: lấy món của phiên OPEN"]
+    S2{"Trạng thái chuyển có trong allowed?"}
+    S3["Cập nhật có điều kiện trong transaction"]
+    S4["Ghi OrderItemStatusHistory + AuditLog"]
+    S5["Trả lỗi Conflict nếu guard không đạt"]
+  end
+  C1 --> S1
+  S1 --> K1 --> K2 --> K3 --> S2
+  S2 -- Có --> S3 --> S4 --> C2
+  S2 -- Không --> S5
+  K3 --> K4 --> S2
+  K4 --> K5 --> S2
+  K1 --> K6 --> S2
+  O1 --> S1
+  O2 --> S1
