@@ -63,7 +63,7 @@ export function CustomerTabletAccountsPanel() {
         apiClient.get("/tables"),
       ]);
       const usersPayload = unwrap<{ data: Array<CustomerAccount & { role: { code: string } }> }>(usersResponse.data);
-      setAccounts((usersPayload.data ?? []).filter((user) => user.role.code === "CUSTOMER"));
+      setAccounts((usersPayload.data ?? []).filter((user) => user.role.code === "CUSTOMER" && user.tableDevice));
       setTables(unwrap<DiningTable[]>(tablesResponse.data) ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải tài khoản tablet.");
