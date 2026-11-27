@@ -172,11 +172,9 @@ export function useCustomerOrder() {
               items: restored,
             });
           } else {
-            setCart([]);
-            await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
-              sessionId: null,
-              items: [],
-            });
+            // A missing/closed session is not a reason to discard an unsent cart.
+            // Keep the cart available so the customer can open a new session or
+            // submit the first order without losing selected dishes.
           }
         } catch {
           // A temporary network failure must not clear the currently restored session.
