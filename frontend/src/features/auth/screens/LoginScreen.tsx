@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { KeyRound, Lock, Mail, ShieldCheck, Utensils } from 'lucide-react-native';
+import { KeyRound, Lock, User, ShieldCheck, Utensils } from 'lucide-react-native';
 import { APP_CONFIG } from '@/src/constants/config';
 import { ROLE_LABELS } from '@/src/constants/rbac';
 import { useTheme } from '@/src/theme/ThemeContext';
@@ -133,10 +133,9 @@ export function LoginScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="VD: tablet_t01 hoặc manager"
-                keyboardType="email-address"
                 autoCapitalize="none"
                 error={errors.email}
-                leftIcon={<Mail size={16} color={theme.colors.outline} />}
+                leftIcon={<User size={16} color={theme.colors.outline} />}
               />
               <Input
                 label="Mật khẩu"
