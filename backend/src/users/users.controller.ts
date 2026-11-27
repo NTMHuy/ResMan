@@ -6,6 +6,7 @@ import { CreateUserDto } from "./dto/create-user.dto.js";
 import { UpdateUserDto } from "./dto/update-user.dto.js";
 import { UpdateUserRoleDto } from "./dto/update-user-role.dto.js";
 import { UpdateUserStatusDto } from "./dto/update-user-status.dto.js";
+import { UpdateCustomerAccountDto } from "./dto/update-customer-account.dto.js";
 import { UsersService } from "./users.service.js";
 
 @Controller("users")
@@ -29,6 +30,18 @@ export class UsersController {
   @Permissions("users:update")
   update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
     return this.users.update(BigInt(id), dto);
+  }
+
+  @Patch(":id/tablet")
+  @Permissions("users:update")
+  updateCustomerAccount(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateCustomerAccountDto) {
+    return this.users.updateCustomerAccount(BigInt(id), dto);
+  }
+
+  @Delete(":id/tablet")
+  @Permissions("users:update")
+  deleteCustomerAccount(@Param("id", ParseIntPipe) id: number) {
+    return this.users.deleteCustomerAccount(BigInt(id));
   }
 
   @Patch(":id/role")
