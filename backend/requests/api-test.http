@@ -1,0 +1,50 @@
+
+@baseUrl = http://localhost:3000/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJtYW5hZ2VyIiwiaWF0IjoxNzk0OTI3MTkwLCJleHAiOjE3OTUwMTM1OTB9.nuNyd_bwc82SipObWvOfUNn-rnz5k7_JwBu4Dx7xJ7E
+
+
+### 1. Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+
+### 2. Tables
+GET {{baseUrl}}/tables
+Authorization: Bearer {{token}}
+
+### 3. Active orders
+GET {{baseUrl}}/orders/active
+Authorization: Bearer {{token}}
+
+### 4. Kitchen queue
+GET {{baseUrl}}/kitchen/queue
+Authorization: Bearer {{token}}
+
+### 5. Reports overview
+GET {{baseUrl}}/reports/overview
+Authorization: Bearer {{token}}
+
+### Lấy danh sách bàn
+GET {{baseUrl}}/tables
+Authorization: Bearer {{token}}
+
+
+### Tạo bàn thử nghiệm
+POST {{baseUrl}}/tables
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "T01",
+  "name": "Bàn 01",
+  "capacity": 4
+}
+
+
+### Mở phiên ăn cho bàn T01
+POST {{baseUrl}}/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tableId": 1
+}

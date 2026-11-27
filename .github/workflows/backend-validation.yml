@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - member/minhhuy
+      - member/quocthang
     paths:
       - "backend/**"
       - "prisma/**"

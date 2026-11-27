@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed-variant": "#003ea8",
+          "on-secondary-fixed": "#00174b",
+          "on-tertiary-fixed-variant": "#6e3900",
+          "surface-container-low": "#eff4ff",
+          "on-primary-fixed": "#131b2e",
+          "on-primary": "#ffffff",
+          "secondary-fixed": "#dbe1ff",
+          "error-container": "#ffdad6",
+          "on-tertiary-fixed": "#2f1500",
+          "surface-container-lowest": "#ffffff",
+          "primary": "#000000",
+          "tertiary": "#000000",
+          "surface-container-high": "#dce9ff",
+          "surface-tint": "#565e74",
+          "on-tertiary": "#ffffff",
+          "tertiary-container": "#2f1500",
+          "surface-variant": "#d3e4fe",
+          "background": "#f8f9ff",
+          "inverse-surface": "#213145",
+          "outline-variant": "#c6c6cd",
+          "tertiary-fixed": "#ffdcc3",
+          "on-surface-variant": "#45464d",
+          "tertiary-fixed-dim": "#ffb77d",
+          "on-error-container": "#93000a",
+          "surface": "#f8f9ff",
+          "primary-container": "#131b2e",
+          "error": "#ba1a1a",
+          "surface-container": "#e5eeff",
+          "primary-fixed-dim": "#bec6e0",
+          "secondary-fixed-dim": "#b4c5ff",
+          "on-error": "#ffffff",
+          "on-secondary": "#ffffff",
+          "on-tertiary-container": "#c76c00",
+          "surface-bright": "#f8f9ff",
+          "inverse-primary": "#bec6e0",
+          "on-primary-fixed-variant": "#3f465c",
+          "secondary": "#0051d5",
+          "on-secondary-container": "#fefcff",
+          "primary-fixed": "#dae2fd",
+          "inverse-on-surface": "#eaf1ff",
+          "secondary-container": "#316bf3",
+          "outline": "#76777d",
+          "surface-container-highest": "#d3e4fe",
+          "surface-dim": "#cbdbf5",
+          "on-primary-container": "#7c839b",
+          "on-surface": "#0b1c30",
+          "on-background": "#0b1c30"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "space-md": "0.75rem",
+          "gutter": "1rem",
+          "margin": "1rem",
+          "space-xl": "1.5rem",
+          "space-lg": "1rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "headline-xl-mobile": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "label-lg": [
+            "JetBrains Mono"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "tabular-data": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ]
+        },
+        "fontSize": {
+          "headline-xl-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-xl": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "tabular-data": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-sm": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "0em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "500"
+            }
+          ]
+        }
+      }
+    }
+  };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col h-full"><div class="h-16 px-margin flex items-center gap-space-sm bg-surface-container-lowest"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">restaurant_menu</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">ResMan</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Enterprise OS</span></div></div><div class="px-margin py-space-xs"><div class="bg-surface-container-low px-space-md py-space-sm rounded-lg flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Branch Station</span><span class="font-headline-sm text-headline-sm text-on-surface">Downtown #04</span></div><span class="material-symbols-outlined text-on-surface-variant text-[20px]">swap_vert</span></div></div><nav class="flex-1 px-space-sm py-space-sm space-y-space-xs overflow-y-auto" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-lg"><div class="px-space-md pt-space-xs pb-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase">Operations Core</div><a aria-current="page" class="flex items-center gap-space-md px-space-md min-h-[44px] transition-colors bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-lg" data-path="menu-management" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Menu Catalog</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-001 / F-002</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="customer-ordering" href="#"><span class="material-symbols-outlined text-[20px]">point_of_sale</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Customer Order</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-002 / F-003</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="order-management" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Live Orders</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-003 - F-007</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="kitchen-display-system" href="#"><span class="material-symbols-outlined text-[20px]">skillet</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">KDS Kitchen Display</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-008 / F-009</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="inventory-stock" href="#"><span class="material-symbols-outlined text-[20px]">inventory_2</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Inventory Audit</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-010 / F-011</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="employee-management" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Staff &amp; Shifts</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-013</span></div></a><a class="flex items-center gap-space-md px-space-md min-h-[44px] rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="reporting-analytics" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><div class="flex flex-col"><span class="font-body-md text-body-md leading-tight">Reports &amp; Telemetry</span><span class="font-label-sm text-label-sm text-on-surface-variant">F-014 / F-015</span></div></a></nav><div class="p-margin bg-surface-container-low mt-auto"><div class="flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-container"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Sync Engine Active</span></div><span class="font-tabular-data text-tabular-data text-on-surface-variant">0.02s</span></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-gutter"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs bg-surface-container-low p-space-xs rounded-lg"><button class="min-h-[36px] px-space-md rounded bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-none flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">shield_person</span>Manager</button><button class="min-h-[36px] px-space-md rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">orders</span>Order Staff</button><button class="min-h-[36px] px-space-md rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">flatware</span>Kitchen / KDS</button><button class="min-h-[36px] px-space-md rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">shelves</span>Inventory</button><button class="min-h-[36px] px-space-md rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[16px]">devices</span>Customer View</button></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-full"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-sm text-label-sm text-on-surface">Cloud POS Link OK</span><span class="font-tabular-data text-tabular-data text-on-surface-variant">12ms</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-background min-h-screen px-gutter py-space-lg"><div class="flex flex-col w-full gap-space-md">
+<!-- Operational Metrics & Status Bar -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Tổng số món</span>
+<span class="font-tabular-data text-headline-md text-on-surface">148</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">restaurant</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Đang phục vụ</span>
+<span class="font-tabular-data text-headline-md text-secondary">132</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">check_circle</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-error">Hết món (86'd)</span>
+<span class="font-tabular-data text-headline-md text-error">9</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[22px]">do_not_disturb_on</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Tạm ngưng / Ẩn</span>
+<span class="font-tabular-data text-headline-md text-on-surface-variant">7</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[22px]">visibility_off</span>
+</div>
+</div>
+</section>
+<!-- Filter & Action Header -->
+<section class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface">Quản lý thực đơn</span>
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs rounded font-medium">F-001 / F-002</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="min-h-[36px] px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md flex items-center gap-space-xs" onclick="toggleBatchModal(true)" type="button">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+          Cập nhật trạng thái hàng loạt
+        </button>
+<button class="min-h-[36px] px-space-md rounded bg-primary text-on-primary hover:opacity-90 transition-opacity font-label-md text-label-md flex items-center gap-space-xs shadow-sm" onclick="openCreateDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+          + Thêm món mới
+        </button>
+</div>
+</div>
+<!-- Quick Filters -->
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1">
+<button class="category-filter active min-h-[32px] px-space-md rounded font-label-sm text-label-sm bg-primary text-on-primary" data-category="ALL" type="button">Tất cả (148)</button>
+<button class="category-filter min-h-[32px] px-space-md rounded font-label-sm text-label-sm bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" data-category="APPETIZER" type="button">Khai vị (24)</button>
+<button class="category-filter min-h-[32px] px-space-md rounded font-label-sm text-label-sm bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" data-category="MAIN" type="button">Món chính (76)</button>
+<button class="category-filter min-h-[32px] px-space-md rounded font-label-sm text-label-sm bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" data-category="DESSERT" type="button">Tráng miệng (18)</button>
+<button class="category-filter min-h-[32px] px-space-md rounded font-label-sm text-label-sm bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" data-category="BEVERAGE" type="button">Đồ uống (30)</button>
+</div>
+<div class="flex items-center gap-space-sm flex-1 md:flex-initial justify-end">
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-low text-on-surface font-body-sm text-body-sm pl-8 pr-space-md py-1.5 rounded focus:outline-none focus:bg-surface-container-lowest" id="searchInput" placeholder="Tìm theo tên món, mã SKU..." type="text"/>
+</div>
+<select class="bg-surface-container-low text-on-surface font-label-sm text-label-sm px-space-sm py-1.5 rounded focus:outline-none" id="statusFilter">
+<option value="ALL">Mọi trạng thái</option>
+<option value="AVAILABLE">Đang phục vụ</option>
+<option value="OUT_OF_STOCK">Hết hàng (86)</option>
+<option value="INACTIVE">Tạm ngưng</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Dual Workspace: Dense Catalog Table (Left 70%) & Dish Telemetry Preview (Right 30%) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+<!-- Left Table -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left" id="menuTable">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
+<th class="py-space-sm px-space-md w-12 text-center">
+<input class="rounded accent-primary cursor-pointer" id="selectAllCheckbox" type="checkbox"/>
+</th>
+<th class="py-space-sm px-space-md">Món ăn / Mã</th>
+<th class="py-space-sm px-space-md">Phân loại</th>
+<th class="py-space-sm px-space-md">Khu vực bếp</th>
+<th class="py-space-sm px-space-md text-right">Đơn giá</th>
+<th class="py-space-sm px-space-md text-center">Trạng thái</th>
+<th class="py-space-sm px-space-md text-right">Thao tác</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="dish-row hover:bg-surface-container-low/60 cursor-pointer transition-colors" data-id="MN-001" onclick="selectDish(this, 'MN-001')">
+<td class="py-space-sm px-space-md text-center" onclick="event.stopPropagation()">
+<input class="dish-select rounded accent-primary" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover flex-shrink-0" data-alt="Tô Phở Bò Tái Nạm Đặc Biệt thơm ngon nóng hổi, thịt bò mềm và nước dùng thanh trong ẩm thực Việt Nam đậm vị truyền thống" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRuP5y0BxkwgbXdmM1PqYSgF3OZ7QI4bAh6ACa7wKSQJSytuf96AUjMKaspbbHPYWo2N5y7-S0R5iSkZOokC7WGFC7B5wZAPNqaH_YgjJSsPS48rSWcM1Q11_oWfw3Gl0DDNxNwwwGfieTJqDy52nVvXlW9Rj7El6K6XecA965boZ6YLHY9wDr2rk5rrxkeTsBQWjWzkClWGZQAWF_2MJ1xBME09oKC6m2s0aQvkwpznCqp1n01E2vlA"/>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Phở Bò Đặc Biệt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">MN-001</span>
+</div>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface">Món chính</span>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded">Bếp Nóng</span>
+</td>
+<td class="py-space-sm px-space-md text-right font-tabular-data text-tabular-data font-semibold text-on-surface">
+                85,000 đ
+              </td>
+<td class="py-space-sm px-space-md text-center">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm bg-surface-container-low text-secondary px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đang bán
+                </span>
+</td>
+<td class="py-space-sm px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="editDishModal('MN-001')" title="Sửa thông tin" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="toggleStockQuick('MN-001')" title="Đổi trạng thái" type="button">
+<span class="material-symbols-outlined text-[18px]">toggle_on</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="dish-row bg-surface-container-low/30 hover:bg-surface-container-low/60 cursor-pointer transition-colors" data-id="MN-002" onclick="selectDish(this, 'MN-002')">
+<td class="py-space-sm px-space-md text-center" onclick="event.stopPropagation()">
+<input class="dish-select rounded accent-primary" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover flex-shrink-0" data-alt="Dĩa Cơm Tấm Sườn Bì Chả truyền thống Sài Gòn, miếng sườn nướng cháy xém cạnh, đồ chua và mỡ hành bóng bẩy bắt mắt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOk4gjM1xi-kYRf1WR6sbGGtlglvg73PrAZdvO0dq_4rmM20LQMF0-eAKqueXPs-6Y4JhC3iWQR1Y36c-6mzYUe-BJu7FIvU4IKLb4ugW__SmbiPwj-S1b5TG0u65RS626apqQrxm6psytNDDH1gO5FFkVNfZarJUaiUbhHc-G5z0vRj9LgXAx_FlYCouQoW38D6qd174iN339iOdA37ITqRmoXdlyXJLP8vOAa2eevU8KGAqisTXtDg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Cơm Tấm Sườn Bì Chả</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">MN-002</span>
+</div>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface">Món chính</span>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded">Bếp Nóng</span>
+</td>
+<td class="py-space-sm px-space-md text-right font-tabular-data text-tabular-data font-semibold text-on-surface">
+                75,000 đ
+              </td>
+<td class="py-space-sm px-space-md text-center">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm bg-surface-container-low text-secondary px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đang bán
+                </span>
+</td>
+<td class="py-space-sm px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="editDishModal('MN-002')" title="Sửa thông tin" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="toggleStockQuick('MN-002')" title="Đổi trạng thái" type="button">
+<span class="material-symbols-outlined text-[18px]">toggle_on</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 - Out of stock (86'd) -->
+<tr class="dish-row bg-error-container/20 hover:bg-error-container/30 cursor-pointer transition-colors" data-id="MN-003" onclick="selectDish(this, 'MN-003')">
+<td class="py-space-sm px-space-md text-center" onclick="event.stopPropagation()">
+<input class="dish-select rounded accent-primary" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover flex-shrink-0" data-alt="Đĩa Gỏi Cuốn Tôm Thịt tươi mát kèm bát nước chấm tương đen đậu phộng giòn rụm trong ánh sáng studio đồ ăn hiện đại" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCM4jp2xHVHPrRJbqKMVsmgfBlgcHE7v24m8HsEqPIDpq3p6kVjaatq7zPrXTe2GIOXbI4PM8K7Q158lmCw-MEUXesZr2LT26l47VwWvK9xfBYputjE1kQDGfcP2zUEfurUfmu-dODAwzor1_CjaEOnCYmsBaiD9hecuVYdpQswu5Tk2j42ZJiUmIT8nmzvAqHQOGkYK3IwXkacv5aiq7fjkx8iXuVA63QZr_cc_4SIaVfTZ07CXrO_iw"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Gỏi Cuốn Tôm Thịt</span>
+<span class="font-label-sm text-label-sm bg-error text-on-error px-1 py-0.2 rounded font-bold">86</span>
+</div>
+<span class="font-label-sm text-label-sm text-error font-medium">Hết tôm sú tươi</span>
+</div>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface">Khai vị</span>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded">Bếp Nguội</span>
+</td>
+<td class="py-space-sm px-space-md text-right font-tabular-data text-tabular-data font-semibold text-on-surface">
+                55,000 đ
+              </td>
+<td class="py-space-sm px-space-md text-center">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm bg-error-container text-on-error-container px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> Hết hàng
+                </span>
+</td>
+<td class="py-space-sm px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="editDishModal('MN-003')" title="Sửa thông tin" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-error hover:text-error font-bold" onclick="toggleStockQuick('MN-003')" title="Bật lại món" type="button">
+<span class="material-symbols-outlined text-[18px]">toggle_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="dish-row hover:bg-surface-container-low/60 cursor-pointer transition-colors" data-id="MN-004" onclick="selectDish(this, 'MN-004')">
+<td class="py-space-sm px-space-md text-center" onclick="event.stopPropagation()">
+<input class="dish-select rounded accent-primary" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover flex-shrink-0" data-alt="Ly Trà Đào Cam Sả mát lạnh với những lát đào ngâm vàng ươm, nhánh sả tươi và đá viên trong veo bắt sáng tự nhiên" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuLPZpsSBQsK2vprZJeLH7WlWuU7QYYrlRuHv-gVvr60vjlAxSkrcMhBAbFn5zxbse0w-qt5hSVF6V7vPDUSCPkAOIhvqAzQko1gnTmxGyyPzlE9A-jkgxhaBPbr5dEKuJH5vqPWLW9tpByK8smf3pQ8Z4hCiPiIte4dhBDpEbY0BN8zcxS5ERNI3J7GZapBnaGWwg14FoU_NzkLgDvy53_OD9gsn_0W3_eq0xzXaDLEgl0H0Eh0E4kg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Trà Đào Cam Sả</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">MN-004</span>
+</div>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface">Đồ uống</span>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded">Quầy Bar</span>
+</td>
+<td class="py-space-sm px-space-md text-right font-tabular-data text-tabular-data font-semibold text-on-surface">
+                45,000 đ
+              </td>
+<td class="py-space-sm px-space-md text-center">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm bg-surface-container-low text-secondary px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Đang bán
+                </span>
+</td>
+<td class="py-space-sm px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="editDishModal('MN-004')" title="Sửa thông tin" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="toggleStockQuick('MN-004')" title="Đổi trạng thái" type="button">
+<span class="material-symbols-outlined text-[18px]">toggle_on</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 - Inactive -->
+<tr class="dish-row opacity-60 hover:opacity-100 hover:bg-surface-container-low/60 cursor-pointer transition-all" data-id="MN-005" onclick="selectDish(this, 'MN-005')">
+<td class="py-space-sm px-space-md text-center" onclick="event.stopPropagation()">
+<input class="dish-select rounded accent-primary" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center text-on-surface-variant flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">icecream</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Chè Khúc Bạch Hạnh Nhân</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">MN-005</span>
+</div>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface">Tráng miệng</span>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded">Bếp Nguội</span>
+</td>
+<td class="py-space-sm px-space-md text-right font-tabular-data text-tabular-data font-semibold text-on-surface">
+                38,000 đ
+              </td>
+<td class="py-space-sm px-space-md text-center">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Tạm dừng
+                </span>
+</td>
+<td class="py-space-sm px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="editDishModal('MN-005')" title="Sửa thông tin" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="toggleStockQuick('MN-005')" title="Kích hoạt lại" type="button">
+<span class="material-symbols-outlined text-[18px]">toggle_off</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination & Table Metadata -->
+<div class="p-space-sm bg-surface-container-low flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span>Hiển thị 1-5 trên 148 món</span>
+<span class="text-outline-variant">|</span>
+<label class="flex items-center gap-1">
+<span>Dòng/trang:</span>
+<select class="bg-surface-container-lowest rounded px-1 py-0.5 text-on-surface">
+<option>10</option>
+<option selected="">20</option>
+<option>50</option>
+</select>
+</label>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-7 h-7 rounded bg-surface-container-lowest flex items-center justify-center hover:bg-surface-container-high transition-colors" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<span class="px-2 py-1 font-semibold text-on-surface">Trang 1 / 8</span>
+<button class="w-7 h-7 rounded bg-surface-container-lowest flex items-center justify-center hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Side Detail Preview Panel -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-lg shadow-sm p-space-md flex flex-col gap-space-md sticky top-20">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">info</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Chi tiết món ăn</span>
+</div>
+<span class="font-tabular-data text-label-sm text-on-surface-variant" id="previewDishId">MN-001</span>
+</div>
+<div class="flex gap-space-md items-start">
+<img class="w-20 h-20 rounded object-cover flex-shrink-0" data-alt="Ảnh cận cảnh đĩa thức ăn nhà hàng cao cấp với độ chi tiết ánh sáng phòng bếp tự nhiên" id="previewImage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmNED5hoUVGtCXW_Y4sFAJKgW_xsfT2-QlPbO1vEqnGlRTwZ3LvpclvMdnk91sFxT5_FqPeIYwCzmPQK0F8LbvZNAz3IwvoHAH3ZZbF7bmnWd282h2noCLRlTCrpE9arSvOSLN-s3YKdWubpKCFmgJHIzerjYcG40yvOWyyUZe0TKmAVhzCsvXVJQrMFqzkQSEmhBQAfargOACzD4DfuZijGp-lOUWoLZjEaJwFtAu6M6sHwlcPEvLPw"/>
+<div class="flex flex-col min-w-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight" id="previewTitle">Phở Bò Đặc Biệt</h3>
+<span class="font-tabular-data text-headline-sm text-secondary font-bold mt-1" id="previewPrice">85,000 đ</span>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-1.5 py-0.5 rounded" id="previewCategory">Món chính</span>
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface px-1.5 py-0.5 rounded" id="previewStation">Bếp Nóng</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 bg-surface-container-low p-space-sm rounded">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Mô tả thực đơn</span>
+<p class="font-body-sm text-body-sm text-on-surface" id="previewDescription">
+          Phở bò truyền thống hầm xương ống 12 tiếng cùng quế, hồi, thảo quả. Phục vụ kèm bánh phở tươi, thịt nạm giòn, gầu hoa, bò viên và rổ rau thơm húng quế, ngò gai.
+        </p>
+</div>
+<!-- Inventory Linkage (Strictly recipe sync without auto-pricing) -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Định lượng kho (F-010 Liên kết)</span>
+<span class="font-label-sm text-label-sm text-secondary hover:underline cursor-pointer">Sửa định lượng</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between p-space-xs bg-surface-container-low rounded font-tabular-data text-body-sm">
+<span class="font-medium text-on-surface">Bánh phở tươi</span>
+<span class="text-on-surface-variant">180g / phần</span>
+</div>
+<div class="flex items-center justify-between p-space-xs bg-surface-container-low rounded font-tabular-data text-body-sm">
+<span class="font-medium text-on-surface">Bò nạm &amp; gầu tươi</span>
+<span class="text-on-surface-variant">120g / phần</span>
+</div>
+<div class="flex items-center justify-between p-space-xs bg-surface-container-low rounded font-tabular-data text-body-sm">
+<span class="font-medium text-on-surface">Nước cốt hầm bò</span>
+<span class="text-on-surface-variant">450ml / phần</span>
+</div>
+</div>
+</div>
+<!-- Modifiers & Options -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Nhóm tùy chọn / Modifier</span>
+<div class="flex flex-wrap gap-1">
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-2 py-1 rounded">↳ Không hành lá</span>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-2 py-1 rounded">↳ Nước dùng ít béo</span>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-2 py-1 rounded">↳ Thêm trứng chần (+10k)</span>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-2 py-1 rounded">↳ Thêm bánh quẩy (+5k)</span>
+</div>
+</div>
+<!-- Quick Action Controls -->
+<div class="pt-space-sm flex gap-space-sm">
+<button class="flex-1 min-h-[36px] bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded flex items-center justify-center gap-1 transition-colors" onclick="editDishModal('MN-001')" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span> Cấu hình món
+        </button>
+<button class="flex-1 min-h-[36px] bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md rounded flex items-center justify-center gap-1 transition-opacity" onclick="toggleStockQuick('MN-001')" type="button">
+<span class="material-symbols-outlined text-[16px]">pause_circle</span> Đổi trạng thái
+        </button>
+</div>
+</div>
+</section>
+<!-- Slide-Over: Add / Edit Dish Modal Simulation -->
+<div class="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-[2px] hidden transition-opacity" id="dishDrawer">
+<div class="w-full max-w-xl bg-surface-container-lowest h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+<div class="p-gutter flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold" id="drawerTitle">Thêm món ăn mới</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Phân hệ Danh mục món ăn &amp; Menu F-001</span>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant" onclick="closeCreateDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-space-md" onsubmit="event.preventDefault(); saveDish();">
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Mã món (SKU Code)</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-tabular-data text-body-sm focus:outline-none focus:bg-surface-container-lowest" required="" type="text" value="MN-006"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Khu vực chế biến</label>
+<select class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-body-sm focus:outline-none">
+<option>Bếp Nóng</option>
+<option>Bếp Nguội</option>
+<option>Quầy Bar</option>
+<option>Bếp Nướng Than</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Tên món ăn (Hiển thị POS &amp; Thực đơn)</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest" placeholder="Nhập tên món ăn..." required="" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Nhóm danh mục</label>
+<select class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-body-sm focus:outline-none">
+<option>Khai vị</option>
+<option selected="">Món chính</option>
+<option>Tráng miệng</option>
+<option>Đồ uống</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Giá bán niêm yết (VNĐ)</label>
+<input class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-tabular-data text-body-sm focus:outline-none focus:bg-surface-container-lowest" placeholder="65000" required="" step="1000" type="number"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Mô tả món ăn &amp; Thành phần dị ứng</label>
+<textarea class="bg-surface-container-low px-space-sm py-2 rounded text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest" placeholder="Nhập mô tả nguyên liệu, khuyến nghị phục vụ..." rows="3"></textarea>
+</div>
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded">
+<span class="font-label-sm text-label-sm uppercase text-on-surface font-semibold">Tùy chọn phục vụ tức thời</span>
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="accent-primary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface">Cho phép phục vụ ngay sau khi lưu</span>
+</label>
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="accent-primary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface">Đồng bộ tự động sang màn hình bếp KDS</span>
+</label>
+</div>
+</form>
+</div>
+<div class="p-gutter bg-surface-container-low flex items-center justify-end gap-space-sm">
+<button class="min-h-[36px] px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md" onclick="closeCreateDrawer()" type="button">
+          Hủy bỏ
+        </button>
+<button class="min-h-[36px] px-space-lg rounded bg-primary text-on-primary hover:opacity-90 transition-opacity font-label-md text-label-md" onclick="saveDish()" type="button">
+          Lưu thông tin món
+        </button>
+</div>
+</div>
+</div>
+<!-- Batch Action Modal Simulation -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] hidden transition-opacity" id="batchModal">
+<div class="w-full max-w-md bg-surface-container-lowest rounded-lg shadow-xl p-gutter flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-primary">swap_horizontal_circle</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Cập nhật hàng loạt</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface" onclick="toggleBatchModal(false)" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Thay đổi trạng thái phục vụ cho các món đang được chọn trong bảng danh mục.
+      </p>
+<div class="flex flex-col gap-space-sm">
+<button class="w-full py-2 px-space-md rounded bg-surface-container-low hover:bg-surface-container text-left flex items-center justify-between text-on-surface" onclick="applyBatchAction('AVAILABLE')" type="button">
+<span class="font-label-sm text-label-sm">Đánh dấu: Đang phục vụ</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</button>
+<button class="w-full py-2 px-space-md rounded bg-error-container/40 hover:bg-error-container text-left flex items-center justify-between text-on-error-container" onclick="applyBatchAction('OUT_OF_STOCK')" type="button">
+<span class="font-label-sm text-label-sm">Đánh dấu: Hết hàng (86)</span>
+<span class="w-2 h-2 rounded-full bg-error"></span>
+</button>
+<button class="w-full py-2 px-space-md rounded bg-surface-container-low hover:bg-surface-container text-left flex items-center justify-between text-on-surface-variant" onclick="applyBatchAction('INACTIVE')" type="button">
+<span class="font-label-sm text-label-sm">Đánh dấu: Tạm ngưng bán</span>
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+</button>
+</div>
+<div class="flex justify-end pt-space-xs">
+<button class="min-h-[32px] px-space-md rounded bg-surface-container text-on-surface font-label-md text-label-md" onclick="toggleBatchModal(false)" type="button">
+          Đóng
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple Mock Data for interactive preview
+  const dishMockData = {
+    'MN-001': {
+      title: 'Phở Bò Đặc Biệt',
+      price: '85,000 đ',
+      category: 'Món chính',
+      station: 'Bếp Nóng',
+      desc: 'Phở bò truyền thống hầm xương ống 12 tiếng cùng quế, hồi, thảo quả. Phục vụ kèm bánh phở tươi, thịt nạm giòn, gầu hoa, bò viên và rổ rau thơm húng quế, ngò gai.'
+    },
+    'MN-002': {
+      title: 'Cơm Tấm Sườn Bì Chả',
+      price: '75,000 đ',
+      category: 'Món chính',
+      station: 'Bếp Nóng',
+      desc: 'Hạt tấm thơm dẻo, sườn cốt lết ướp mật ong nướng than hồng thơm lừng, chả trứng hấp mềm ẩm, bì heo trộn thính gạo rang tay.'
+    },
+    'MN-003': {
+      title: 'Gỏi Cuốn Tôm Thịt',
+      price: '55,000 đ',
+      category: 'Khai vị',
+      station: 'Bếp Nguội',
+      desc: 'Gỏi cuốn bánh tráng gạo mỏng kèm tôm sú tươi luộc, thịt ba chỉ luộc thái mỏng, bún tươi và hẹ lá. Chấm cùng tương đen đậu phộng béo bùi.'
+    },
+    'MN-004': {
+      title: 'Trà Đào Cam Sả',
+      price: '45,000 đ',
+      category: 'Đồ uống',
+      station: 'Quầy Bar',
+      desc: 'Trà đen ủ lạnh chiết xuất thanh mát hòa quyện cùng nước cốt cam tươi nguyên chất, tinh dầu sả đập dập và đào ngâm giòn ngọt.'
+    },
+    'MN-005': {
+      title: 'Chè Khúc Bạch Hạnh Nhân',
+      price: '38,000 đ',
+      category: 'Tráng miệng',
+      station: 'Bếp Nguội',
+      desc: 'Khúc bạch phô mai sữa béo ngậy, nhãn tươi cùi dày thanh mát, hạnh nhân lát rang giòn trong nước đường phèn hoa bưởi.'
+    }
+  };
+
+  function selectDish(rowElement, dishId) {
+    document.querySelectorAll('.dish-row').forEach(row => {
+      row.classList.remove('bg-surface-container-high/40');
+    });
+    rowElement.classList.add('bg-surface-container-high/40');
+
+    const data = dishMockData[dishId];
+    if (data) {
+      document.getElementById('previewDishId').innerText = dishId;
+      document.getElementById('previewTitle').innerText = data.title;
+      document.getElementById('previewPrice').innerText = data.price;
+      document.getElementById('previewCategory').innerText = data.category;
+      document.getElementById('previewStation').innerText = data.station;
+      document.getElementById('previewDescription').innerText = data.desc;
+    }
+  }
+
+  function openCreateDrawer() {
+    document.getElementById('drawerTitle').innerText = "Thêm món ăn mới";
+    document.getElementById('dishDrawer').classList.remove('hidden');
+  }
+
+  function editDishModal(dishId) {
+    document.getElementById('drawerTitle').innerText = "Sửa món: " + dishId;
+    document.getElementById('dishDrawer').classList.remove('hidden');
+  }
+
+  function closeCreateDrawer() {
+    document.getElementById('dishDrawer').classList.add('hidden');
+  }
+
+  function saveDish() {
+    closeCreateDrawer();
+  }
+
+  function toggleBatchModal(show) {
+    const el = document.getElementById('batchModal');
+    if (show) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  }
+
+  function applyBatchAction(status) {
+    toggleBatchModal(false);
+  }
+
+  function toggleStockQuick(dishId) {
+    const row = document.querySelector(`.dish-row[data-id="${dishId}"]`);
+    if (row) {
+      row.classList.toggle('opacity-50');
+    }
+  }
+
+  // Checkbox select all helper
+  document.getElementById('selectAllCheckbox')?.addEventListener('change', function(e) {
+    const checked = e.target.checked;
+    document.querySelectorAll('.dish-select').forEach(cb => cb.checked = checked);
+  });
+</script></main></div></body></html>

@@ -1,0 +1,27 @@
+sequenceDiagram
+  actor User as Người dùng
+  participant UI as LoginScreen
+  participant Repo as ApiAuthRepository
+  participant Ctrl as AuthController
+  participant Svc as AuthService
+  participant DB as PrismaService
+  participant JWT as JwtService
+  User->>UI: Nhập thông tin
+  UI->>Repo: login(credentials)
+  Repo->>Ctrl: POST /api/v1/auth/login
+  Ctrl->>Svc: login(LoginDto)
+  Svc->>DB: user.findUnique(username, role.permissions, employee)
+  DB-->>Svc: User + Role + Permission
+  Svc->>Svc: bcrypt.compare + isActive
+  alt Không hợp lệ
+    Svc-->>Ctrl: UnauthorizedException
+    Ctrl-->>Repo: HTTP 401
+    Repo-->>UI: Lỗi
+  else Hợp lệ
+    Svc->>DB: user.update(lastLoginAt)
+    Svc->>JWT: signAsync(payload)
+    JWT-->>Svc: accessToken
+    Svc-->>Ctrl: token + user + permissions
+    Ctrl-->>Repo: HTTP 200
+    Repo-->>UI: Kết quả
+  end

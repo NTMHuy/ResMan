@@ -11,6 +11,18 @@ import { PaymentsService } from "./payments.service.js";
 export class PaymentsController {
   constructor(private readonly payments: PaymentsService) {}
 
+  @Post("customer/request")
+  @Permissions("payments:request")
+  requestForCustomer(@CurrentUser() user: { id: string }) {
+    return this.payments.requestForCustomer(BigInt(user.id));
+  }
+
+  @Get("requests")
+  @Permissions("payments:read")
+  listPendingRequests() {
+    return this.payments.listPendingRequests();
+  }
+
   @Get("sessions/:sessionId/summary")
   @Permissions("payments:read")
   getSummary(@Param("sessionId", ParseIntPipe) sessionId: number) {

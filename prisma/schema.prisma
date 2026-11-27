@@ -59,6 +59,7 @@ model User {
   inventoryCounts InventoryCountRecord[]
   payments        Payment[]
   auditLogs       AuditLog[]
+  tableDevice     TableDevice?
 
   @@map("users")
 }
@@ -78,6 +79,13 @@ model Employee {
   @@map("employees")
 }
 
+enum MenuPricingType {
+  FIXED
+  PER_UNIT
+  MARKET_PRICE
+  UNSET
+}
+
 model MenuCategory {
   id          BigInt     @id @default(autoincrement())
   code        String     @unique @db.VarChar(40)
@@ -92,23 +100,27 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id                 BigInt       @id @default(autoincrement())
-  categoryId         BigInt       @map("category_id")
-  code               String       @unique @db.VarChar(40)
-  name               String       @db.VarChar(150)
+  id                 BigInt          @id @default(autoincrement())
+  categoryId         BigInt          @map("category_id")
+  code               String          @unique @db.VarChar(40)
+  name               String          @db.VarChar(150)
   description        String?
-  price              Decimal      @db.Decimal(14, 2)
-  imageUrl           String?      @map("image_url") @db.VarChar(1000)
-  availabilityStatus String       @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
-  availabilityReason String?      @map("availability_reason")
-  isActive           Boolean      @default(true) @map("is_active")
-  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-  category           MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  price              Decimal?        @db.Decimal(14, 2)
+  pricingType        MenuPricingType @default(FIXED) @map("pricing_type")
+  priceUnit          String?         @map("price_unit") @db.VarChar(30)
+  imageUrl           String?         @map("image_url") @db.VarChar(1000)
+  imagePublicId      String?         @map("image_public_id") @db.VarChar(255)
+  availabilityStatus String          @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
+  availabilityReason String?         @map("availability_reason")
+  isActive           Boolean         @default(true) @map("is_active")
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  category           MenuCategory    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   orderItems         OrderItem[]
 
   @@index([availabilityStatus, categoryId])
   @@index([isActive, categoryId])
+  @@index([pricingType, categoryId])
   @@map("menu_items")
 }
 
@@ -139,6 +151,7 @@ model DiningSession {
   opener      User?       @relation("SessionOpener", fields: [openedBy], references: [id], onDelete: Restrict)
   closer      User?       @relation("SessionCloser", fields: [closedBy], references: [id], onDelete: Restrict)
   order       Order?
+  paymentRequest PaymentRequest?
 
   @@index([tableId, status])
   @@map("dining_sessions")
@@ -146,13 +159,15 @@ model DiningSession {
 
 model TableDevice {
   id            BigInt      @id @default(autoincrement())
-  diningTableId BigInt      @map("dining_table_id")
+  diningTableId BigInt      @unique @map("dining_table_id")
+  userId        BigInt?     @unique @map("user_id")
   deviceCode    String      @unique @map("device_code") @db.VarChar(100)
   deviceName    String      @map("device_name") @db.VarChar(120)
   isActive      Boolean     @default(true) @map("is_active")
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
   table         DiningTable @relation(fields: [diningTableId], references: [id], onDelete: Restrict)
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([diningTableId, isActive])
   @@map("table_devices")
@@ -255,6 +270,7 @@ model InventoryCountRecord {
   id             BigInt     @id @default(autoincrement())
   ingredientId   BigInt     @map("ingredient_id")
   actualQuantity Decimal    @map("actual_quantity") @db.Decimal(14, 3)
+  countType      String     @default("GENERAL") @map("count_type") @db.VarChar(20)
   countedAt      DateTime   @default(now()) @map("counted_at") @db.Timestamptz(6)
   countedBy      BigInt     @map("counted_by")
   note           String?
@@ -264,6 +280,18 @@ model InventoryCountRecord {
   @@index([ingredientId, countedAt(sort: Desc)])
   @@index([countedAt(sort: Desc)])
   @@map("inventory_count_records")
+}
+
+model PaymentRequest {
+  id             BigInt        @id @default(autoincrement())
+  diningSessionId BigInt       @unique @map("dining_session_id")
+  status         String        @default("PENDING") @db.VarChar(20)
+  requestedAt    DateTime      @default(now()) @map("requested_at") @db.Timestamptz(6)
+  resolvedAt     DateTime?     @map("resolved_at") @db.Timestamptz(6)
+  diningSession  DiningSession @relation(fields: [diningSessionId], references: [id], onDelete: Restrict)
+
+  @@index([status, requestedAt])
+  @@map("payment_requests")
 }
 
 model Payment {

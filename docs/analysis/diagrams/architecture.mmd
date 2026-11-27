@@ -1,0 +1,22 @@
+flowchart TB
+  U["Người dùng: CUSTOMER / ORDER_STAFF / KITCHEN_STAFF / INVENTORY_STAFF / MANAGER"]
+  subgraph FE["Frontend — Expo / React Native"]
+    UI["Expo Router + Screens"]
+    CTX["AuthContext / NavigationContext"]
+    REPO["Api*Repository"]
+    UI <--> CTX
+    UI <--> REPO
+  end
+  subgraph BE["Backend — NestJS"]
+    CTRL["Controllers"]
+    GUARD["JwtAuthGuard + PermissionsGuard"]
+    SVC["Services nghiệp vụ"]
+    PRISMA["Prisma Client / PrismaService"]
+    GUARD --> CTRL --> SVC --> PRISMA
+  end
+  DB[("PostgreSQL")]
+  CLOUD["Cloudinary"]
+  U <--> UI
+  REPO <-->|"REST /api/v1, JSON; Bearer JWT cho endpoint cần xác thực"| CTRL
+  PRISMA <--> DB
+  SVC <-->|"Upload/delete ảnh"| CLOUD

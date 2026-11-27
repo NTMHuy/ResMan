@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:3000/api/v1
+@customerToken = YOUR_CUSTOMER_ACCESS_TOKEN
+@menuItemId = 1
+@itemId = 1
+
+### 4.1 - CUSTOMER xem thực đơn đã đăng nhập
+GET {{baseUrl}}/menu-items/customer/menu
+Authorization: Bearer {{customerToken}}
+
+### 4.2 - Tablet CUSTOMER khởi động chức năng gọi món
+# Backend tự xác định bàn qua tài khoản CUSTOMER đã được gán.
+# Nếu bàn chưa có phiên, tạo DiningSession + Order.
+# Nếu đã có phiên OPEN, sử dụng lại; không tạo trùng.
+POST {{baseUrl}}/sessions/customer/open
+Authorization: Bearer {{customerToken}}
+
+### 4.3 - CUSTOMER xem phiên của bàn được gán
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
+
+### 4.4 - CUSTOMER gọi món
+POST {{baseUrl}}/customer/session/items
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "menuItemId": {{menuItemId}},
+      "quantity": 2,
+      "note": "Ít cay"
+    }
+  ]
+}
+
+### 4.5 - CUSTOMER kiểm tra món vừa gọi
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
+
+### 4.6 - CUSTOMER hủy món trước khi bếp tiếp nhận
+DELETE {{baseUrl}}/customer/session/items/{{itemId}}
+Authorization: Bearer {{customerToken}}
+
+### 4.7 - CUSTOMER kiểm tra trạng thái sau khi hủy
+GET {{baseUrl}}/customer/session
+Authorization: Bearer {{customerToken}}
+
+# Không còn sử dụng GET /guest/session/tables, POST /guest/session/connect
+# hoặc X-Session-Code. Bàn được xác định hoàn toàn từ tài khoản CUSTOMER.

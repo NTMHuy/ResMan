@@ -69,8 +69,9 @@ Không tạo các bảng `customers`, `kitchen_stations`, `kitchen_tickets`, `sh
 
 ### 4.1 Staff và role
 
-- `users` lưu tài khoản nhân viên; `employees` lưu hồ sơ nhân sự.
-- Role code dự kiến: `ORDER_STAFF`, `KITCHEN_STAFF`, `INVENTORY_STAFF`, `MANAGER`. Customer không phải tài khoản nhân viên và không có role đăng nhập trong MVP.
+- `users` lưu tài khoản nhân viên và tài khoản khách hàng tablet; `employees` chỉ lưu hồ sơ nhân sự.
+- Role code gồm `MANAGER`, `ORDER_STAFF`, `KITCHEN_STAFF`, `INVENTORY_STAFF`, `CUSTOMER`.
+- Mỗi tài khoản `CUSTOMER` gắn đúng một bàn qua `table_devices.user_id`; không tạo bảng Customer riêng.
 - Có thể dùng bảng permissions/role_permissions để phân quyền chi tiết.
 - Quản lý được quyền quản trị; quyền xem inventory alert vẫn chỉ cấp cho Inventory Staff.
 
@@ -88,7 +89,7 @@ Không còn `AUTO_OUT_OF_STOCK`, nguyên liệu bắt buộc hoặc mapping món
 - `dining_tables.status` chỉ nhận `AVAILABLE` hoặc `OCCUPIED`.
 - Phiên có `OPEN` hoặc `CLOSED`; bàn OCCUPIED khi có phiên OPEN và AVAILABLE khi không có phiên OPEN.
 - Database phải bảo đảm tối đa một phiên OPEN trên mỗi bàn bằng partial unique index trong migration SQL.
-- `table_devices` chỉ mô tả tablet/thiết bị được gán vật lý với bàn (mã thiết bị, tên hiển thị, trạng thái gán). Không lưu token/hash/credential cho tới khi cơ chế xác thực tablet được quyết định.
+- `table_devices` liên kết tablet với bàn và tài khoản CUSTOMER: `user_id` UNIQUE, `dining_table_id` UNIQUE. Mỗi CUSTOMER account tương ứng một bàn; không cố định số lượng bàn ở 20. Quản lý tạo bàn và tài khoản/gán tablet theo quy mô thực tế.
 - Mỗi phiên có một order. Dùng unique constraint trên `orders.dining_session_id`.
 - Không lưu trạng thái `WAITING_PAYMENT` cho bàn.
 
@@ -202,7 +203,7 @@ Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc 
 
 ## 10. Checklist
 
-- [ ] Không có Customer model/tài khoản khách hoặc customer_id trong order.
+- [ ] Không có Customer model riêng hoặc customer_id trong order; tài khoản khách dùng role CUSTOMER và được gán bàn qua TableDevice.
 - [ ] Không có KitchenStation, stationId, KitchenTicket hoặc station routing.
 - [ ] Không có order_type takeaway, guest_count hoặc table_id lặp trong Order.
 - [ ] Một bàn tối đa một phiên OPEN; một phiên một order.
@@ -225,9 +226,19 @@ Không dùng các điểm còn mở để tự tạo thêm trạng thái hoặc 
 ## 11. Cập nhật phiên bản 3.2 — 07/11/2026
 
 - Người dùng đã xác nhận **phương án 2**: loại bỏ Kitchen Station và dùng một hàng đợi bếp chung. Thiết kế không tạo `kitchen_stations`, `kitchen_tickets`, `station_id` hoặc ràng buộc order theo station.
-- Xác nhận guest-only cho MVP; không có Customer model/account/customer_id.
+- Tại thời điểm phiên bản 3.2, MVP dùng guest-only; quyết định này đã được thay thế bởi phiên bản 3.3 ngày 26/11/2026.
 - Xác nhận payment gate phương án B; item `IN_PREPARATION` được phép khi xác nhận payment/đóng phiên, miễn không còn item `AWAITING_ACCEPTANCE`.
 - Xác nhận kiểm kê độc lập, linh hoạt; không bắt buộc đầu ngày/cuối ngày.
 - Xác nhận low-stock chỉ cảnh báo Inventory Staff; không tự động khóa món, không tự trừ kho và không có recipe mapping.
 
 Phiên bản này là baseline thiết kế để kiểm tra Prisma schema. Chưa được xem là migration đã sinh hoặc đã validate bằng Prisma CLI.
+
+
+## 12. Cập nhật phiên bản 3.3 — 26/11/2026
+
+- Bổ sung role `CUSTOMER`; khách dùng tài khoản được quản lý tạo và đăng nhập sẵn trên tablet.
+- Một tài khoản CUSTOMER tương ứng đúng một bàn thông qua `TableDevice.user_id` và `TableDevice.dining_table_id` (đều UNIQUE). Không cố định 20 bàn; quản lý tạo số bàn theo nhu cầu.
+- Tablet vẫn đăng nhập khi bàn trống; không duy trì DiningSession khi bàn trống.
+- Khi khách mở chức năng gọi món trên tablet, backend tự mở phiên của bàn được gán; nếu phiên đã OPEN thì tái sử dụng. Nhân viên ORDER_STAFF cũng có thể chọn bất kỳ bàn nào và mở phiên qua chức năng quản lý bàn.
+- Customer API lấy bàn từ JWT CUSTOMER -> TableDevice -> DiningTable; không nhận tableId/sessionCode từ client và không cho khách tự chọn bàn.
+- Khi thanh toán hoàn tất, phiên đóng và bàn trở về AVAILABLE; tablet vẫn giữ tài khoản CUSTOMER để phục vụ lượt khách tiếp theo.

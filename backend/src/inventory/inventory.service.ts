@@ -174,7 +174,7 @@ export class InventoryService {
         const movement = await tx.stockMovement.create({
           data: {
             ingredientId,
-            movementType: "STOCK_IN",
+            movementType: "IN",
             quantityDelta: quantity,
             reason: input.reason.trim(),
             referenceCode: input.referenceCode?.trim() || null,
@@ -205,7 +205,7 @@ export class InventoryService {
     }
   }
 
-  async recordCount(ingredientId: bigint, input: { actualQuantity: string; note?: string }, actorId: bigint) {
+  async recordCount(ingredientId: bigint, input: { actualQuantity: string; countType: "OPENING" | "CLOSING"; note?: string }, actorId: bigint) {
     const actual = this.decimal(input.actualQuantity, "actualQuantity");
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -225,6 +225,7 @@ export class InventoryService {
           data: {
             ingredientId,
             actualQuantity: actual,
+            countType: input.countType,
             countedBy: actorId,
             note: input.note?.trim() || null,
           },
@@ -233,7 +234,7 @@ export class InventoryService {
           await tx.stockMovement.create({
             data: {
               ingredientId,
-              movementType: "COUNT_ADJUSTMENT",
+              movementType: "ADJUSTMENT",
               quantityDelta: delta,
               reason: "Điều chỉnh theo kết quả kiểm kê",
               referenceCode: `COUNT-${record.id}`,
@@ -319,6 +320,7 @@ export class InventoryService {
       id: record.id.toString(),
       ingredient: { ...record.ingredient, id: record.ingredient.id.toString() },
       actualQuantity: record.actualQuantity.toString(),
+      countType: record.countType,
       countedAt: record.countedAt,
       note: record.note,
       actor: {

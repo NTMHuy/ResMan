@@ -12,14 +12,14 @@
 4. Lưu snapshot tên và giá tại thời điểm gọi món.
 5. Mọi thay đổi trạng thái, số dư kho và thanh toán phải có lịch sử tương ứng.
 6. Dùng transaction cho nghiệp vụ cập nhật nhiều bảng.
-7. Không có customer account, kitchen station, recipe, supplier, shift scheduling, split payment hoặc automatic stock deduction trong MVP.
+7. Không có Customer model riêng, kitchen station, recipe, supplier, shift scheduling, split payment hoặc automatic stock deduction trong MVP. Tài khoản khách dùng User với role CUSTOMER.
 8. ID BigInt trả ra JSON dưới dạng string; Decimal trả ra dạng chuỗi thập phân.
 
 ## 2. Model hiện có
 
 | Miền | Model | Vai trò |
 |---|---|---|
-| Identity/RBAC | Role, Permission, RolePermission, User, Employee | Tài khoản nhân viên và phân quyền |
+| Identity/RBAC | Role, Permission, RolePermission, User, Employee | Tài khoản nhân viên, CUSTOMER và phân quyền |
 | Menu | MenuCategory, MenuItem | Danh mục, món, giá, availability |
 | Table/device | DiningTable, DiningSession, TableDevice | Bàn, phiên, tablet gắn bàn |
 | Order/Kitchen | Order, OrderItem, OrderItemStatusHistory | Đơn, từng món, lịch sử trạng thái |
@@ -65,8 +65,8 @@ ERD trên phản ánh quan hệ model hiện có. Một số ràng buộc nghi�
 
 **Role**
 - id BIGINT PK; code VARCHAR(40) UNIQUE; name VARCHAR(100); description; created_at.
-- Seed role: MANAGER, ORDER_STAFF, KITCHEN_STAFF, INVENTORY_STAFF.
-- GUEST là ngữ cảnh tablet, không phải tài khoản User.
+- Seed role: MANAGER, ORDER_STAFF, KITCHEN_STAFF, INVENTORY_STAFF, CUSTOMER.
+- CUSTOMER là tài khoản đăng nhập sẵn trên tablet; mỗi CUSTOMER account gắn đúng một bàn qua TableDevice.
 
 **Permission / RolePermission**
 - Permission.code unique.
@@ -111,9 +111,10 @@ ERD trên phản ánh quan hệ model hiện có. Một số ràng buộc nghi�
 - Mỗi session tối đa một Order.
 
 **TableDevice**
-- device_code unique; dining_table_id FK; is_active để thu hồi thiết bị.
-- CẦN DUYỆT: dùng credential riêng, lưu hash, hỗ trợ rotate/revoke; không coi deviceCode dễ đoán là secret.
-- Tablet không tự đổi bàn; nhân viên có quyền mới được gán/thu hồi thiết bị.
+- device_code unique; dining_table_id FK UNIQUE; user_id FK UNIQUE tới User; is_active để vô hiệu hóa assignment.
+- Mỗi CUSTOMER account tương ứng đúng một bàn; mỗi bàn có tối đa một tablet/customer account được gán.
+- Quản lý tạo tài khoản CUSTOMER và gán bàn/tablet; không seed cứng 20 bàn.
+- Tablet không tự đổi bàn; chỉ quản lý có quyền mới được thay đổi assignment.
 
 ### 4.4 Order và Kitchen
 
@@ -267,7 +268,7 @@ ALTER TABLE payments
 
 ### 6.3 Invariants ở service/transaction
 
-- Open session: kiểm tra bàn, chống concurrent open; tạo session + order + cập nhật table trong transaction.
+- Open session: kiểm tra bàn, chống concurrent open; tạo session + order + cập nhật table trong transaction. ORDER_STAFF mở bàn bất kỳ; CUSTOMER chỉ mở bàn suy ra từ TableDevice của chính tài khoản.
 - Create item: lấy giá từ DB, tính lineTotal ở server, lưu snapshot và initial history.
 - Transition: kiểm tra current status, actor permission và transition; update item + insert history atomically.
 - Inventory: update balance + insert movement atomically; ngăn race condition và số dư âm.
@@ -347,7 +348,7 @@ Không lấy giá menu hiện tại để tính lại item cũ. Không chỉnh s
 - [ ] Snapshot giá/tên không đổi khi menu thay đổi.
 - [ ] Mọi transition có history.
 - [ ] Mọi thay đổi balance có stock movement.
-- [ ] Không có station, recipe, customer account hoặc split payment trong MVP.
+- [ ] Không có Customer model riêng, station, recipe hoặc split payment; CUSTOMER account được gán bàn qua TableDevice.
 
 
 ## 8.1. Bổ sung đề xuất: IdempotencyRecord
@@ -370,3 +371,13 @@ Constraint đề xuất: UNIQUE(scope, idempotency_key). Cùng key + cùng reque
 
 Đây là **model bổ sung**, không nằm trong 19 model hiện tại; không tự thêm vào Prisma schema trước khi được duyệt.
 
+
+
+## 12. Cập nhật nghiệp vụ CUSTOMER — 26/11/2026
+
+- User có role CUSTOMER được đăng nhập trên tablet đã gán sẵn.
+- TableDevice có user_id UNIQUE và dining_table_id UNIQUE để đảm bảo ánh xạ một tài khoản ↔ một bàn.
+- Không giới hạn số lượng bàn trong schema hoặc seed; số bàn do quản lý cấu hình.
+- Tablet gọi API mở phiên khi người dùng mở chức năng gọi món. Backend tự xác định bàn từ tài khoản; không nhận tableId/sessionCode do tablet gửi.
+- ORDER_STAFF vẫn có thể mở phiên cho bất kỳ bàn nào qua API staff.
+- Khi bàn trống, tài khoản CUSTOMER vẫn đăng nhập nhưng không có DiningSession OPEN. Khi thanh toán xong, session đóng và bàn AVAILABLE.

@@ -1,0 +1,15 @@
+flowchart TD
+  A([Bắt đầu]) --> B["Khách POST /payments/customer/request"]
+  B --> C["Tạo/cập nhật PaymentRequest PENDING"]
+  C --> D["Nhân viên xem yêu cầu và tổng kết"]
+  D --> E["POST /payments/sessions/:id/confirm"]
+  E --> F{"Phiên OPEN, chưa thanh toán,<br/>không còn AWAITING_ACCEPTANCE?"}
+  F -- Không --> G["Trả lỗi nghiệp vụ"]
+  G --> H([Kết thúc chưa thanh toán])
+  F -- Có --> I["Tính tổng món không CANCELLED"]
+  I --> J["Tạo Payment PAID"]
+  J --> K["Hoàn tất PaymentRequest"]
+  K --> L["Đóng DiningSession"]
+  L --> M["Đặt DiningTable AVAILABLE"]
+  M --> N["Ghi AuditLog và commit transaction"]
+  N --> O([Kết thúc thành công])

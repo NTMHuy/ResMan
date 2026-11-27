@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { Permissions } from "../auth/decorators/permissions.decorator.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { PermissionsGuard } from "../auth/guards/permissions.guard.js";
+import { CreateGuestOrderItemsDto } from "./dto/create-guest-order-items.dto.js";
 import { UpdateOrderItemNoteDto } from "./dto/update-order-item-note.dto.js";
 import { OrdersService } from "./orders.service.js";
 
@@ -15,6 +16,16 @@ export class StaffOrdersController {
   @Permissions("orders:read")
   findActive() {
     return this.orders.findActiveOrders();
+  }
+
+  @Post(":orderId/items")
+  @Permissions("orders:create-item")
+  addItems(
+    @Param("orderId", ParseIntPipe) orderId: number,
+    @Body() dto: CreateGuestOrderItemsDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.orders.addStaffItems(BigInt(orderId), dto.items, BigInt(user.id));
   }
 
   @Patch("items/:itemId/note")
