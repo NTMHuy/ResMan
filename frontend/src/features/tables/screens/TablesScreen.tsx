@@ -4,6 +4,7 @@ import { Armchair, CheckCircle2, Clock, Pencil, Plus, RefreshCw, Trash2 } from "
 import { apiClient } from "@/src/services/api/apiClient";
 import { repositories } from "@/src/repositories";
 import { useTheme } from "@/src/theme/ThemeContext";
+import { useToast } from "@/src/contexts/ToastContext";
 import { ModalDialog } from "@/src/components/common/ModalDialog";
 import { Input } from "@/src/components/common/Input";
 import { Button } from "@/src/components/common/Button";
@@ -67,6 +68,7 @@ const ITEM_STATUS: Record<SessionItem["status"], { label: string; color: "succes
 
 export function TablesScreen() {
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const [tables, setTables] = useState<DiningTable[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -84,6 +86,8 @@ export function TablesScreen() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [mutating, setMutating] = useState(false);
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<DiningTable | null>(null);
+  const [deletingTable, setDeletingTable] = useState(false);
 
   const loadTables = useCallback(async (silent = false) => {
     if (!silent) { setLoading(true); setError(null); }
@@ -183,22 +187,30 @@ export function TablesScreen() {
     finally { setSaving(false); }
   };
   const deleteTable = (table: DiningTable) => {
-    if (table.status === "OCCUPIED") { Alert.alert("Không thể xóa bàn", "Bàn đang có khách."); return; }
-    if (table.devices?.length) {
-      Alert.alert("Không thể xóa bàn", "Bàn đang được gán với tài khoản hoặc thiết bị tablet. Hãy xóa tài khoản tablet hoặc gỡ liên kết thiết bị trước.");
+    if (table.status === "OCCUPIED") {
+      showToast("Không thể xóa bàn", "warning", "Bàn đang có khách.");
       return;
     }
-    Alert.alert("Xóa bàn", `Bạn có chắc muốn xóa ${table.code} - ${table.name}? Bàn đã có lịch sử phiên hoặc thiết bị gán sẽ không thể xóa.`, [
-      { text: "Hủy", style: "cancel" },
-      { text: "Xóa", style: "destructive", onPress: () => {
-        void (async () => {
-          setBusyId(table.id);
-          try { await apiClient.delete(`/tables/${table.id}`); await loadTables(); }
-          catch (err) { Alert.alert("Không thể xóa bàn", err instanceof Error ? err.message : "Vui lòng thử lại."); }
-          finally { setBusyId(null); }
-        })();
-      }},
-    ]);
+    if (table.devices?.length) {
+      showToast("Không thể xóa bàn", "warning", "Hãy xóa tài khoản tablet hoặc gỡ liên kết thiết bị trước.");
+      return;
+    }
+    setDeleteTarget(table);
+  };
+
+  const confirmDeleteTable = async () => {
+    if (!deleteTarget) return;
+    setDeletingTable(true);
+    try {
+      await apiClient.delete(`/tables/${deleteTarget.id}`);
+      showToast("Đã xóa bàn", "success", `${deleteTarget.code} · ${deleteTarget.name}`);
+      setDeleteTarget(null);
+      await loadTables();
+    } catch (err) {
+      showToast("Không thể xóa bàn", "error", err instanceof Error ? err.message : "Bàn có thể đã có lịch sử phiên.");
+    } finally {
+      setDeletingTable(false);
+    }
   };
 
   const addOrderItem = async (input: { menuItemId: string; quantity: number; note: string }) => {
@@ -412,6 +424,23 @@ export function TablesScreen() {
         onClose={() => setPaymentOpen(false)}
         onConfirm={confirmPayment}
       />
+
+      <ModalDialog
+        visible={Boolean(deleteTarget)}
+        title="Xác nhận xóa bàn"
+        subtitle={deleteTarget ? `Bạn sắp xóa ${deleteTarget.code} · ${deleteTarget.name}.` : undefined}
+        onClose={() => { if (!deletingTable) setDeleteTarget(null); }}
+        footer={
+          <>
+            <Button label="Hủy" variant="secondary" onPress={() => setDeleteTarget(null)} disabled={deletingTable} />
+            <Button label="Xóa bàn" variant="danger" onPress={() => void confirmDeleteTable()} loading={deletingTable} />
+          </>
+        }
+      >
+        <Text style={{ color: theme.colors.onSurfaceVariant }}>
+          Chỉ bàn chưa có phiên phục vụ và chưa được gán thiết bị mới có thể xóa. Dữ liệu lịch sử được giữ nguyên.
+        </Text>
+      </ModalDialog>
 
       <ModalDialog visible={formOpen} title={editing ? "Cập nhật bàn" : "Tạo bàn mới"} subtitle="Mã bàn phải duy nhất trong nhà hàng." onClose={() => setFormOpen(false)} footer={
         <>
