@@ -699,7 +699,7 @@ erDiagram
     }
     AUDIT_LOG {
       bigint id PK
-      bigint actorId FK
+      bigint actorId FK?
       string action
       string entityType
       string entityId
