@@ -51,7 +51,7 @@ flowchart TB
     DB[("PostgreSQL<br/>Prisma models")]
     CLOUD["Cloudinary<br/>Ảnh thực đơn"]
     U <--> UI
-    REPO <-->|"HTTPS/HTTP REST<br/>JSON + Bearer JWT"| CTRL
+    REPO <-->|"HTTPS/HTTP REST<br/>JSON; Bearer JWT với API được bảo vệ"| CTRL
     PRISMA <--> DB
     SVC <-->|"Upload / delete ảnh"| CLOUD
 ```
