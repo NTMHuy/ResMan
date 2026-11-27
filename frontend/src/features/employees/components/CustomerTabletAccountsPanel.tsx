@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Armchair, Edit2, Plus, RefreshCw, Tablet, Trash2 } from "lucide-react-native";
 import { apiClient } from "@/src/services/api/apiClient";
 import { useTheme } from "@/src/theme/ThemeContext";
@@ -52,6 +52,7 @@ export function CustomerTabletAccountsPanel() {
   const [form, setForm] = useState<AccountForm>({ username: "", password: "", email: "", deviceCode: "", deviceName: "" });
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [editingAccount, setEditingAccount] = useState<CustomerAccount | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CustomerAccount | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -143,66 +144,19 @@ export function CustomerTabletAccountsPanel() {
   };
 
   const deleteAccount = (account: CustomerAccount) => {
-    Alert.alert(
-      "Xóa tài khoản tablet",
-      `Bạn có chắc muốn xóa tài khoản ${account.username}? Lịch sử gọi món được giữ lại; tài khoản sẽ bị vô hiệu hóa và liên kết thiết bị được gỡ.`,
-      [
-        { text: "Hủy", style: "cancel" },
-        { text: "Xóa", style: "destructive", onPress: () => {
-          void (async () => {
-            setMutating(true);
-            try {
-              await apiClient.delete(`/users/${account.id}/tablet`);
-              showToast("Đã xóa tài khoản tablet", "success", account.username);
-              await load();
-            } catch (err) {
-              showToast("Không thể xóa tài khoản", "error", err instanceof Error ? err.message : undefined);
-            } finally {
-              setMutating(false);
-            }
-          })();
-        } },
-      ],
-    );
+    setDeleteTarget(account);
   };
 
-  const createAccount = async () => {
-    setFormError(null);
-    if (form.username.trim().length < 3) { setFormError("Tên đăng nhập phải có ít nhất 3 ký tự."); return; }
-    if (form.password.length < 12) { setFormError("Mật khẩu phải có ít nhất 12 ký tự."); return; }
-    if (form.deviceCode.trim().length < 2 || form.deviceName.trim().length < 2) {
-      setFormError("Mã thiết bị và tên thiết bị phải có ít nhất 2 ký tự."); return;
-    }
-    if (!selectedTableId) { setFormError("Vui lòng chọn bàn chưa được gán tablet."); return; }
+  const confirmDeleteAccount = async () => {
+    if (!deleteTarget) return;
     setMutating(true);
     try {
-      await apiClient.post("/users", {
-        username: form.username.trim(),
-        password: form.password,
-        ...(form.email.trim() ? { email: form.email.trim().toLowerCase() } : {}),
-        roleCode: "CUSTOMER",
-        tableId: Number(selectedTableId),
-        deviceCode: form.deviceCode.trim(),
-        deviceName: form.deviceName.trim(),
-      });
-      setFormOpen(false);
-      showToast("Đã tạo tài khoản tablet", "success", `${form.username.trim()} · ${tables.find((table) => table.id === selectedTableId)?.code ?? ""}`);
+      await apiClient.delete(`/users/${deleteTarget.id}/tablet`);
+      showToast("Đã xóa tài khoản tablet", "success", deleteTarget.username);
+      setDeleteTarget(null);
       await load();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Không thể tạo tài khoản tablet.");
-    } finally {
-      setMutating(false);
-    }
-  };
-
-  const toggleAccount = async (account: CustomerAccount, isActive: boolean) => {
-    setMutating(true);
-    try {
-      await apiClient.patch(`/users/${account.id}/status`, { isActive });
-      showToast(isActive ? "Đã kích hoạt tài khoản tablet" : "Đã khóa tài khoản tablet", isActive ? "success" : "warning", account.username);
-      await load();
-    } catch (err) {
-      showToast("Không thể cập nhật tài khoản", "error", err instanceof Error ? err.message : undefined);
+      showToast("Không thể xóa tài khoản", "error", err instanceof Error ? err.message : undefined);
     } finally {
       setMutating(false);
     }
@@ -266,6 +220,23 @@ export function CustomerTabletAccountsPanel() {
           </Card>
         ))}
       </View>
+
+      <ModalDialog
+        visible={Boolean(deleteTarget)}
+        title="Xác nhận xóa tài khoản tablet"
+        subtitle={deleteTarget ? `Tài khoản: ${deleteTarget.username}` : undefined}
+        onClose={() => { if (!mutating) setDeleteTarget(null); }}
+        footer={
+          <>
+            <Button label="Hủy" variant="secondary" onPress={() => setDeleteTarget(null)} disabled={mutating} />
+            <Button label="Xóa tài khoản" variant="danger" onPress={() => void confirmDeleteAccount()} loading={mutating} />
+          </>
+        }
+      >
+        <Text style={{ color: theme.colors.onSurfaceVariant }}>
+          Tài khoản sẽ bị vô hiệu hóa và gỡ liên kết với tablet. Lịch sử phiên và đơn hàng vẫn được giữ lại. Không thể xóa khi bàn đang có phiên phục vụ mở.
+        </Text>
+      </ModalDialog>
 
       <ModalDialog
         visible={formOpen}
