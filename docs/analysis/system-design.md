@@ -485,7 +485,7 @@ Role "1" -- "0..*" RolePermission
 Permission "1" -- "0..*" RolePermission
 User "1" -- "0..1" Employee
 User "0..1" -- "0..1" TableDevice
-DiningTable "1" -- "0..*" TableDevice
+DiningTable "1" -- "0..1" TableDevice
 DiningTable "1" -- "0..*" DiningSession
 User "0..1" -- "0..*" DiningSession : openedBy / closedBy
 DiningSession "1" -- "0..1" Order
@@ -537,7 +537,7 @@ erDiagram
     PERMISSION ||--o{ ROLE_PERMISSION : included
     USER ||--o| EMPLOYEE : profile
     USER o|--o| TABLE_DEVICE : assigned
-    DINING_TABLE ||--o{ TABLE_DEVICE : has
+    DINING_TABLE ||--o| TABLE_DEVICE : has
     DINING_TABLE ||--o{ DINING_SESSION : serves
     USER o|--o{ DINING_SESSION : opens_or_closes
     DINING_SESSION ||--o| ORDER : contains
