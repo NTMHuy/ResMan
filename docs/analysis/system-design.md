@@ -543,7 +543,7 @@ erDiagram
     USER o|--o| TABLE_DEVICE : assigned
     DINING_TABLE ||--o| TABLE_DEVICE : has
     DINING_TABLE ||--o{ DINING_SESSION : serves
-    USER ||--o{ DINING_SESSION : opens
+    USER o|--o{ DINING_SESSION : opens
     USER o|--o{ DINING_SESSION : closes
     DINING_SESSION ||--o| ORDER : contains
     ORDER ||--o{ ORDER_ITEM : includes
