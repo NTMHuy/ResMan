@@ -46,7 +46,7 @@ flowchart TB
       GUARD["JwtAuthGuard + PermissionsGuard"]
       SVC["Services nghiệp vụ"]
       PRISMA["Prisma Client / PrismaService"]
-      CTRL --> GUARD --> SVC --> PRISMA
+      GUARD --> CTRL --> SVC --> PRISMA
     end
     DB[("PostgreSQL<br/>Prisma models")]
     CLOUD["Cloudinary<br/>Ảnh thực đơn"]
@@ -766,6 +766,23 @@ Frontend sử dụng Expo Router làm điểm vào ứng dụng (\`expo-router/e
 ### 3.8.3. Kết luận đối chiếu
 
 Kiến trúc, phân hệ, mô hình dữ liệu và các quy trình chính trong chương này được xây dựng từ thành phần đang có trên nhánh \`member/minhhuy\`. Một số luồng có đủ controller, service và model dữ liệu để mô tả như hiện trạng; một số khác mới được hỗ trợ một phần hoặc còn sai lệch hợp đồng frontend–backend. Vì vậy, các sơ đồ biểu diễn **hiện trạng có căn cứ**; các nội dung chưa triển khai không được gộp vào thiết kế hiện tại.
+
+## 3.8.4. Mã nguồn sơ đồ
+
+Các sơ đồ được lưu riêng để thuận tiện chỉnh sửa và render lại:
+
+| Sơ đồ | Tệp nguồn |
+|---|---|
+| Kiến trúc tổng thể | [architecture.mmd](diagrams/architecture.mmd) |
+| Activity – Đăng nhập | [activity-login.mmd](diagrams/activity-login.mmd) |
+| Activity – Khách hàng gọi món | [activity-customer-order.mmd](diagrams/activity-customer-order.mmd) |
+| Activity – Xử lý món tại bếp | [activity-kitchen.mmd](diagrams/activity-kitchen.mmd) |
+| Activity – Thanh toán | [activity-payment.mmd](diagrams/activity-payment.mmd) |
+| Sequence – Đăng nhập | [sequence-login.mmd](diagrams/sequence-login.mmd) |
+| Sequence – Khách hàng gọi món | [sequence-customer-order.mmd](diagrams/sequence-customer-order.mmd) |
+| Sequence – Xác nhận thanh toán | [sequence-payment.mmd](diagrams/sequence-payment.mmd) |
+| Class Diagram | [class-domain.puml](diagrams/class-domain.puml) |
+| ERD | [erd.mmd](diagrams/erd.mmd) |
 
 ## 3.9. Tổng kết chương
 
