@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-import { Armchair, Plus, RefreshCw, Tablet } from "lucide-react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Armchair, Edit2, Plus, RefreshCw, Tablet, Trash2 } from "lucide-react-native";
 import { apiClient } from "@/src/services/api/apiClient";
 import { useTheme } from "@/src/theme/ThemeContext";
 import { useToast } from "@/src/contexts/ToastContext";
@@ -18,13 +18,15 @@ type CustomerAccount = {
   isActive: boolean;
   createdAt: string;
   tableDevice: null | {
+    id: string;
+    diningTableId: string;
     deviceCode: string;
     deviceName: string;
     isActive: boolean;
     table: { code: string; name: string };
   };
 };
-type CreateForm = {
+type AccountForm = {
   username: string;
   password: string;
   email: string;
@@ -47,8 +49,9 @@ export function CustomerTabletAccountsPanel() {
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<CreateForm>({ username: "", password: "", email: "", deviceCode: "", deviceName: "" });
+  const [form, setForm] = useState<AccountForm>({ username: "", password: "", email: "", deviceCode: "", deviceName: "" });
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [editingAccount, setEditingAccount] = useState<CustomerAccount | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -79,14 +82,88 @@ export function CustomerTabletAccountsPanel() {
   ), [accounts, tables]);
 
   const availableTables = tables.filter((table) =>
-    table.status === "AVAILABLE" && !assignedTableIds.has(table.id),
+    (table.status === "AVAILABLE" && !assignedTableIds.has(table.id)) ||
+    (editingAccount?.tableDevice?.diningTableId === table.id),
   );
 
   const openCreate = () => {
+    setEditingAccount(null);
     setForm({ username: "", password: "", email: "", deviceCode: "", deviceName: "" });
     setSelectedTableId(availableTables[0]?.id ?? null);
     setFormError(null);
     setFormOpen(true);
+  };
+
+  const openEdit = (account: CustomerAccount) => {
+    if (!account.tableDevice) {
+      showToast("Không thể sửa tài khoản", "error", "Tài khoản chưa có thiết bị được gán.");
+      return;
+    }
+    setEditingAccount(account);
+    setForm({
+      username: account.username,
+      password: "",
+      email: account.email ?? "",
+      deviceCode: account.tableDevice.deviceCode,
+      deviceName: account.tableDevice.deviceName,
+    });
+    setSelectedTableId(account.tableDevice.diningTableId);
+    setFormError(null);
+    setFormOpen(true);
+  };
+
+  const saveAccount = async () => {
+    if (!editingAccount) return createAccount();
+    setFormError(null);
+    if (form.username.trim().length < 3) { setFormError("Tên đăng nhập phải có ít nhất 3 ký tự."); return; }
+    if (form.password.length > 0 && form.password.length < 12) { setFormError("Mật khẩu mới phải có ít nhất 12 ký tự."); return; }
+    if (form.deviceCode.trim().length < 2 || form.deviceName.trim().length < 2) {
+      setFormError("Mã thiết bị và tên thiết bị phải có ít nhất 2 ký tự."); return;
+    }
+    if (!selectedTableId) { setFormError("Vui lòng chọn bàn được gán."); return; }
+    setMutating(true);
+    try {
+      await apiClient.patch(`/users/${editingAccount.id}/tablet`, {
+        username: form.username.trim(),
+        ...(form.password ? { password: form.password } : {}),
+        email: form.email.trim(),
+        deviceCode: form.deviceCode.trim(),
+        deviceName: form.deviceName.trim(),
+        tableId: Number(selectedTableId),
+      });
+      setFormOpen(false);
+      setEditingAccount(null);
+      showToast("Đã cập nhật tài khoản tablet", "success", form.username.trim());
+      await load();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Không thể cập nhật tài khoản tablet.");
+    } finally {
+      setMutating(false);
+    }
+  };
+
+  const deleteAccount = (account: CustomerAccount) => {
+    Alert.alert(
+      "Xóa tài khoản tablet",
+      `Bạn có chắc muốn xóa tài khoản ${account.username}? Lịch sử gọi món được giữ lại; tài khoản sẽ bị vô hiệu hóa và liên kết thiết bị được gỡ.`,
+      [
+        { text: "Hủy", style: "cancel" },
+        { text: "Xóa", style: "destructive", onPress: () => {
+          void (async () => {
+            setMutating(true);
+            try {
+              await apiClient.delete(`/users/${account.id}/tablet`);
+              showToast("Đã xóa tài khoản tablet", "success", account.username);
+              await load();
+            } catch (err) {
+              showToast("Không thể xóa tài khoản", "error", err instanceof Error ? err.message : undefined);
+            } finally {
+              setMutating(false);
+            }
+          })();
+        } },
+      ],
+    );
   };
 
   const createAccount = async () => {
@@ -177,6 +254,14 @@ export function CustomerTabletAccountsPanel() {
                 <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 11 }}>{account.isActive ? "Đang mở" : "Đã khóa"}</Text>
                 <Switch value={account.isActive} onValueChange={(value) => void toggleAccount(account, value)} disabled={mutating} />
               </View>
+              <View style={styles.switchColumn}>
+                <Pressable onPress={() => openEdit(account)} disabled={mutating} style={[styles.refresh, { backgroundColor: theme.colors.surfaceLow }]}>
+                  <Edit2 size={16} color={theme.colors.secondary} />
+                </Pressable>
+                <Pressable onPress={() => deleteAccount(account)} disabled={mutating} style={[styles.refresh, { backgroundColor: theme.colors.surfaceLow }]}>
+                  <Trash2 size={16} color={theme.colors.error} />
+                </Pressable>
+              </View>
             </View>
           </Card>
         ))}
@@ -184,19 +269,19 @@ export function CustomerTabletAccountsPanel() {
 
       <ModalDialog
         visible={formOpen}
-        title="Tạo tài khoản tablet"
-        subtitle="Tài khoản sẽ đăng nhập mặc định trên tablet được gán với bàn đã chọn."
+        title={editingAccount ? "Sửa tài khoản tablet" : "Tạo tài khoản tablet"}
+        subtitle={editingAccount ? "Cập nhật thông tin đăng nhập và thiết bị được gán. Để trống mật khẩu nếu không muốn đổi." : "Tài khoản sẽ đăng nhập mặc định trên tablet được gán với bàn đã chọn."}
         onClose={() => { if (!mutating) setFormOpen(false); }}
         maxWidth={560}
         footer={
           <>
             <Button label="Hủy" variant="secondary" onPress={() => setFormOpen(false)} disabled={mutating} />
-            <Button label="Tạo tài khoản" onPress={() => void createAccount()} loading={mutating} />
+            <Button label={editingAccount ? "Lưu thay đổi" : "Tạo tài khoản"} onPress={() => void saveAccount()} loading={mutating} />
           </>
         }
       >
         <Input label="Tên đăng nhập *" value={form.username} onChangeText={(username) => setForm((v) => ({ ...v, username }))} autoCapitalize="none" placeholder="VD: tablet_t01" />
-        <Input label="Mật khẩu ban đầu *" value={form.password} onChangeText={(password) => setForm((v) => ({ ...v, password }))} secureTextEntry placeholder="Tối thiểu 12 ký tự" />
+        <Input label={editingAccount ? "Mật khẩu mới (không bắt buộc)" : "Mật khẩu ban đầu *"} value={form.password} onChangeText={(password) => setForm((v) => ({ ...v, password }))} secureTextEntry placeholder={editingAccount ? "Để trống nếu giữ mật khẩu cũ" : "Tối thiểu 12 ký tự"} />
         <Input label="Email (không bắt buộc)" value={form.email} onChangeText={(email) => setForm((v) => ({ ...v, email }))} autoCapitalize="none" keyboardType="email-address" />
         <Input label="Mã thiết bị *" value={form.deviceCode} onChangeText={(deviceCode) => setForm((v) => ({ ...v, deviceCode }))} placeholder="VD: TAB-T01" />
         <Input label="Tên thiết bị *" value={form.deviceName} onChangeText={(deviceName) => setForm((v) => ({ ...v, deviceName }))} placeholder="VD: Tablet bàn T01" />
