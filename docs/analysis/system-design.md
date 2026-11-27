@@ -637,6 +637,8 @@ erDiagram
       bigint tableId FK
       string sessionCode UK
       string status
+      bigint openedBy FK?
+      bigint closedBy FK?
     }
     ORDER {
       bigint id PK
