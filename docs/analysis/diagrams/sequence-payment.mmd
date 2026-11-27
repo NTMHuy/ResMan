@@ -1,12 +1,14 @@
 sequenceDiagram
   actor Staff as Nhân viên
   participant UI as Giao diện thanh toán
+  participant Guard as JwtAuthGuard + PermissionsGuard
   participant Ctrl as PaymentsController
   participant Svc as PaymentsService
   participant DB as PrismaService
   Staff->>UI: Xác nhận thanh toán
-  UI->>Ctrl: POST /payments/sessions/:id/confirm [JWT]
-  Ctrl->>Ctrl: JwtAuthGuard + PermissionsGuard
+  UI->>Guard: POST /payments/sessions/:id/confirm [JWT]
+  Guard->>Guard: Xác thực JWT và permission payments:confirm
+  Guard->>Ctrl: Cho phép request
   Ctrl->>Svc: confirmForSession(...)
   Svc->>DB: BEGIN Serializable transaction
   Svc->>DB: Đọc session, order, items, payment
