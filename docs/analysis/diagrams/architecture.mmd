@@ -12,7 +12,7 @@ flowchart TB
     GUARD["JwtAuthGuard + PermissionsGuard"]
     SVC["Services nghiệp vụ"]
     PRISMA["Prisma Client / PrismaService"]
-    CTRL --> GUARD --> SVC --> PRISMA
+    GUARD --> CTRL --> SVC --> PRISMA
   end
   DB[("PostgreSQL")]
   CLOUD["Cloudinary"]
