@@ -560,13 +560,38 @@ export function CustomerOrderScreen() {
                           <Text style={[styles.trackItems, { color: theme.colors.onSurface }]}>
                             {index + 1}. {item.quantity}x {item.menuItemName}
                           </Text>
-                          <Text style={[styles.trackItems, { color: theme.colors.onSurfaceVariant }]}>
-                            {item.kitchenStatus === 'QUEUED' ? 'Chờ bếp tiếp nhận' :
-                              item.kitchenStatus === 'ACCEPTED' ? 'Đã tiếp nhận' :
-                              item.kitchenStatus === 'COOKING' ? 'Đang chế biến' :
-                              item.kitchenStatus === 'COMPLETED' ? 'Đã hoàn thành' : 'Đã hủy'}
-                            {' · '}{formatVND(item.unitPrice * item.quantity)}
-                          </Text>
+                          <View style={{ gap: 6, alignItems: 'flex-start' }}>
+                            <Badge
+                              label={item.kitchenStatus === 'QUEUED' ? 'Chờ bếp tiếp nhận' :
+                                item.kitchenStatus === 'ACCEPTED' ? 'Bếp đã tiếp nhận' :
+                                item.kitchenStatus === 'COOKING' ? 'Đang chế biến' :
+                                item.kitchenStatus === 'COMPLETED' ? 'Đã hoàn thành' : 'Đã hủy'}
+                              tone={item.kitchenStatus === 'COMPLETED' ? 'success' :
+                                item.kitchenStatus === 'COOKING' ? 'warning' :
+                                item.kitchenStatus === 'ACCEPTED' ? 'info' :
+                                item.kitchenStatus === 'VOIDED' ? 'danger' : 'neutral'}
+                            />
+                            {item.kitchenStatus !== 'VOIDED' ? (
+                              <View style={{ flexDirection: 'row', gap: 4, width: '100%' }}>
+                                {['QUEUED', 'ACCEPTED', 'COOKING', 'COMPLETED'].map((step, stepIndex) => {
+                                  const currentIndex = item.kitchenStatus === 'QUEUED' ? 0 :
+                                    item.kitchenStatus === 'ACCEPTED' ? 1 :
+                                    item.kitchenStatus === 'COOKING' ? 2 : 3;
+                                  return (
+                                    <View key={step} style={{
+                                      flex: 1,
+                                      height: 5,
+                                      borderRadius: 3,
+                                      backgroundColor: stepIndex <= currentIndex ? theme.colors.secondary : theme.colors.border,
+                                    }} />
+                                  );
+                                })}
+                              </View>
+                            ) : null}
+                            <Text style={[styles.trackItems, { color: theme.colors.onSurfaceVariant }]}>
+                              {formatVND(item.unitPrice * item.quantity)}
+                            </Text>
+                          </View>
                         </View>
                         {!APP_CONFIG.USE_MOCK_CUSTOMER_ORDER && item.kitchenStatus === 'QUEUED' ? (
                           <Button
