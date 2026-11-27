@@ -87,6 +87,7 @@ export function TablesScreen() {
   const [mutating, setMutating] = useState(false);
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<DiningTable | null>(null);
+  const [openSessionTarget, setOpenSessionTarget] = useState<DiningTable | null>(null);
   const [deletingTable, setDeletingTable] = useState(false);
 
   const loadTables = useCallback(async (silent = false) => {
@@ -160,7 +161,14 @@ export function TablesScreen() {
   const handleTablePress = (table: DiningTable) => {
     const opened = Boolean(table.sessions?.length) || table.status === "OCCUPIED";
     if (opened) void loadSessionDetail(table);
-    else void openTable(table);
+    else setOpenSessionTarget(table);
+  };
+
+  const confirmOpenTable = async () => {
+    if (!openSessionTarget) return;
+    const table = openSessionTarget;
+    setOpenSessionTarget(null);
+    await openTable(table);
   };
 
   const beginCreate = () => {
@@ -337,6 +345,23 @@ export function TablesScreen() {
         </View>
         {!loading && tables.length === 0 ? <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: "center", marginTop: 20 }}>Chưa có bàn. Quản lý có thể tạo bàn mới.</Text> : null}
       </ScrollView>
+
+      <ModalDialog
+        visible={Boolean(openSessionTarget)}
+        title="Xác nhận mở phiên phục vụ"
+        subtitle={openSessionTarget ? `Bạn muốn mở phiên mới cho ${openSessionTarget.name} (${openSessionTarget.code})?` : undefined}
+        onClose={() => { if (!busyId) setOpenSessionTarget(null); }}
+        footer={
+          <>
+            <Button label="Hủy" variant="secondary" onPress={() => setOpenSessionTarget(null)} disabled={Boolean(busyId)} />
+            <Button label="Xác nhận mở phiên" onPress={() => void confirmOpenTable()} loading={Boolean(busyId)} />
+          </>
+        }
+      >
+        <Text style={{ color: theme.colors.onSurfaceVariant }}>
+          Hệ thống sẽ tạo phiên phục vụ và đơn hàng cho bàn này. Bạn có thể thêm món ngay sau khi phiên được mở.
+        </Text>
+      </ModalDialog>
 
       <ModalDialog
         visible={detailLoading || Boolean(selectedSession) || Boolean(detailError)}
