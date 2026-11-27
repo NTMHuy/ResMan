@@ -17,6 +17,6 @@ flowchart TB
   DB[("PostgreSQL")]
   CLOUD["Cloudinary"]
   U <--> UI
-  REPO <-->|"REST /api/v1, JSON, Bearer JWT"| CTRL
+  REPO <-->|"REST /api/v1, JSON; Bearer JWT cho endpoint cần xác thực"| CTRL
   PRISMA <--> DB
   SVC <-->|"Upload/delete ảnh"| CLOUD
