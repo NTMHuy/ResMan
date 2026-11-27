@@ -23,7 +23,8 @@ sequenceDiagram
     Svc->>DB: Hoàn tất PaymentRequest
     Svc->>DB: Đóng DiningSession
     Svc->>DB: DiningTable = AVAILABLE
-    Svc->>DB: Tạo AuditLog; COMMIT
+    Svc->>DB: Tạo AuditLog
+    Svc->>DB: COMMIT transaction
     DB-->>Svc: Thành công
     Svc-->>Ctrl: Payment + phiên CLOSED
     Ctrl-->>UI: HTTP 200
