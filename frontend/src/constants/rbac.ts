@@ -112,7 +112,6 @@ export const ROLE_ALLOWED_ROUTES: Record<UserRole, AppRoute[]> = {
   MANAGER: [
     "dashboard",
     "menu",
-    "customer-order",
     "tables",
     "orders",
     "kitchen",
