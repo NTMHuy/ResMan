@@ -196,7 +196,7 @@ export function CustomerOrderScreen() {
           </ScrollView>
         ) : (
           <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
-            Tablet đã được gán cố định với {tableNumber}. Khách cần mở phiên gọi món trước khi chọn và gửi món.
+            Tablet đã được gán cố định với {tableNumber}. Bạn có thể chọn món ngay; hệ thống sẽ tự mở phiên khi nhấn Gửi đơn xuống bếp.
           </Text>
         )}
 
