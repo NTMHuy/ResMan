@@ -107,7 +107,7 @@ export function LoginScreen() {
                   { color: theme.colors.onSurfaceVariant, fontFamily: theme.typography.body },
                 ]}
               >
-                Nhập thông tin tài khoản hoặc chọn nhanh vai trò để kiểm thử nghiệp vụ.
+                Đăng nhập bằng tên tài khoản được cấp (không phải email), cùng mật khẩu tương ứng.
               </Text>
             </View>
 
@@ -129,10 +129,10 @@ export function LoginScreen() {
 
             <View style={styles.fields}>
               <Input
-                label="Email đăng nhập"
+                label="Tên đăng nhập"
                 value={email}
                 onChangeText={setEmail}
-                placeholder="name@resman.vn"
+                placeholder="VD: tablet_t01 hoặc manager"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={errors.email}
