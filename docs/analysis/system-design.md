@@ -277,7 +277,7 @@ sequenceDiagram
     end
     SessionSvc-->>Repo: Thông tin phiên (không trả sessionCode)
     UI->>Repo: addItems(items)
-    Repo->>OrderCtrl: POST endpoint customer add items [Bearer JWT]
+    Repo->>OrderCtrl: POST /api/v1/customer/session/items [Bearer JWT]
     OrderCtrl->>OrderSvc: addCustomerItems(userId, items)
     OrderSvc->>DB: Xác định TableDevice và sessionCode nội bộ
     OrderSvc->>DB: Transaction kiểm tra phiên/món/giá; tạo OrderItem, History, AuditLog
