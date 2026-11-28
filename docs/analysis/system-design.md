@@ -920,7 +920,7 @@ Các ngưỡng dưới đây là mục tiêu để nghiệm thu/benchmark, khôn
 - Backend yêu cầu Node.js >= 24 theo backend/package.json; PostgreSQL được kết nối qua DATABASE_URL.
 - Biến cấu hình backend được đọc từ backend/.env: DATABASE_URL, PORT, FRONTEND_ORIGIN, JWT_SECRET, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET.
 - Seed tài khoản quản lý đầu tiên sử dụng INITIAL_ADMIN_USERNAME, INITIAL_ADMIN_PASSWORD, INITIAL_ADMIN_FULL_NAME, INITIAL_ADMIN_EMPLOYEE_CODE. Password phải tối thiểu 12 ký tự; chỉ dùng cho bootstrap và không đưa secret thật vào Git.
-- frontend API base URL được cấu hình tại frontend/src/constants/config.ts; cần đặt URL phù hợp môi trường, không dùng localhost từ thiết bị thật.
+- frontend API base URL được cấu hình bằng EXPO_PUBLIC_API_URL tại frontend/src/constants/config.ts; biến này bắt buộc ở production build. Các cờ EXPO_PUBLIC_USE_MOCK_DATA, EXPO_PUBLIC_USE_MOCK_ORDERS, EXPO_PUBLIC_USE_MOCK_AUTH, EXPO_PUBLIC_USE_MOCK_MENU và EXPO_PUBLIC_USE_MOCK_CUSTOMER_ORDER phục vụ chế độ mock/dev, mặc định false khi không khai báo. Cần đặt URL phù hợp môi trường, không dùng localhost từ thiết bị thật.
 - backend/.env.example hiện còn merge conflict markers và biến Cloudinary lặp; không dùng file này làm template triển khai trước khi làm sạch.
 
 **Migration và khởi tạo dữ liệu**
