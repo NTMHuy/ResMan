@@ -22,6 +22,6 @@ sequenceDiagram
     S->>JWT: signAsync({sub, username})
     JWT-->>S: accessToken (1 ngày)
     S-->>C: token + user + role + permissions
-    C-->>R: HTTP 200
+    C-->>R: HTTP 201 (NestJS POST default)
     R-->>UI: Lưu token / user
   end
