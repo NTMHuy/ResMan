@@ -1,50 +1,56 @@
 sequenceDiagram
     autonumber
+
     actor Staff as Nhân viên Kho
-    participant UI as InventoryScreen
-    participant Repo as ApiInventoryRepository
-    participant Ctrl as InventoryController
-    participant Guard as JwtAuthGuard + PermissionsGuard
-    participant Svc as InventoryService
-    participant DB as Prisma / PostgreSQL
+
+    participant UI as Giao diện ứng dụng
+    participant Auth as Xác thực và phân quyền
+    participant Inv as Xử lý kho
+    participant DB as Cơ sở dữ liệu
 
     alt Nhập kho
         Staff->>UI: Nhập số lượng và lý do
-        UI->>Repo: stockIn(input)
-        Repo->>Ctrl: POST /inventory/ingredients/:ingredientId/stock-in
-        Ctrl->>Guard: JWT + inventory:manage
-        Guard-->>Ctrl: Cho phép
-        Ctrl->>Svc: stockIn(ingredientId, dto, actorId)
-        Svc->>Svc: Kiểm tra quantity > 0, tối đa 3 chữ số thập phân, reason không rỗng
-        Svc->>DB: BEGIN Serializable
-        Svc->>DB: Kiểm tra Ingredient đang hoạt động
-        Svc->>DB: InventoryBalance.upsert / increment
-        Svc->>DB: INSERT StockMovement(IN)
-        Svc->>DB: INSERT AuditLog(INVENTORY_STOCK_IN)
-        Svc->>DB: COMMIT
-        Svc-->>Ctrl: quantityOnHand + movementId
-        Ctrl-->>Repo: HTTP 201
-        Repo-->>UI: Tải lại tồn kho
+        UI->>Auth: Gửi yêu cầu nhập kho kèm thông tin đăng nhập
+        Auth->>Auth: Kiểm tra đăng nhập và quyền quản lý kho
+        Auth-->>UI: Cho phép
+        UI->>Inv: Yêu cầu nhập kho cho nguyên liệu đã chọn
+
+        Inv->>Inv: Kiểm tra số lượng lớn hơn 0, tối đa 3 chữ số thập phân, lý do không để trống
+        Inv->>DB: Mở giao dịch có kiểm soát xung đột khi nhiều người cùng thao tác
+        Inv->>DB: Kiểm tra nguyên liệu đang hoạt động
+        Inv->>DB: Cộng thêm số lượng vào số lượng tồn (tạo mới nếu chưa có)
+        Inv->>DB: Ghi biến động kho loại Nhập kho
+        Inv->>DB: Ghi nhật ký kiểm toán nhập kho
+        Inv->>DB: Xác nhận hoàn tất giao dịch
+
+        Inv-->>UI: Số lượng tồn mới và mã biến động kho
+        UI->>UI: Tải lại tồn kho
+        UI-->>Staff: Hiển thị tồn kho đã cập nhật
+
     else Kiểm kê
         Staff->>UI: Nhập số lượng thực tế và loại kiểm kê
-        UI->>Repo: countStock(input)
-        Repo->>Ctrl: POST /inventory/ingredients/:ingredientId/count
-        Ctrl->>Guard: JWT + inventory:count
-        Guard-->>Ctrl: Cho phép
-        Ctrl->>Svc: recordCount(ingredientId, dto, actorId)
-        Svc->>Svc: Kiểm tra actualQuantity không âm, tối đa 3 chữ số thập phân
-        Svc->>DB: BEGIN Serializable
-        Svc->>DB: Đọc Ingredient + InventoryBalance
-        Svc->>Svc: delta = actualQuantity - previousQuantity
-        Svc->>DB: InventoryBalance.upsert(actualQuantity)
-        Svc->>DB: INSERT InventoryCountRecord
-        opt delta khác 0
-            Svc->>DB: INSERT StockMovement(ADJUSTMENT, delta)
+        UI->>Auth: Gửi yêu cầu kiểm kê kèm thông tin đăng nhập
+        Auth->>Auth: Kiểm tra đăng nhập và quyền kiểm kê
+        Auth-->>UI: Cho phép
+        UI->>Inv: Yêu cầu ghi nhận kiểm kê cho nguyên liệu đã chọn
+
+        Inv->>Inv: Kiểm tra số lượng thực tế không âm, tối đa 3 chữ số thập phân
+        Inv->>DB: Mở giao dịch có kiểm soát xung đột khi nhiều người cùng thao tác
+        Inv->>DB: Đọc nguyên liệu và số lượng tồn hiện tại
+        Inv->>Inv: Tính chênh lệch = số lượng thực tế - số lượng tồn trước kiểm kê
+        Inv->>DB: Cập nhật số lượng tồn bằng số lượng thực tế
+        Inv->>DB: Ghi phiếu kiểm kê
+
+        opt Chênh lệch khác 0
+            Inv->>DB: Ghi biến động kho loại Điều chỉnh theo kiểm kê (kèm giá trị chênh lệch)
         end
-        Svc->>DB: INSERT AuditLog(INVENTORY_COUNT_RECORDED)
-        Svc->>DB: COMMIT
-        Svc-->>Ctrl: previousQuantity + actualQuantity + adjustment
-        Ctrl-->>Repo: HTTP 201
-        Repo-->>UI: Tải lại tồn kho
+
+        Inv->>DB: Ghi nhật ký kiểm toán kiểm kê
+        Inv->>DB: Xác nhận hoàn tất giao dịch
+
+        Inv-->>UI: Số lượng trước kiểm kê, số lượng thực tế và mức điều chỉnh
+        UI->>UI: Tải lại tồn kho
+        UI-->>Staff: Hiển thị tồn kho đã cập nhật
     end
-    Note over Svc,DB: Số dư, movement/count record và audit được ghi trong cùng transaction.
+
+    Note over Inv,DB: Số lượng tồn, biến động kho hoặc phiếu kiểm kê và nhật ký kiểm toán được ghi trong cùng một giao dịch
