@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
@@ -40,6 +40,9 @@ export function useCustomerOrder() {
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
   const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
+  const recommendationSourceRef = useRef<'AUTO' | 'SURVEY' | null>(null);
+  const recommendationRequestRef = useRef(0);
+  const previousSessionIdRef = useRef(activeSessionId);
 
   const loadCustomerData = useCallback(
     async (silent = false) => {
@@ -173,7 +176,20 @@ export function useCustomerOrder() {
   }, [activeSessionId, loadCustomerData]);
 
   useEffect(() => {
+    if (previousSessionIdRef.current === activeSessionId) return;
+    previousSessionIdRef.current = activeSessionId;
+    recommendationSourceRef.current = null;
+    recommendationRequestRef.current += 1;
+    setMealSuggestions([]);
+    setRecommendationAvailable(false);
+    setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+  }, [activeSessionId]);
+
+  useEffect(() => {
+    if (recommendationSourceRef.current === 'SURVEY') return;
+
     let active = true;
+    const requestId = ++recommendationRequestRef.current;
     const hasOrderedItems = tableOrders.some((order) =>
       order.items.some((item) => item.kitchenStatus !== 'VOIDED'),
     );
@@ -185,7 +201,8 @@ export function useCustomerOrder() {
     }
 
     void mealRecommendationService.getRecommendations({ k: 6 }).then((result) => {
-      if (!active) return;
+      if (!active || requestId !== recommendationRequestRef.current ||
+        recommendationSourceRef.current === 'SURVEY') return;
       setMealSuggestions(result.items.filter((item) =>
         item.price > 0 &&
         item.pricingType !== 'MARKET_PRICE' &&
@@ -194,7 +211,8 @@ export function useCustomerOrder() {
       setSuggestionMessage(result.message);
       setRecommendationAvailable(result.available);
     }).catch(() => {
-      if (!active) return;
+      if (!active || requestId !== recommendationRequestRef.current ||
+        recommendationSourceRef.current === 'SURVEY') return;
       setMealSuggestions([]);
       setSuggestionMessage('Chưa thể tải gợi ý AI. Bạn vẫn có thể chọn món trong thực đơn.');
       setRecommendationAvailable(false);
@@ -391,6 +409,8 @@ export function useCustomerOrder() {
     suggestionMessage,
     recommendationAvailable,
     setSurveyRecommendations: (nextItems: MenuItem[], nextMessage: string, nextAvailable: boolean) => {
+      recommendationRequestRef.current += 1;
+      recommendationSourceRef.current = 'SURVEY';
       setMealSuggestions(nextItems);
       setSuggestionMessage(nextMessage);
       setRecommendationAvailable(nextAvailable);
