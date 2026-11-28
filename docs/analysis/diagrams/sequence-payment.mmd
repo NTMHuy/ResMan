@@ -1,38 +1,57 @@
 sequenceDiagram
-  actor Staff as Nhân viên Order
-  participant UI as OrdersScreen / PaymentModal
-  participant C as PaymentsController
-  participant Guard as JwtAuthGuard + PermissionsGuard
-  participant S as PaymentsService
-  participant DB as PostgreSQL / Prisma
-  Staff->>UI: Xem yêu cầu và tổng kết phiên
-  UI->>C: GET /api/v1/payments/sessions/:id/summary [Bearer]
-  C->>Guard: JWT + payments:read
-  Guard-->>C: Cho phép
-  C->>S: getSessionSummary(sessionId)
-  S->>DB: Load session, order, items
-  DB-->>S: Summary snapshot
-  S-->>C: Summary
-  C-->>UI: Summary
-  Staff->>UI: Xác nhận đã nhận tiền
-  UI->>C: POST /api/v1/payments/sessions/:id/confirm [Bearer]
-  C->>Guard: JWT + payments:confirm
-  Guard-->>C: Cho phép
-  C->>S: confirmForSession(sessionId, actorId, method?, ref?)
-  S->>DB: BEGIN SERIALIZABLE
-  S->>DB: Load session/order/items/payment
-  S->>S: Check OPEN, no payment, no AWAITING_ACCEPTANCE
-  alt Điều kiện không đạt
-    S->>DB: ROLLBACK
-    S-->>C: HTTP conflict / not found
-    C-->>UI: HTTP conflict / not found
-  else Điều kiện đạt
-    S->>DB: Create Payment PAID (paymentMethod may be null)
-    S->>DB: PaymentRequest PENDING -> COMPLETED (if present)
-    S->>DB: DiningSession OPEN -> CLOSED
-    S->>DB: DiningTable OCCUPIED -> AVAILABLE
-    S->>DB: Create AuditLog
-    S->>DB: COMMIT
-    S-->>C: Payment + closed session
-    C-->>UI: Payment + closed session
-  end
+    autonumber
+
+    actor Staff as Nhân viên Order
+
+    participant UI as Giao diện thanh toán
+    participant Auth as Xác thực và phân quyền
+    participant Payment as Xử lý thanh toán
+    participant DB as Cơ sở dữ liệu
+
+    Staff->>UI: Xem yêu cầu thanh toán và tổng kết phiên phục vụ
+    UI->>Auth: Gửi yêu cầu xem tổng kết phiên kèm thông tin đăng nhập
+    Auth->>Auth: Kiểm tra đăng nhập và quyền payments:read
+    Auth-->>UI: Cho phép
+
+    UI->>Payment: Yêu cầu lấy tổng kết phiên phục vụ
+    Payment->>DB: Đọc phiên phục vụ, đơn hàng và các món đã gọi
+    DB-->>Payment: Trả về thông tin phiên và dữ liệu đơn hàng
+    Payment->>Payment: Tổng hợp thông tin thanh toán
+    Payment-->>UI: Trả về tổng kết phiên phục vụ
+    UI-->>Staff: Hiển thị thông tin thanh toán
+
+    Staff->>UI: Xác nhận đã nhận tiền
+    UI->>Auth: Gửi yêu cầu xác nhận thanh toán kèm thông tin đăng nhập
+    Auth->>Auth: Kiểm tra đăng nhập và quyền payments:confirm
+    Auth-->>UI: Cho phép
+
+    UI->>Payment: Yêu cầu xác nhận thanh toán cho phiên phục vụ
+    Payment->>DB: Bắt đầu giao dịch SERIALIZABLE
+    Payment->>DB: Đọc phiên phục vụ, đơn hàng, các món và thông tin thanh toán
+    DB-->>Payment: Trả về dữ liệu hiện tại
+
+    Payment->>Payment: Kiểm tra phiên đang mở
+    Payment->>Payment: Kiểm tra phiên chưa có thanh toán
+    Payment->>Payment: Kiểm tra không còn món đang chờ tiếp nhận
+
+    alt Phiên không hợp lệ hoặc không tìm thấy dữ liệu
+        Payment->>DB: Hủy bỏ giao dịch
+        Payment-->>UI: Trả về lỗi không tìm thấy hoặc xung đột
+        UI-->>Staff: Hiển thị thông báo lỗi
+    else Các điều kiện đều hợp lệ
+        Payment->>DB: Tạo bản ghi thanh toán với trạng thái PAID
+        Note over Payment,DB: Phương thức thanh toán có thể để trống nếu không được cung cấp
+
+        opt Có yêu cầu thanh toán đang chờ xử lý
+            Payment->>DB: Chuyển PaymentRequest từ PENDING sang COMPLETED
+        end
+
+        Payment->>DB: Đóng phiên phục vụ từ OPEN sang CLOSED
+        Payment->>DB: Cập nhật bàn từ OCCUPIED sang AVAILABLE
+        Payment->>DB: Ghi nhật ký kiểm toán thanh toán
+        Payment->>DB: Xác nhận hoàn tất giao dịch
+
+        Payment-->>UI: Trả về thông tin thanh toán và phiên đã đóng
+        UI->>UI: Cập nhật trạng thái thanh toán và bàn
+        UI-->>Staff: Hiển thị kết quả thanh toán thành công
+    end
