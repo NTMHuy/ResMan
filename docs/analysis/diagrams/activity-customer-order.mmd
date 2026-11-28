@@ -23,7 +23,7 @@ flowchart TB
     S4["Tái sử dụng phiên và Order"]
     S5["Tạo DiningSession + Order; đánh dấu bàn OCCUPIED"]
     S6["Kiểm tra menu, giá và phiên; tạo OrderItem + history"]
-    S7["Đồng bộ trạng thái phiên"]
+    S7["Polling 5 giây: tải lại menu, recent orders và active session"]
     S8["PaymentRequest PENDING"]
     S9{"Còn món AWAITING_ACCEPTANCE?"}
     S10["Từ chối xác nhận; yêu cầu xử lý món chờ"]
