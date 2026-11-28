@@ -1,6 +1,6 @@
 # CHƯƠNG 3. PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
 
-> **Phạm vi khảo sát:** Nhánh nguồn `member/minhhuy` tại commit `8658704` của repository `NTMHuy/ResMan`. Nội dung kế thừa tác nhân, yêu cầu FR/NFR và Use Case trong [Chương 2](requirements-analysis.md), đồng thời đối chiếu với `docs/11-confirmed-business-rules.md`, mã nguồn frontend/backend và `prisma/schema.prisma`. Đây là kết quả khảo sát tĩnh; không thay thế kiểm thử tích hợp hoặc xác nhận vận hành trên môi trường thực tế.
+> **Phạm vi và thời điểm kiểm tra:** Rà soát ngày **2026-11-28** trên nhánh nguồn `member/minhhuy`, commit đầy đủ `865870498670c3b828caa71d01031be429571197` (`8658704`). Tài liệu đối chiếu Chương 2, `docs/11-confirmed-business-rules.md`, source frontend/backend và schema chuẩn tại **`prisma/schema.prisma` (thư mục gốc repository)**. Đây là kiểm tra tĩnh; không thay thế kiểm thử tích hợp hoặc xác nhận trạng thái database production.
 
 > **Quy ước trạng thái:** **Đã triển khai** = có bằng chứng ở source code; **Triển khai một phần** = có thành phần nhưng chưa đáp ứng đầy đủ hợp đồng/yêu cầu; **Quy tắc nghiệp vụ** = yêu cầu đã xác nhận nhưng chưa được code thực hiện; **Đề xuất** = hướng cải thiện chưa được xem là chức năng hiện hành.
 
@@ -33,7 +33,7 @@ Các mô hình được xây dựng từ branch source được nêu trong phạ
 
 ResMan được tổ chức theo kiến trúc frontend – backend – database, triển khai theo hướng modular monolith ở backend. Frontend là ứng dụng React Native chạy trên Expo SDK 58, sử dụng Expo Router và các feature module. Lớp repository API đóng gói lời gọi HTTP; context quản lý trạng thái xác thực và điều hướng. Backend sử dụng NestJS, chia module theo nghiệp vụ; Controller tiếp nhận HTTP request, DTO kiểm tra dữ liệu đầu vào và Service thực hiện nghiệp vụ. Prisma Client cùng `PrismaService` truy cập PostgreSQL. Cloudinary là dịch vụ ngoài dùng cho ảnh món ăn.
 
-Đường giao tiếp chính là REST API với global prefix `/api/v1`. Các API nội bộ sử dụng Bearer JWT. Backend dùng `JwtAuthGuard` và `PermissionsGuard` ở các controller/route được khai báo. API đọc thực đơn khách `GET /menu-items/customer/menu` được tách thành `GuestMenuController` không gắn guard ở controller; đây là endpoint đọc công khai trong code hiện tại, cần được đối chiếu với chính sách truy cập khi triển khai.
+Đường giao tiếp chính là REST API với global prefix `/api/v1`. Các API nội bộ sử dụng Bearer JWT. Backend dùng `JwtAuthGuard` và `PermissionsGuard` ở các controller/route được khai báo. API đọc thực đơn khách `GET /menu-items/customer/menu` được tách thành `GuestMenuController` không gắn guard ở controller; comment của controller xác định đây là public read-only menu. Thiết kế cho phép khách xem catalog trước khi mở phiên, trong khi mở phiên và gọi món vẫn bắt buộc JWT CUSTOMER cùng permission. Endpoint public không cấp quyền truy cập phiên, đơn hoặc thao tác nghiệp vụ.
 
 ### 3.2.2. Thành phần và trách nhiệm
 
@@ -68,13 +68,13 @@ Frontend gọi API thông qua repository. Với API được bảo vệ, request
 |---|---|---|---|
 | Modular monolith trên NestJS | Microservices hoặc tách backend thành nhiều deployable service | AppModule tập hợp các module nghiệp vụ trong một ứng dụng; các service dùng chung PrismaService và PostgreSQL. Cấu trúc phù hợp phạm vi đồ án và giao dịch liên module. | Đơn giản hóa build, triển khai và transaction; các module vẫn dùng chung tiến trình và database, nên chưa có khả năng scale/deploy độc lập. |
 | REST API qua HTTP/JSON | GraphQL, WebSocket hoặc RPC làm giao thức chính | Controllers khai báo route HTTP, frontend dùng Axios và Api*Repository; global prefix là /api/v1. | Hợp đồng đơn giản, dễ kiểm thử và tích hợp đa nền tảng; polling tạo độ trễ và request định kỳ, không có server push. |
-| JWT Bearer thời hạn 1 ngày | Session server-side hoặc access token ngắn hạn kết hợp refresh token | AuthModule cấu hình expiresIn = 1d; JwtStrategy xác minh token và tải lại user/permission từ database. | Không cần lưu session truy cập trên server; token bị lộ có thể dùng đến hết hạn nếu user chưa bị khóa. Chưa có refresh/revoke endpoint. |
+| JWT Bearer thời hạn 1 ngày | Session server-side hoặc access token ngắn hạn kết hợp refresh token | AuthModule cấu hình expiresIn = 1d; JwtStrategy xác minh token và tải lại user/permission từ database. Với tablet gán cố định, thời hạn một ngày giảm số lần đăng nhập lại trong ca phục vụ nhưng vẫn giới hạn vòng đời token. | Không cần lưu session truy cập trên server; token bị lộ có thể dùng đến hết hạn nếu user chưa bị khóa. Chưa có refresh/revoke endpoint. **Đề xuất:** khi token hết hạn, tablet đưa người dùng về màn hình đăng nhập và yêu cầu xác thực lại; nếu cần trải nghiệm liên tục, bổ sung refresh token có rotation, thu hồi theo thiết bị và lưu trữ an toàn. Không tự động gia hạn access token hiện tại vì backend chưa có endpoint refresh. |
 | PostgreSQL + Prisma | NoSQL hoặc ORM khác | Dữ liệu có quan hệ, FK, unique, CHECK trong migration và transaction Serializable; Prisma schema mô tả model và migration. | Hỗ trợ ràng buộc quan hệ và transaction; cần quản lý schema/migration đồng bộ, một số CHECK/partial index chỉ hiện trong SQL migration. |
 | Một Order cho một DiningSession | Nhiều Order trong một phiên | Order.diningSessionId có unique constraint; các lần gọi món tiếp theo thêm OrderItem vào Order hiện tại. | Đơn giản hóa tổng kết và thanh toán theo phiên; hạn chế tách hóa đơn hoặc tạo nhiều order độc lập trong một phiên. |
 | Cloudinary lưu ảnh thực đơn | Lưu file trên backend hoặc object storage tự quản lý | CloudinaryService upload ảnh, trả secure URL/public ID; MenuItem lưu hai giá trị này. | Giảm trách nhiệm lưu file và phân phối ảnh tại backend; phụ thuộc dịch vụ ngoài, credential, mạng và chính sách chi phí. |
 | Tablet khách gán cố định với bàn | Khách tự chọn bàn, nhập mã bàn hoặc dùng session code | TableDevice có diningTableId unique và userId nullable unique; SessionsService/OrdersService xác định bàn từ user đã đăng nhập. | Giảm nguy cơ khách truy cập nhầm bàn; cần quy trình quản trị gán/đổi tablet, và thiết bị không tự chuyển bàn theo khách. |
 
-**Căn cứ source:** backend/src/app.module.ts (AppModule imports); backend/src/auth/auth.module.ts (JwtModule signOptions); backend/src/main.ts (global prefix); prisma/schema.prisma (Order.diningSessionId, TableDevice); backend/src/cloudinary/cloudinary.service.ts (uploadImage); backend/src/sessions/sessions.service.ts (openForCustomer); backend/src/orders/orders.service.ts (getCustomerSessionCode).
+**Căn cứ source:** `backend/src/app.module.ts:19–37`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/main.ts:19–52`; `prisma/schema.prisma:147–190`; `backend/src/cloudinary/cloudinary.service.ts:56–105`; `backend/src/sessions/sessions.service.ts:93–118`; `backend/src/orders/orders.service.ts:14–35`.
 
 ## 3.3. Thiết kế phân hệ và ranh giới module
 
@@ -136,16 +136,17 @@ Danh sách giữ nguyên mã UC đã xác định trong Chương 2 để đảm 
 | UC-12 Xác nhận thanh toán | Order, Quản lý | Tạo Payment, đóng phiên, giải phóng bàn | Đã triển khai |
 | UC-13 Quản lý tài khoản | Quản lý | Tạo/cập nhật user, role và trạng thái | Đã triển khai |
 | UC-14 Xem báo cáo | Quản lý | Xem tổng quan, doanh thu, đơn, món bán chạy, kho | Đã triển khai |
+| UC-15 Tra cứu nhật ký kiểm toán | Quản lý | Xem AuditLog theo thời gian, tác nhân và entity; đây là UC đề xuất để truy vết FR-24, chưa có endpoint/controller đọc | Chưa có trong code |
 
 ### 3.4.3. Biểu đồ Use Case
 
 **Hình 3.4. Use Case tổng quát theo năm tác nhân nghiệp vụ.**
 
-**Use Case tổng quát – mã nguồn:** [use-cases.puml](diagrams/use-cases.puml).
+**Use Case tổng quát – mã nguồn:** [use-cases.puml](diagrams/use-cases.puml). UC-15 là use case đề xuất gắn với FR-24; sơ đồ phân biệt rõ đây chưa phải chức năng đã triển khai.
 
 ### 3.4.4. Ma trận truy vết FR – UC – màn hình – API – dữ liệu
 
-Mã FR, UC và trạng thái được kế thừa từ docs/analysis/requirements-analysis.md. Endpoint dưới đây là route backend thực sự khai báo; route frontend gọi nhưng backend chưa khai báo được ghi rõ là sai khác, không coi là API hiện hành.
+Mã FR, UC và trạng thái được kế thừa từ docs/analysis/requirements-analysis.md. FR-21 trong Chương 2 lặp lại nghiệp vụ quản lý bàn đã có ở FR-07; giữ nguyên cả hai mã để bảo toàn traceability nhưng không tính FR-21 là chức năng độc lập. FR-24 hiện chỉ có phần ghi AuditLog; UC-15 được bổ sung ở Chương 3 dưới dạng Use Case đề xuất để biểu diễn khoảng trống tra cứu. Endpoint dưới đây là route backend thực sự khai báo; route frontend gọi nhưng backend chưa khai báo được ghi rõ là sai khác.
 
 | FR | UC | Màn hình | Endpoint backend liên quan | Bảng / model dữ liệu | Trạng thái |
 |---|---|---|---|---|---|
@@ -169,12 +170,12 @@ Mã FR, UC và trạng thái được kế thừa từ docs/analysis/requirement
 | FR-18 | UC-10 | InventoryScreen | GET /inventory/ingredients; GET /inventory/movements; GET /inventory/counts | Ingredient, InventoryBalance, StockMovement, InventoryCountRecord | Đã triển khai |
 | FR-19 | UC-13 | EmployeesScreen | GET /users; POST /users; PATCH /users/:id; PATCH /users/:id/role; PATCH /users/:id/status; PATCH/DELETE /users/:id/tablet | User, Role, Employee, TableDevice | Đã triển khai |
 | FR-20 | UC-08 | MenuScreen | CRUD /menu-categories; CRUD /menu-items; PATCH /menu-items/:id/status; POST/DELETE /menu-items/:id/image | MenuCategory, MenuItem; Cloudinary là dịch vụ ảnh ngoài | Đã triển khai |
-| FR-21 | UC-07 | TablesScreen | GET /tables; GET /tables/:id; POST /tables; PATCH /tables/:id; DELETE /tables/:id | DiningTable, DiningSession, TableDevice | Đã triển khai |
+| FR-21 | UC-07 | TablesScreen | GET /tables; GET /tables/:id; POST /tables; PATCH /tables/:id; DELETE /tables/:id | DiningTable, DiningSession, TableDevice | Đã triển khai (nội dung trùng FR-07) |
 | FR-22 | UC-05, UC-09, UC-10, UC-12 | DashboardScreen, OrdersScreen, KitchenScreen, InventoryScreen | GET /orders/active; GET /kitchen/queue; GET /inventory/ingredients; GET /payments/requests và API summary | Order, OrderItem, DiningSession, InventoryBalance, PaymentRequest, Payment | Đã triển khai |
 | FR-23 | UC-14 | ReportsScreen, DashboardScreen | GET /reports/overview; /reports/revenue; /reports/best-sellers; /reports/orders; /reports/inventory | Payment, Order, OrderItem, Ingredient, InventoryBalance | Đã triển khai |
-| FR-24 | Chưa có UC đọc audit riêng | Chưa thấy màn hình tra cứu AuditLog | Chưa có endpoint đọc AuditLog trong controller hiện tại | AuditLog | Triển khai một phần |
+| FR-24 | UC-15 (đề xuất; chưa có trong danh sách UC Chương 2) | Chưa thấy màn hình tra cứu AuditLog | Chưa có endpoint đọc AuditLog trong controller hiện tại | AuditLog | Triển khai một phần; thiếu chức năng đọc |
 
-**Căn cứ:** docs/analysis/requirements-analysis.md (FR-01…FR-24); frontend/src/navigation/FeatureRouteView.tsx; frontend/src/repositories/api/ApiOrderRepository.ts; backend/src/*/*.controller.ts; backend/src/*/*.service.ts; prisma/schema.prisma.
+**Căn cứ:** `docs/analysis/requirements-analysis.md:45–107`; `frontend/src/navigation/FeatureRouteView.tsx:24–72`; `frontend/src/repositories/api/ApiOrderRepository.ts:130–167`; `backend/src/orders/orders.controller.ts:18–45`; `backend/src/orders/staff-orders.controller.ts:10–48`; `backend/src/kitchen/kitchen.controller.ts:10–35`; `prisma/schema.prisma:147–208`.
 
 ## 3.5. Thiết kế quy trình nghiệp vụ
 
@@ -209,7 +210,7 @@ Khách hàng gửi yêu cầu thanh toán; backend tạo hoặc tái sử dụng
 | Client | API được gọi | Chu kỳ | Hành vi sau thao tác |
 |---|---|---:|---|
 | KDS | GET /kitchen/queue | 8 giây khi autoRefresh bật | Sau khi cập nhật trạng thái món, hook gọi fetchQueue(true) ngay để đồng bộ queue |
-| Tablet khách | GET /sessions/customer/active và tải dữ liệu qua GET /customer/session; đồng thời tải lại menu | 5 giây | Giữ trạng thái giỏ hàng local; cập nhật active session và dữ liệu món khi request thành công |
+| Tablet khách | GET /sessions/customer/active, GET /customer/session, GET /menu-items/customer/menu (public) và recent table orders | 5 giây | Mỗi chu kỳ gọi loadCustomerData(true) để tải lại menu/dữ liệu bàn; đồng thời kiểm tra active session, giữ giỏ hàng local |
 
 KDS còn có timer 1 giây để cập nhật thời gian chờ/SLA trên giao diện; timer này không gọi backend. Không có bằng chứng về WebSocket, Socket.IO hoặc SSE trong các luồng cập nhật trạng thái hiện tại.
 
@@ -217,7 +218,7 @@ KDS còn có timer 1 giây để cập nhật thời gian chờ/SLA trên giao d
 
 **Đề xuất – chuyển sang push event:** giữ REST cho thao tác ghi, bổ sung SSE cho luồng server-to-client nếu chỉ cần đẩy trạng thái đơn/KDS tới giao diện; cân nhắc WebSocket nếu cần giao tiếp hai chiều, presence hoặc tương tác nhiều loại event. Sự kiện chỉ phát sau khi transaction commit; client vẫn cần cơ chế reconnect và tải snapshot REST để phục hồi sau mất kết nối. Đây là hướng đề xuất, chưa có trong code.
 
-**Căn cứ source:** frontend/src/features/kds/hooks/useKds.ts (polling 8.000 ms, SLA timer 1.000 ms); frontend/src/features/customer-order/hooks/useCustomerOrder.ts (polling 5.000 ms); frontend/src/repositories/api/ApiKDSRepository.ts; frontend/src/repositories/api/ApiCustomerOrderRepository.ts.
+**Căn cứ source:** `frontend/src/features/kds/hooks/useKds.ts:19–50,108–120`; `frontend/src/features/customer-order/hooks/useCustomerOrder.ts:45–60,151–183`; `frontend/src/repositories/api/ApiKDSRepository.ts:1–80`; `frontend/src/repositories/api/ApiCustomerOrderRepository.ts:1–100`.
 
 ## 3.6. Thiết kế tương tác – Sequence Diagram
 
@@ -229,7 +230,7 @@ KDS còn có timer 1 giây để cập nhật thời gian chờ/SLA trên giao d
 
 ### 3.6.2. Khách hàng mở phiên và gửi món
 
-**Hình 3.9. Sequence – Khách hàng xem menu, mở phiên và gửi món.** Menu GET hiện không gắn guard; các thao tác mở phiên, đọc phiên và gửi món yêu cầu JWT cùng permission CUSTOMER tương ứng. Customer API lấy bàn từ TableDevice, không nhận tableId/sessionCode từ client.
+**Hình 3.9. Sequence – Khách hàng xem menu, mở phiên và gửi món.** Menu GET hiện không gắn guard; các thao tác mở phiên, đọc phiên và gửi món yêu cầu JWT cùng permission CUSTOMER tương ứng. Customer API lấy bàn từ TableDevice, không nhận tableId/sessionCode từ client. Menu được tải công khai; hook customer polling tải lại menu và recent orders mỗi 5 giây.
 
 **Sequence customer – mã nguồn:** [sequence-customer-order.mmd](diagrams/sequence-customer-order.mmd).
 
@@ -241,15 +242,15 @@ KDS còn có timer 1 giây để cập nhật thời gian chờ/SLA trên giao d
 
 ### 3.6.4. Hủy món theo vai trò
 
-**Hình 3.12. Sequence – Hủy món bởi khách hàng, nhân viên Order và bếp.**
+**Hình 3.11. Sequence – Hủy món bởi khách hàng, nhân viên Order và bếp.**
 
 **Mã nguồn sơ đồ:** [sequence-cancel-item.mmd](diagrams/sequence-cancel-item.mmd).
 
-Khách hàng chỉ hủy món AWAITING_ACCEPTANCE thuộc phiên được gán cho tài khoản. Nhân viên Order hủy món AWAITING_ACCEPTANCE hoặc ACCEPTED. Bếp gửi PATCH trạng thái CANCELLED và hiện phải cung cấp reason. Cả ba nhánh đều cập nhật trạng thái món, không xóa vật lý OrderItem; các nhánh có ghi OrderItemStatusHistory và AuditLog trong transaction.
+Khách hàng chỉ hủy món AWAITING_ACCEPTANCE thuộc phiên được gán cho tài khoản. Nhân viên Order hủy món AWAITING_ACCEPTANCE hoặc ACCEPTED. Bếp gửi PATCH trạng thái CANCELLED và hiện phải cung cấp reason. Cả ba nhánh đều cập nhật trạng thái món sang CANCELLED, không xóa vật lý OrderItem; các nhánh có ghi OrderItemStatusHistory và AuditLog trong transaction. Dù endpoint khách và nhân viên dùng HTTP DELETE, hành vi thực tế là soft-cancel theo trạng thái. **Đề xuất:** bổ sung PATCH `.../items/:itemId/cancel` để thể hiện rõ lệnh chuyển trạng thái; duy trì DELETE hiện tại như alias tương thích cho đến khi client được nâng cấp.
 
 ### 3.6.5. Bếp cập nhật trạng thái món
 
-**Hình 3.18. Sequence – Bếp cập nhật trạng thái và xử lý cạnh tranh.**
+**Hình 3.12. Sequence – Bếp cập nhật trạng thái và xử lý cạnh tranh.**
 
 **Mã nguồn sơ đồ:** [sequence-kitchen-status.mmd](diagrams/sequence-kitchen-status.mmd).
 
@@ -257,7 +258,7 @@ KitchenService đọc trạng thái hiện tại và phiên, kiểm tra transiti
 
 ### 3.6.6. Khách yêu cầu thanh toán
 
-**Hình 3.19. Sequence – Tạo hoặc tái sử dụng PaymentRequest.**
+**Hình 3.13. Sequence – Tạo hoặc tái sử dụng PaymentRequest.**
 
 **Mã nguồn sơ đồ:** [sequence-payment-request.mmd](diagrams/sequence-payment-request.mmd).
 
@@ -265,13 +266,13 @@ PaymentsService xác định bàn qua TableDevice, tìm phiên OPEN và kiểm t
 
 ### 3.6.7. Nhập kho và kiểm kê
 
-**Hình 3.20. Sequence – Nhập kho và điều chỉnh tồn theo kiểm kê.**
+**Hình 3.14. Sequence – Nhập kho và điều chỉnh tồn theo kiểm kê.**
 
 **Mã nguồn sơ đồ:** [sequence-inventory-operations.mmd](diagrams/sequence-inventory-operations.mmd).
 
 Nhập kho cộng số lượng vào InventoryBalance, tạo StockMovement loại IN và AuditLog trong transaction Serializable. Kiểm kê đọc số dư cũ, tính delta, cập nhật số dư bằng số thực tế, tạo InventoryCountRecord, tạo StockMovement loại ADJUSTMENT nếu delta khác 0 và ghi AuditLog trong cùng transaction.
 
-**Căn cứ:** backend/src/orders/orders.service.ts (addGuestItems, cancelGuestItem, addStaffItems, cancelByOrderStaff); backend/src/kitchen/kitchen.service.ts (updateStatus); backend/src/payments/payments.service.ts (requestForCustomer); backend/src/inventory/inventory.service.ts (stockIn, recordCount).
+**Căn cứ:** `backend/src/orders/orders.service.ts:137–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:1–120`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/inventory/inventory.service.ts:1–260`.
 
 ## 3.7. Thiết kế trạng thái và điều kiện chuyển đổi
 
@@ -289,7 +290,7 @@ Các trạng thái lưu trong `OrderItem.status` là String và được giới 
 | AWAITING_ACCEPTANCE / ACCEPTED | CANCELLED | Nhân viên Order; phiên còn OPEN | Đã triển khai |
 | AWAITING_ACCEPTANCE / ACCEPTED / IN_PREPARATION | CANCELLED | Nhân viên Bếp; code cho phép nhưng quy tắc nghiệp vụ chưa chốt đầy đủ trạng thái được hủy | Có trong code; cần xác nhận phạm vi nghiệp vụ |
 
-**Hình 3.11. State/transition diagram – OrderItem.** Mũi tên nét đứt thể hiện chuyển trạng thái có trong quy tắc nghiệp vụ nhưng chưa có trong KitchenService.
+**Hình 3.15. State diagram – OrderItem, DiningSession, DiningTable và PaymentRequest.** Mũi tên nét đứt thể hiện chuyển trạng thái có trong quy tắc nghiệp vụ nhưng chưa có trong KitchenService.
 
 **Order item state machine – mã nguồn:** [state-order-item.mmd](diagrams/state-order-item.mmd).
 
@@ -309,6 +310,10 @@ Quy tắc nghiệp vụ 4.2 quy định lý do hủy món do bếp là không b�
 
 Không có bằng chứng về endpoint độc lập cho phép đóng phiên mà bỏ qua điều kiện thanh toán trong luồng nghiệp vụ chính. Trạng thái PaymentRequest là String; migration tạo cột và index nhưng không tạo CHECK constraint cho miền giá trị status.
 
+**Hình 3.15** tổng hợp bốn state machine. DiningSession chuyển OPEN → CLOSED; SessionsService.close() yêu cầu Payment.status=PAID, và PaymentsService.confirmForSession() thực hiện đóng phiên trong cùng transaction với ghi Payment. DiningTable chuyển AVAILABLE → OCCUPIED khi mở phiên và OCCUPIED → AVAILABLE khi đóng phiên đã thanh toán. PaymentRequest được tạo/upsert ở PENDING; khi xác nhận thanh toán, request PENDING được chuyển COMPLETED. Request đang PENDING được trả lại như thao tác idempotent, không tạo thêm bản ghi. OrderItem giữ các transition ở bảng 3.7.1; chỉ IN_PREPARATION → ACCEPTED là nét đứt/Đề xuất theo quy tắc nghiệp vụ chưa triển khai.
+
+**State machines – mã nguồn:** [state-lifecycle.mmd](diagrams/state-lifecycle.mmd).
+
 ## 3.8. Thiết kế cơ sở dữ liệu
 
 ### 3.8.1. Nguyên tắc và nhóm dữ liệu
@@ -317,13 +322,13 @@ Prisma schema dùng PostgreSQL. Phần lớn khóa chính là BigInt tự tăng;
 
 ### 3.8.2. ERD tổng quan
 
-**Hình 3.12. ERD tổng quan.** Sơ đồ thể hiện các nhóm tài khoản, menu, phiên/đơn, kho và thanh toán; thuộc tính chi tiết được tách sang ba ERD nhóm để giữ khả năng đọc.
+**Hình 3.16. ERD tổng quan.** Sơ đồ thể hiện các nhóm tài khoản, menu, phiên/đơn, kho và thanh toán; thuộc tính chi tiết được tách sang ba ERD nhóm để giữ khả năng đọc.
 
 **ERD overview – mã nguồn:** [erd-overview.mmd](diagrams/erd-overview.mmd).
 
 ### 3.8.3. ERD tài khoản và RBAC
 
-**Hình 3.13. ERD – Tài khoản, vai trò, quyền và thiết bị khách.**
+**Hình 3.17. ERD – Tài khoản, vai trò, quyền và thiết bị khách.**
 
 **ERD account – mã nguồn:** [erd-account-rbac.mmd](diagrams/erd-account-rbac.mmd).
 
@@ -335,7 +340,7 @@ Prisma schema dùng PostgreSQL. Phần lớn khóa chính là BigInt tự tăng;
 
 ### 3.8.4. ERD phiên, đơn và thanh toán
 
-**Hình 3.14. ERD – Phiên phục vụ, Order, OrderItem và Payment.**
+**Hình 3.18. ERD – Phiên phục vụ, Order, OrderItem và Payment.**
 
 **ERD sessions orders – mã nguồn:** [erd-session-order-payment.mmd](diagrams/erd-session-order-payment.mmd).
 
@@ -343,7 +348,7 @@ DiningTable có nhiều DiningSession theo thời gian; Order.diningSessionId un
 
 ### 3.8.5. ERD thực đơn và kho
 
-**Hình 3.15. ERD – Danh mục, món ăn và dữ liệu tồn kho.**
+**Hình 3.19. ERD – Danh mục, món ăn và dữ liệu tồn kho.**
 
 **ERD menu inventory – mã nguồn:** [erd-menu-inventory.mmd](diagrams/erd-menu-inventory.mmd).
 
@@ -357,7 +362,7 @@ Migration khởi tạo mới có thao tác loại bỏ một số cấu trúc c�
 
 ### 3.8.7. Class Diagram nhóm xử lý
 
-**Hình 3.16. Class Diagram – Các thành phần điều phối nghiệp vụ cốt lõi.** DTO là cấu trúc request; Prisma model là cấu trúc dữ liệu; Controller và Service là các class xử lý của NestJS.
+**Hình 3.20. Class Diagram – Các thành phần điều phối nghiệp vụ cốt lõi.** DTO là cấu trúc request; Prisma model là cấu trúc dữ liệu; Controller và Service là các class xử lý của NestJS.
 
 **Class diagram – mã nguồn:** [class-domain.puml](diagrams/class-domain.puml).
 
@@ -365,6 +370,8 @@ Migration khởi tạo mới có thao tác loại bỏ một số cấu trúc c�
 ### 3.8.8. Metadata bảng và từ điển dữ liệu
 
 Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các trường thời gian tạo thường có default now(); updatedAt dùng @updatedAt do Prisma quản lý. Mọi quan hệ FK trong schema hiện tại dùng onDelete: Restrict. Những CHECK constraint và partial unique index bổ sung bằng migration được nêu riêng ở cuối mục.
+
+**Bảng metadata (1/2) – tài khoản, nhân sự, menu, bàn, phiên và Order**
 
 | Model / bảng | Cột và kiểu dữ liệu | Null / default chính | Unique và index | FK / onDelete |
 |---|---|---|---|---|
@@ -378,6 +385,11 @@ Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các t
 | DiningTable / dining_tables | id BigInt; code VarChar(30); name VarChar(80); capacity Int; status VarChar(20); createdAt/updatedAt Timestamptz(6) | capacity nullable; status AVAILABLE; createdAt now(); updatedAt @updatedAt | code unique | Không có |
 | DiningSession / dining_sessions | id BigInt; tableId BigInt; sessionCode VarChar(80); status VarChar(20); openedBy/closedBy BigInt; openedAt/closedAt Timestamptz(6) | openedBy, closedBy, closedAt nullable; status OPEN; openedAt now() | sessionCode unique; index (tableId, status); partial unique index một phiên OPEN/bàn trong migration | tableId → DiningTable; openedBy/closedBy → User; Restrict |
 | TableDevice / table_devices | id BigInt; diningTableId BigInt; userId BigInt; deviceCode VarChar(100); deviceName VarChar(120); isActive Boolean; createdAt/updatedAt Timestamptz(6) | userId nullable; isActive true; createdAt now(); updatedAt @updatedAt | diningTableId, userId, deviceCode unique; index (diningTableId, isActive) | diningTableId → DiningTable; userId → User; Restrict |
+
+**Bảng metadata (2/2) – lịch sử món, kho, thanh toán và audit**
+
+| Model / bảng | Cột và kiểu dữ liệu | Null / default chính | Unique và index | FK / onDelete |
+|---|---|---|---|---|
 | Order / orders | id BigInt; orderCode VarChar(40); diningSessionId BigInt; note String; createdAt/updatedAt Timestamptz(6) | note nullable; createdAt now(); updatedAt @updatedAt | orderCode, diningSessionId unique | diningSessionId → DiningSession; Restrict |
 | OrderItem / order_items | id BigInt; orderId/menuItemId BigInt; itemNameSnapshot VarChar(150); quantity Int; unitPrice/lineTotal Decimal(14,2); note String; status VarChar(30); createdAt/updatedAt Timestamptz(6) | note nullable; status AWAITING_ACCEPTANCE; createdAt now(); updatedAt @updatedAt | indexes (orderId, status), (status, createdAt) | orderId → Order; menuItemId → MenuItem; Restrict |
 | OrderItemStatusHistory / order_item_status_history | id BigInt; orderItemId BigInt; fromStatus/toStatus VarChar(30); reason String; actorId BigInt; changedAt Timestamptz(6) | fromStatus, reason, actorId nullable; changedAt now() | index (orderItemId, changedAt DESC) | orderItemId → OrderItem; actorId → User; Restrict |
@@ -450,7 +462,7 @@ Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các t
 | orderId | BigInt | NOT NULL, FK Order.id, Restrict | Đơn chứa món |
 | menuItemId | BigInt | NOT NULL, FK MenuItem.id, Restrict | Món thực đơn gốc |
 | itemNameSnapshot | VarChar(150) | NOT NULL | Tên món tại thời điểm gọi |
-| quantity | Int | NOT NULL | Số lượng hoặc đơn vị tính theo quy ước menu |
+| quantity | Int | NOT NULL; API DTO IsInt, Min(1), Max(99) | Số lượng nguyên của món; với pricingType=PER_UNIT, quantity là số đơn vị nguyên (ví dụ số lạng) nhân với unitPrice. Không hỗ trợ số lượng phân số ở DTO hiện tại. |
 | unitPrice | Decimal(14,2) | NOT NULL | Đơn giá snapshot |
 | lineTotal | Decimal(14,2) | NOT NULL | Thành tiền snapshot |
 | note | Text | NULL | Ghi chú món |
@@ -514,7 +526,77 @@ Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các t
 | createdBy | BigInt | NOT NULL, FK User.id, Restrict | Người ghi nhận |
 | createdAt | Timestamptz(6) | NOT NULL, default now() | Thời điểm ghi nhận |
 
-**Căn cứ schema:** prisma/schema.prisma (các model Role đến AuditLog). **Căn cứ migration:** prisma/migrations/20261117190000_one_open_session_per_table/migration.sql; prisma/migrations/20261126170000_add_payment_requests/migration.sql:1–12; các migration liên quan CHECK constraint.
+**MenuItem – menu_items**
+
+| Cột | Kiểu | Null / default / ràng buộc | Mô tả |
+|---|---|---|---|
+| id | BigInt | PK, autoincrement | Định danh món |
+| categoryId | BigInt | NOT NULL, FK MenuCategory.id, Restrict | Danh mục món |
+| code | VarChar(40) | NOT NULL, UNIQUE | Mã món |
+| name | VarChar(150) | NOT NULL | Tên món hiện hành |
+| description | Text | NULL | Mô tả món |
+| price | Decimal(14,2) | NULL | Giá; null với loại giá không cố định |
+| pricingType | MenuPricingType | NOT NULL, default FIXED | FIXED, PER_UNIT, MARKET_PRICE hoặc UNSET |
+| priceUnit | VarChar(30) | NULL | Đơn vị giá; bắt buộc ở tầng service khi PER_UNIT |
+| imageUrl | VarChar(1000) | NULL | URL ảnh Cloudinary |
+| imagePublicId | VarChar(255) | NULL | Public ID dùng quản lý ảnh |
+| availabilityStatus | VarChar(30) | NOT NULL, default AVAILABLE | Tình trạng có thể bán |
+| availabilityReason | Text | NULL | Lý do tạm hết/ngừng bán |
+| isActive | Boolean | NOT NULL, default true | Bật/tắt bản ghi món |
+| createdAt / updatedAt | Timestamptz(6) | createdAt default now(); updatedAt @updatedAt | Thời điểm tạo/cập nhật |
+
+**DiningTable – dining_tables**
+
+| Cột | Kiểu | Null / default / ràng buộc | Mô tả |
+|---|---|---|---|
+| id | BigInt | PK, autoincrement | Định danh bàn |
+| code | VarChar(30) | NOT NULL, UNIQUE | Mã bàn |
+| name | VarChar(80) | NOT NULL | Tên hiển thị |
+| capacity | Int | NULL | Sức chứa |
+| status | VarChar(20) | NOT NULL, default AVAILABLE | Trạng thái bàn; code dùng AVAILABLE/OCCUPIED |
+| createdAt / updatedAt | Timestamptz(6) | createdAt default now(); updatedAt @updatedAt | Thời điểm tạo/cập nhật |
+
+**Ingredient – ingredients**
+
+| Cột | Kiểu | Null / default / ràng buộc | Mô tả |
+|---|---|---|---|
+| id | BigInt | PK, autoincrement | Định danh nguyên liệu |
+| code | VarChar(40) | NOT NULL, UNIQUE | Mã nguyên liệu |
+| name | VarChar(120) | NOT NULL | Tên nguyên liệu |
+| category | VarChar(80) | NULL | Nhóm nguyên liệu |
+| unit | VarChar(30) | NOT NULL | Đơn vị tồn kho |
+| lowStockThreshold | Decimal(14,3) | NULL | Ngưỡng cảnh báo tồn thấp |
+| note | Text | NULL | Ghi chú |
+| isActive | Boolean | NOT NULL, default true | Trạng thái sử dụng |
+| createdAt / updatedAt | Timestamptz(6) | createdAt default now(); updatedAt @updatedAt | Thời điểm tạo/cập nhật |
+
+**InventoryCountRecord – inventory_count_records**
+
+| Cột | Kiểu | Null / default / ràng buộc | Mô tả |
+|---|---|---|---|
+| id | BigInt | PK, autoincrement | Định danh lần kiểm kê |
+| ingredientId | BigInt | NOT NULL, FK Ingredient.id, Restrict | Nguyên liệu được kiểm kê |
+| actualQuantity | Decimal(14,3) | NOT NULL | Số lượng thực tế |
+| countType | VarChar(20) | NOT NULL, default GENERAL | Loại kiểm kê; API DTO hiện chỉ nhận OPENING/CLOSING |
+| countedAt | Timestamptz(6) | NOT NULL, default now() | Thời điểm kiểm kê |
+| countedBy | BigInt | NOT NULL, FK User.id, Restrict | Người thực hiện |
+| note | Text | NULL | Ghi chú kiểm kê |
+| Index | — | (ingredientId, countedAt DESC), (countedAt DESC) | Truy vấn lịch sử theo nguyên liệu/thời gian |
+
+**AuditLog – audit_logs**
+
+| Cột | Kiểu | Null / default / ràng buộc | Mô tả |
+|---|---|---|---|
+| id | BigInt | PK, autoincrement | Định danh sự kiện audit |
+| actorId | BigInt | NULL, FK User.id, Restrict | Tài khoản thực hiện; null cho một số luồng khách |
+| action | VarChar(100) | NOT NULL | Mã hành động |
+| entityType | VarChar(80) | NOT NULL | Loại thực thể |
+| entityId | VarChar(100) | NOT NULL | ID thực thể dạng chuỗi |
+| metadata | Json | NULL | Dữ liệu bổ sung theo hành động |
+| occurredAt | Timestamptz(6) | NOT NULL, default now() | Thời điểm phát sinh |
+| Index | — | (entityType, entityId, occurredAt DESC), (actorId, occurredAt DESC) | Truy vấn audit theo entity hoặc actor |
+
+**Căn cứ schema:** `prisma/schema.prisma:1–326` (đường dẫn duy nhất tại thư mục gốc repository). **Căn cứ migration:** `prisma/migrations/20261117190000_one_open_session_per_table/migration.sql:1–20`; `prisma/migrations/20261126170000_add_payment_requests/migration.sql:1–12`; các migration trạng thái/quantity liên quan trong `prisma/migrations/`.
 
 ## 3.9. Thiết kế API và hợp đồng giao tiếp
 
@@ -522,7 +604,7 @@ Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các t
 
 Base path là `/api/v1` theo `backend/src/main.ts`. Request/response sử dụng JSON; upload ảnh thực đơn dùng multipart field `file`. Các endpoint được bảo vệ sử dụng `Authorization: Bearer <accessToken>`. Global ValidationPipe bật `whitelist`, `forbidNonWhitelisted` và `transform`. NestJS exception mapping trả các HTTP status phù hợp như 400 (dữ liệu không hợp lệ), 401 (chưa xác thực), 403 (thiếu quyền), 404 (không tìm thấy), 409 (xung đột/vi phạm điều kiện) và 5xx (lỗi máy chủ). Hình dạng response cụ thể phụ thuộc interceptor/filter hiện có; không áp đặt một envelope chưa được xác minh.
 
-### 3.9.2. API theo phân hệ
+### 3.9.2. Danh mục route backend theo Controller
 
 Bảng liệt kê route được khai báo trong Controller. Tiền tố toàn cục /api/v1 được cấu hình tại backend/src/main.ts. Route không được khai báo ở backend không được coi là API hợp lệ dù frontend repository có gọi.
 
@@ -570,7 +652,7 @@ Bảng liệt kê route được khai báo trong Controller. Tiền tố toàn c
 | Inventory | GET | /inventory/movements; /inventory/counts | inventory:read |
 | Reports | GET | /reports/overview; /reports/revenue; /reports/best-sellers; /reports/orders; /reports/inventory | reports:read (class-level decorator) |
 
-**Bản đồ file nguồn của route inventory:**
+**Đối chiếu route với Controller và handler:**
 
 | Phân hệ | File nguồn | Route / handler được khai báo |
 |---|---|---|
@@ -589,9 +671,13 @@ Bảng liệt kê route được khai báo trong Controller. Tiền tố toàn c
 | Inventory | backend/src/inventory/inventory.controller.ts | GET/POST ingredients; PATCH ingredient; POST stock-in; POST count; GET movements/counts |
 | Reports | backend/src/reports/reports.controller.ts | GET overview, revenue, best-sellers, orders, inventory |
 
+
+
+**Giải thích quyền đọc menu của CUSTOMER:** `GET /menu-items/customer/menu` được cố ý tách thành GuestMenuController chỉ khai báo `@Get("menu")` và không gắn JwtAuthGuard/PermissionsGuard; comment trong controller mô tả đây là public read-only menu. Endpoint chỉ trả danh mục/món có thể hiển thị, không mở phiên hoặc đọc/ghi OrderItem. Các thao tác mang ngữ cảnh bàn vẫn yêu cầu JWT CUSTOMER: `POST /sessions/customer/open` dùng `customer:session:start`, `GET /customer/session` dùng `customer:session:read` và `POST /customer/session/items` dùng `customer:order:create-item`. Vì vậy, public menu là ngoại lệ đọc dữ liệu catalog, không phải luồng đặt món ẩn danh.
+
 Các route trên tương ứng 60 thao tác HTTP. Endpoint cập nhật trạng thái tổng đơn PATCH /orders/:id/items/status không nằm trong danh sách vì StaffOrdersController không khai báo route này; frontend ApiOrderRepository vẫn gọi endpoint đó tại các hàm update/reject/cancel order. Đây là lỗi hợp đồng frontend–backend, không phải endpoint backend đang hoạt động.
 
-**Căn cứ:** từng Controller tại backend/src; đặc biệt backend/src/sessions/sessions.controller.ts (GET customer/active), backend/src/orders/staff-orders.controller.ts, frontend/src/repositories/api/ApiOrderRepository.ts.
+**Căn cứ:** `backend/src/app.controller.ts:1–20`; `backend/src/auth/auth.controller.ts:1–30`; `backend/src/users/users.controller.ts:1–140`; `backend/src/menu-categories/menu-categories.controller.ts:1–100`; `backend/src/menu-items/menu-items.controller.ts:1–200`; `backend/src/sessions/sessions.controller.ts:9–49`; `backend/src/orders/orders.controller.ts:18–46`; `backend/src/orders/staff-orders.controller.ts:10–49`; `backend/src/kitchen/kitchen.controller.ts:1–60`; `backend/src/payments/payments.controller.ts:9–46`; `backend/src/inventory/inventory.controller.ts:1–140`; `backend/src/reports/reports.controller.ts:1–100`; `frontend/src/repositories/api/ApiOrderRepository.ts:130–167`.
 
 ### 3.9.3. Request validation và ranh giới tin cậy
 
@@ -610,11 +696,13 @@ Công thức hiện tại:
 - Thành tiền từng dòng được tạo từ giá MenuItem trong database nhân với quantity; giá được snapshot vào OrderItem.unitPrice và OrderItem.lineTotal.
 - Tổng phiên là tổng lineTotal của các món có trạng thái ACCEPTED, IN_PREPARATION hoặc COMPLETED; CANCELLED không tính.
 - PaymentsService.confirmForSession() từ chối xác nhận nếu còn món AWAITING_ACCEPTANCE, rồi tính lại tổng các món không CANCELLED trước khi tạo Payment.
-- Phép tính dùng Prisma.Decimal. Schema khai báo Decimal(14,2); không thấy quy tắc làm tròn nghiệp vụ riêng hoặc bước round/toFixed trong service.
+- Phép tính dùng Prisma.Decimal. Schema khai báo Decimal(14,2); không thấy quy tắc làm tròn nghiệp vụ riêng hoặc bước round/toFixed trong service. `paymentMethod` là nullable trong Prisma (`String?`) và optional trong ConfirmPaymentDto; controller chuyển tiếp giá trị có thể undefined/null, PaymentsService lưu `paymentMethod ?? null`. Vì vậy API hiện chấp nhận xác nhận thanh toán không chỉ định phương thức.
+
+**Đề xuất – đơn vị tiền và làm tròn:** thống nhất đơn vị tiền của MVP là VND; API hiển thị amount/price theo VND và không diễn giải số Decimal thành ngoại tệ. Do VND không có đơn vị lẻ trong nghiệp vụ thanh toán tiền mặt, đề xuất dùng Decimal/integer arithmetic (không dùng JavaScript floating point), làm tròn từng `lineTotal` đến 1 VND theo HALF_UP rồi cộng các lineTotal đã làm tròn; không làm tròn lại tổng lần hai. Schema hiện chỉ có Decimal(14,2), không có currencyCode và service chưa áp dụng quy tắc làm tròn này, nên đây là **Đề xuất**, không phải hành vi hiện tại.
 
 **Không có trong schema hiện tại:** discount amount/percent, VAT/tax rate và amount, service fee, cash received, change due, payment split hoặc nhiều Payment cho một Order. Payment.orderId unique giới hạn một Payment/Order. Nếu đồ án cần các nghiệp vụ này, cần chốt yêu cầu và thiết kế migration riêng; không suy diễn các trường này từ amount hiện tại.
 
-**Căn cứ:** prisma/schema.prisma (OrderItem, Payment); backend/src/orders/orders.service.ts (addGuestItems, addStaffItems); backend/src/payments/payments.service.ts (getSessionSummary, confirmForSession); backend/src/payments/dto/confirm-payment.dto.ts.
+**Căn cứ:** `prisma/schema.prisma:190–208,297–312`; `backend/src/orders/orders.service.ts:245–270,448–500`; `backend/src/payments/payments.service.ts:85–211,222–281`; `backend/src/payments/dto/confirm-payment.dto.ts:1–13`.
 
 ### 3.9.5. Ví dụ request/response và mã lỗi
 
@@ -675,6 +763,8 @@ Response HTTP 201:
         }
       ]
     }
+
+**Lưu ý tên trường:** response API dùng `itemName`; `OrdersService.addGuestItems()` ánh xạ giá trị này từ Prisma field `itemNameSnapshot` (`backend/src/orders/orders.service.ts:245–270`). `itemNameSnapshot` là tên field lưu trong database, không phải key JSON trả về của endpoint này.
 
 **Hủy món khách – DELETE /api/v1/customer/session/items/101**
 
@@ -744,7 +834,7 @@ Response HTTP 201:
 
 Frontend apiClient.normalizeApiError() còn ánh xạ timeout thành REQUEST_TIMEOUT (408), mất kết nối thành NETWORK_ERROR (503), và chuẩn hóa 401/403/404/400 thành mã UI riêng; các mã này không phải permission code hoặc mã lỗi nghiệp vụ do backend định nghĩa.
 
-**Căn cứ:** backend/src/auth/auth.controller.ts, auth.service.ts, auth.module.ts; backend/src/orders/orders.controller.ts; backend/src/kitchen/kitchen.controller.ts, kitchen.service.ts; backend/src/payments/payments.controller.ts, payments.service.ts; frontend/src/services/api/apiClient.ts.
+**Căn cứ:** `backend/src/auth/auth.controller.ts:1–25`; `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/orders/orders.controller.ts:18–46`; `backend/src/kitchen/kitchen.controller.ts:1–60`; `backend/src/kitchen/kitchen.service.ts:1–120`; `backend/src/payments/payments.controller.ts:9–46`; `backend/src/payments/payments.service.ts:85–211`; `frontend/src/services/api/apiClient.ts:1–200`.
 
 ## 3.10. Thiết kế phân quyền RBAC
 
@@ -771,7 +861,7 @@ RBAC được triển khai bằng Role, Permission và RolePermission. Một Use
 | Reports read | Không | Không | Không | Không | Có |
 | Users read/create/update | Không | Không | Không | Không | Có |
 
-* MANAGER được seed toàn bộ permission nghiệp vụ nội bộ, bao gồm permission customer; điều này phản ánh cấu hình seed, không có nghĩa Quản lý phải dùng giao diện tablet khách.
+* Dấu `Có*` biểu thị quyền được cấp gián tiếp do seed gán toàn bộ `permissionDefinitions` cho MANAGER. Danh sách bao gồm `customer:session:start`, `customer:session:read`, `customer:order:create-item`, `customer:order:cancel-item` **và `payments:request`**. Đây là cấu hình seed, không có nghĩa Quản lý phải dùng giao diện tablet khách.
 
 ### 3.10.3. Phân quyền frontend và backend
 
@@ -785,7 +875,7 @@ Rủi ro least-privilege: nếu tài khoản quản lý được gán TableDevic
 
 **Đề xuất:** thay vì cấp toàn bộ permission cho MANAGER theo mặc định, định nghĩa allowlist theo nhiệm vụ quản lý; chỉ cấp customer permissions cho tài khoản thử nghiệm/đặc thù khi có yêu cầu rõ ràng. Nếu vẫn giữ quyền customer cho MANAGER để hỗ trợ vận hành hoặc test, cần ghi nhận đây là ngoại lệ được phê duyệt và kiểm tra TableDevice ownership ở service. Việc thay đổi seed cần migration/sync quyền có kiểm soát để không làm sai lệch quyền đã tồn tại trong database.
 
-**Căn cứ:** backend/src/seed.ts (rolePermissions.MANAGER); backend/src/sessions/sessions.controller.ts; backend/src/orders/orders.controller.ts; backend/src/payments/payments.controller.ts; frontend/src/constants/rbac.ts (ROLE_ALLOWED_ROUTES).
+**Căn cứ:** `backend/src/seed.ts:22–57`; `backend/src/sessions/sessions.controller.ts:20–29`; `backend/src/orders/orders.controller.ts:23–45`; `backend/src/payments/payments.controller.ts:14–18`; `frontend/src/constants/rbac.ts:111–122`.
 
 ### 3.10.5. Quy ước đặt tên permission
 
@@ -793,7 +883,7 @@ Rủi ro least-privilege: nếu tài khoản quản lý được gán TableDevic
 
 **Ngoại lệ đang tồn tại trong source:** menu.category.* và menu.item.* dùng dấu chấm; hai mã menu:read và menu:manage là mã tổng quát cũ vẫn còn trong seed nhưng route menu hiện dùng mã chi tiết dạng dấu chấm. Không tự đổi các mã đã lưu trong database khi chưa có migration cập nhật đồng bộ role_permissions và mọi consumer.
 
-**Trạng thái:** Triển khai một phần về tính nhất quán naming; TD mới TD-14. Căn cứ: backend/src/seed.ts (permissionDefinitions); backend/src/sync-order-staff-permissions.ts; frontend/src/constants/rbac.ts (BACKEND_PERMISSION_MAP); backend/src/menu-categories/menu-categories.controller.ts; backend/src/menu-items/menu-items.controller.ts.
+**Trạng thái:** Triển khai một phần về tính nhất quán naming; TD-14. **Căn cứ:** `backend/src/seed.ts:22–53`; `backend/src/sync-order-staff-permissions.ts:7–10`; `frontend/src/constants/rbac.ts:1–122`; `backend/src/menu-categories/menu-categories.controller.ts:1–100`; `backend/src/menu-items/menu-items.controller.ts:1–200`.
 
 ## 3.11. Thiết kế giao diện và điều hướng
 
@@ -819,39 +909,39 @@ Expo Router đưa người dùng chưa đăng nhập tới `/login`; nhóm `(mai
 
 Các wireframe dưới đây được dựng từ cấu trúc component và thao tác thực tế của feature screens; đây là bố cục minh họa, không phải ảnh chụp runtime. Kích thước chỉ mang tính bố cục, không khẳng định pixel-perfect với mọi breakpoint.
 
-**Hình 3.17. Login – mobile/tablet responsive.**
+**Hình 3.21. Login – mobile/tablet responsive.**
 
 ![Login wireframe](diagrams/wireframes/login.svg)
 
-**Hình 3.18. Customer Order – tablet ngang.**
+**Hình 3.22. Customer Order – tablet ngang.**
 
 ![Customer order wireframe](diagrams/wireframes/customer-order-tablet.svg)
 
-**Hình 3.19. Orders và PaymentModal – desktop/tablet.**
+**Hình 3.23. Orders và PaymentModal – desktop/tablet.**
 
 ![Orders payment wireframe](diagrams/wireframes/orders-payment.svg)
 
-**Hình 3.20. KDS – màn hình bếp desktop.**
+**Hình 3.24. KDS – màn hình bếp desktop.**
 
 ![KDS wireframe](diagrams/wireframes/kds.svg)
 
-**Hình 3.21. Inventory – desktop.**
+**Hình 3.25. Inventory – desktop.**
 
 ![Inventory wireframe](diagrams/wireframes/inventory.svg)
 
-**Hình 3.22. Reports – desktop.**
+**Hình 3.26. Reports – desktop.**
 
 ![Reports wireframe](diagrams/wireframes/reports.svg)
 
-**Hình 3.23. Tables / Sessions – tablet hoặc desktop (phụ lục).**
+**Hình 3.27. Tables / Sessions – tablet hoặc desktop (phụ lục).**
 
 ![Tables wireframe](diagrams/wireframes/tables-sessions.svg)
 
-**Hình 3.24. Menu Management – desktop (phụ lục).**
+**Hình 3.28. Menu Management – desktop (phụ lục).**
 
 ![Menu wireframe](diagrams/wireframes/menu-management.svg)
 
-**Hình 3.25. Employees – desktop (phụ lục).**
+**Hình 3.29. Employees – desktop (phụ lục).**
 
 ![Employees wireframe](diagrams/wireframes/employees.svg)
 
@@ -942,7 +1032,7 @@ Chưa tìm thấy script hoặc workflow backup/restore PostgreSQL được đ�
 - .github/workflows/frontend-validation.yml: Node 24, npm ci và npm run typecheck.
 - Chưa thấy workflow deploy tự động hoặc release pipeline trong hai workflow validation này. Vì vậy CD hiện được ghi là chưa có bằng chứng trong code; triển khai production cần quy trình phê duyệt, migration, deploy, health check và rollback riêng.
 
-**Căn cứ:** backend/package.json; backend/prisma.config.ts; backend/src/main.ts; backend/src/seed.ts; backend/.env.example; frontend/src/constants/config.ts; .github/workflows/backend-validation.yml; .github/workflows/frontend-validation.yml.
+**Căn cứ:** `backend/package.json:1–40`; `backend/prisma.config.ts:1–40`; `backend/src/main.ts:19–67`; `backend/src/seed.ts:1–100`; `backend/.env.example:1–40`; `frontend/src/constants/config.ts:1–80`; `.github/workflows/backend-validation.yml:1–35`; `.github/workflows/frontend-validation.yml:1–29`.
 
 ## 3.13. Đánh giá tồn tại và hướng hoàn thiện
 
@@ -966,10 +1056,14 @@ Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữ
 | TD-14 | backend/src/seed.ts:22–53; backend/src/sync-order-staff-permissions.ts:7–10; menu controllers dùng menu.category.* và menu.item.* | Permission namespace trộn dấu chấm và dấu hai chấm; menu:read/menu:manage là mã tổng quát còn sót | Chuẩn hóa naming cho permission mới; migration/sync mọi consumer trước khi đổi mã cũ | Mới phát hiện | Trung bình |
 | TD-15 | backend/src/sessions/sessions.controller.ts:20–21; backend/src/seed.ts:26–27 | GET /sessions/customer/active dùng customer:session:start thay vì customer:session:read | Đổi decorator sang quyền đọc phù hợp và kiểm thử role CUSTOMER | Mới phát hiện | Thấp |
 | TD-16 | backend/src/seed.ts:57; frontend/src/constants/rbac.ts:111–122 | MANAGER nhận toàn bộ customer permissions dù frontend không mở route customer-order cho role này | Áp dụng least-privilege; giữ quyền customer chỉ khi có ngoại lệ được phê duyệt | Mới phát hiện | Trung bình |
-| TD-17 | frontend/src/features/kds/hooks/useKds.ts:48–50; frontend/src/features/customer-order/hooks/useCustomerOrder.ts:151–183 | Polling 8s/5s gây trễ và tải đọc định kỳ; không có push realtime | Cân nhắc SSE/WebSocket sau khi có yêu cầu tải và realtime rõ ràng | Mới phát hiện | Thấp |
+| TD-17 | frontend/src/features/kds/hooks/useKds.ts:36–50; frontend/src/features/customer-order/hooks/useCustomerOrder.ts:45–60,151–183 | KDS polling 8 giây; tablet khách mỗi 5 giây gọi loadCustomerData(true), tải lại menu, recent orders và kiểm tra active session. Polling gây trễ và tải đọc định kỳ; không có push realtime | Cân nhắc SSE/WebSocket sau khi có yêu cầu tải và realtime rõ ràng | Mới phát hiện | Thấp |
 | TD-18 | prisma/schema.prisma:190–208, 297–312; backend/src/payments/payments.service.ts:85–211 | Payment không có discount, VAT, cash received hoặc change due; chưa hỗ trợ chia nhiều lần | Chỉ mở rộng khi requirement nghiệp vụ yêu cầu; thiết kế migration và quy tắc tính tiền | Mới phát hiện / cần xác nhận phạm vi | Trung bình |
 | TD-19 | .github/workflows/backend-validation.yml:1–35; .github/workflows/frontend-validation.yml:1–29; backend/package.json:6–20 | CI hiện validate/build/typecheck, chưa có test tự động; chưa thấy CD workflow | Bổ sung unit/integration/e2e và pipeline deploy có approval/rollback | Mới phát hiện | Trung bình |
 | TD-20 | prisma/schema.prisma:269–276; backend/src/inventory/dto/inventory-count.dto.ts:3–8; backend/src/inventory/inventory.service.ts:208–228; prisma/migrations/20261126180000_add_inventory_count_type/migration.sql:1–6 | Prisma model mặc định countType=GENERAL, DTO API chỉ nhận OPENING/CLOSING; migration cho phép cả ba giá trị. API hiện yêu cầu countType nên default GENERAL chỉ có thể xuất hiện ở thao tác ghi trực tiếp không qua DTO | Thống nhất miền giá trị và default theo hợp đồng API; giữ GENERAL chỉ khi có luồng khởi tạo dữ liệu cần dùng | Mới phát hiện | Thấp |
+| TD-21 | backend/src/auth/auth.module.ts:15–26; frontend/src/features/customer-order/hooks/useCustomerOrder.ts:74–118,151–183; backend/src/auth/auth.controller.ts:8–20 | JWT sống 1 ngày; tablet gán cố định không có refresh/revoke endpoint. Khi token hết hạn, luồng tái xác thực/đăng nhập lại theo thiết bị chưa được thiết kế thành quy trình rõ ràng | Thiết kế màn hình hết phiên và đăng nhập lại; nếu yêu cầu phiên dài, bổ sung refresh rotation, revoke theo TableDevice và lưu token an toàn | Mới phát hiện | Trung bình |
+| TD-22 | backend/src/orders/orders.controller.ts:29–36; backend/src/orders/staff-orders.controller.ts:41–48; backend/src/orders/orders.service.ts:328–374,714–755 | DELETE customer/staff được dùng như lệnh hủy nhưng không xóa vật lý; service cập nhật status=CANCELLED và ghi history/audit. Verb DELETE dễ bị hiểu nhầm là xóa resource | **Đề xuất:** bổ sung PATCH /.../items/:itemId/cancel (kèm reason tùy vai trò); giữ DELETE hiện tại như alias tương thích trong giai đoạn chuyển đổi | Mới phát hiện | Thấp |
+| TD-23 | prisma/schema.prisma:297–312; backend/src/payments/dto/confirm-payment.dto.ts:3–12; backend/src/payments/payments.controller.ts:32–44; backend/src/payments/payments.service.ts:85–151 | paymentMethod nullable ở schema và optional ở DTO; service vẫn tạo Payment PAID khi trường này không được gửi, làm giảm khả năng truy vết phương thức thu tiền | Chốt có bắt buộc paymentMethod hay không; nếu bắt buộc, validate DTO và migrate dữ liệu hiện có trước khi đổi nullability | Mới phát hiện | Trung bình |
+| TD-24 | prisma/schema.prisma:100–112,190–208,297–312; backend/src/orders/orders.service.ts:245–270; backend/src/payments/payments.service.ts:222–281 | Dữ liệu tiền dùng Decimal(14,2), không có currencyCode; service nhân Decimal nhưng chưa có quy tắc làm tròn VND tường minh | **Đề xuất:** chuẩn hóa VND, tính bằng Decimal/integer, quy định HALF_UP ở cấp lineTotal và kiểm thử biên; thêm currencyCode chỉ khi mở rộng đa tiền tệ | Mới phát hiện | Trung bình |
 
 
 ### 3.13.1. Các điểm đã kiểm tra riêng
