@@ -61,9 +61,9 @@ MENU-059,Chả cá chiên,Chả cua - Chả cá,89000,VND,phần,fixed,active,0,
 MENU-060,Chả cá nấu chua,Chả cua - Chả cá,99000,VND,phần,fixed,active,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
 MENU-061,Chả cá nấu khổ qua,Chả cua - Chả cá,99000,VND,phần,fixed,active,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
 MENU-062,Chả cá um măng,Chả cua - Chả cá,99000,VND,phần,fixed,active,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
-MENU-063,Ghẹ hấp sả,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,1,0
-MENU-064,Ghẹ rang me,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
-MENU-065,Ghẹ rang muối,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0
+MENU-063,Ghẹ đỏ hấp sả,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,1,0
+MENU-064,Ghẹ đỏ rang me,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
+MENU-065,Ghẹ đỏ rang muối,Ghẹ đỏ - Ghẹ xanh,,,,market_price,active,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0
 MENU-066,Tôm hùm hấp,Tôm hùm,,,,market_price,active,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,1,0
 MENU-067,Tôm hùm nướng,Tôm hùm,,,,market_price,active,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0
 MENU-068,Tôm hùm sốt me,Tôm hùm,,,,market_price,active,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
@@ -98,7 +98,7 @@ MENU-096,Gà quê nướng ớt + lòng,Gà quê,269000,VND,con,fixed,active,1,0
 MENU-097,Gà quê nấu lá giang + lòng,Gà quê,279000,VND,con,fixed,active,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0
 MENU-098,Gà quê nấu nấm + lòng,Gà quê,279000,VND,con,fixed,active,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0
 MENU-099,Gà quê nấu cháo + lòng,Gà quê,279000,VND,con,fixed,active,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0
-MENU-100,Gà quê giá 2 món,Gà quê,289000,VND,con,fixed,active,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0
+MENU-100,Gà quê chế biến 2 món,Gà quê,289000,VND,con,fixed,active,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0
 MENU-101,Ốc đá xào sả,Ốc,85000,VND,phần,fixed,active,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1
 MENU-102,Ốc bươu hấp sả,Ốc,99000,VND,phần,fixed,active,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,0,1
 MENU-103,Ốc bươu um gừng,Ốc,99000,VND,phần,fixed,active,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1
@@ -179,7 +179,7 @@ MENU-177,Nấm biển xào hành,Món Khai Vị,79000,VND,phần,fixed,active,0,
 MENU-178,Nấm biển xào bò,Món Khai Vị,89000,VND,phần,fixed,active,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
 MENU-179,Thỏ um giả cầy,Món Thỏ,129000,VND,phần,fixed,active,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,1
 MENU-180,Thỏ nướng,Món Thỏ,129000,VND,phần,fixed,active,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1
-MENU-181,Thỏ rôti,Món Thỏ,129000,VND,phần,fixed,active,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,1
+MENU-181,Thỏ rô ti,Món Thỏ,129000,VND,phần,fixed,active,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,1
 MENU-182,Cánh gà chiên mắm,Món Khoái Khẩu,79000,VND,phần,fixed,active,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,1
 MENU-183,Bắp non xào hành,Món Khoái Khẩu,49000,VND,phần,fixed,active,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
 MENU-184,Bầu luộc chấm trứng,Món Khoái Khẩu,69000,VND,phần,fixed,active,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,0,1

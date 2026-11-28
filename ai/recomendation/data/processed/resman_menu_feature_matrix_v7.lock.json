@@ -1,7 +1,7 @@
 {
   "matrix": "resman_menu_feature_matrix_v7.csv",
-  "sha256": "2beef3ea324ab72fe7a75532a679f149cf5c85cfc902a519e163c4d401a76e41",
+  "sha256": "93c014228651b18d6afa7fdca486d0455cce42fb85a7701ac35091bd1600d76e",
   "rows": 237,
   "feature_columns": 28,
-  "locked_at": "2026-11-24 15:45"
+  "locked_at": "2026-11-28 11:55"
 }
