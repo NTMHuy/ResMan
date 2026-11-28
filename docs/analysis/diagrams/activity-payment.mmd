@@ -11,7 +11,7 @@ flowchart TB
     K1["Tiếp nhận hoặc hủy món còn chờ"]
   end
   subgraph S["Hệ thống"]
-    S1["Upsert PaymentRequest PENDING"]
+    S1["Tạo mới hoặc tái sử dụng PaymentRequest PENDING"]
     S2{"Phiên OPEN, Order tồn tại, chưa có Payment?"}
     S3{"Còn AWAITING_ACCEPTANCE?"}
     S4["Trả lỗi nghiệp vụ"]
