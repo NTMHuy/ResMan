@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Sparkles } from 'lucide-react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Clock, Plus, SlidersHorizontal, Sparkles } from 'lucide-react-native';
 import { useTheme } from '@/src/theme/ThemeContext';
 import { Card } from '@/src/components/common/Card';
 import { Badge } from '@/src/components/common/Badge';
@@ -15,10 +15,11 @@ interface MealSuggestionCardProps {
   message: string;
   available: boolean;
   onAdd: (item: MenuItem) => void;
+  onSelect: (item: MenuItem) => void;
   onRecommendations: (items: MenuItem[], message: string, available: boolean) => void;
 }
 
-export function MealSuggestionCard({ items, message, available, onAdd, onRecommendations }: MealSuggestionCardProps) {
+export function MealSuggestionCard({ items, message, available, onAdd, onSelect, onRecommendations }: MealSuggestionCardProps) {
   const { theme } = useTheme();
   const [surveyOpen, setSurveyOpen] = useState(false);
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
@@ -176,23 +177,86 @@ export function MealSuggestionCard({ items, message, available, onAdd, onRecomme
           <Button label={loadingSurvey ? 'Đang tải khảo sát...' : 'Khảo sát để nhận gợi ý phù hợp'} size="md" variant="secondary" disabled={loadingSurvey} onPress={() => void openSurvey()} />
           {surveyError ? <Text style={{ color: theme.colors.error, fontSize: 12 }}>{surveyError}</Text> : null}
           {items.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
+            <View style={styles.suggestionList}>
               {items.map((item) => {
-                const unavailable = item.status === 'OUT_OF_STOCK' || item.price <= 0 || item.pricingType === 'MARKET_PRICE' || item.pricingType === 'UNSET';
+                const isOut = item.status === 'OUT_OF_STOCK';
+                const canOrder = item.price > 0 &&
+                  item.pricingType !== 'MARKET_PRICE' &&
+                  item.pricingType !== 'UNSET';
                 const isPerUnit = item.pricingType === 'PER_UNIT';
                 const hasUnit = isPerUnit || Boolean(item.priceUnit);
                 const priceUnit = item.priceUnit || (isPerUnit ? 'lạng' : 'phần');
+                const displayPrice = item.pricingType === 'MARKET_PRICE'
+                  ? 'Giá theo thời điểm'
+                  : !canOrder ? 'Liên hệ nhân viên'
+                    : `${formatVND(item.price)}${hasUnit ? `/${priceUnit}` : ''}`;
+
                 return (
-                  <View key={item.id} style={[styles.suggestion, { backgroundColor: theme.colors.surfaceLow, borderColor: theme.colors.border, borderRadius: theme.radius.md, opacity: unavailable ? 0.6 : 1 }]}>
-                    <Text numberOfLines={2} style={[styles.itemName, { color: theme.colors.onSurface }]}>{item.name}</Text>
-                    <Text style={[styles.price, { color: theme.colors.secondary, fontFamily: theme.typography.mono }]}>
-                      {unavailable ? 'Liên hệ nhân viên' : `${formatVND(item.price)}${hasUnit ? `/${priceUnit}` : ''}`}
-                    </Text>
-                    <Button label={item.status === 'OUT_OF_STOCK' ? 'Hết món' : unavailable ? 'Liên hệ nhân viên' : 'Thêm món'} size="sm" variant="primary" disabled={unavailable} onPress={() => onAdd(item)} />
-                  </View>
+                  <Card
+                    key={item.id}
+                    padding="md"
+                    style={[styles.dishCard, isOut ? styles.dishCardUnavailable : null]}
+                  >
+                    <Pressable onPress={() => onSelect(item)} style={styles.dishRow}>
+                      <Image source={{ uri: item.imageUrl }} style={styles.dishImg} resizeMode="cover" />
+                      <View style={styles.dishBody}>
+                        <View style={styles.dishTopLine}>
+                          <Text
+                            numberOfLines={1}
+                            style={[styles.dishTitle, { color: theme.colors.onSurface, fontFamily: theme.typography.display }]}
+                          >
+                            {item.name}
+                          </Text>
+                          <Badge label="AI đề xuất" tone="primary" />
+                          {isOut ? <Badge label="Hết hàng (86)" tone="danger" /> : null}
+                        </View>
+                        <Text numberOfLines={2} style={[styles.dishDesc, { color: theme.colors.onSurfaceVariant }]}>
+                          {item.description}
+                        </Text>
+                        <View style={styles.dishFooter}>
+                          <View>
+                            <Text style={[styles.dishPrice, {
+                              color: isOut ? theme.colors.outline : theme.colors.onSurface,
+                              fontFamily: theme.typography.mono,
+                            }]}>
+                              {displayPrice}
+                            </Text>
+                            <View style={styles.prepLine}>
+                              <Clock size={12} color={theme.colors.outline} />
+                              <Text style={[styles.prepLabel, { color: theme.colors.outline }]}>
+                                ~{item.prepTimeMinutes} phút
+                              </Text>
+                            </View>
+                          </View>
+                          {isOut ? (
+                            <Badge label="Không khả dụng" tone="neutral" />
+                          ) : !canOrder ? (
+                            <Badge label="Liên hệ nhân viên" tone="warning" />
+                          ) : (
+                            <View style={styles.dishBtnGroup}>
+                              <Button
+                                label="Tùy chọn"
+                                size="sm"
+                                variant="secondary"
+                                leftIcon={<SlidersHorizontal size={13} color={theme.colors.onSurface} />}
+                                onPress={() => onSelect(item)}
+                              />
+                              <Button
+                                label={hasUnit ? `Thêm 1 ${priceUnit}` : 'Thêm món'}
+                                size="sm"
+                                variant="primary"
+                                leftIcon={<Plus size={14} color={theme.colors.onPrimary} />}
+                                onPress={() => onAdd(item)}
+                              />
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </Pressable>
+                  </Card>
                 );
               })}
-            </ScrollView>
+            </View>
           ) : null}
         </>
       ) : (
@@ -220,10 +284,20 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 15, fontWeight: '700' },
-  list: { gap: 8, paddingVertical: 2 },
-  suggestion: { width: 170, minHeight: 116, borderWidth: 1, padding: 10, justifyContent: 'space-between', gap: 8 },
-  itemName: { fontSize: 13, fontWeight: '700', minHeight: 34 },
-  price: { fontSize: 12, fontWeight: '700' },
+  suggestionList: { gap: 10 },
+  dishCard: { overflow: 'hidden' },
+  dishCardUnavailable: { opacity: 0.68 },
+  dishRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  dishImg: { width: 88, height: 88, borderRadius: 10 },
+  dishBody: { flex: 1, gap: 6, minWidth: 0 },
+  dishTopLine: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  dishTitle: { fontSize: 15, fontWeight: '700', flex: 1 },
+  dishDesc: { fontSize: 12, lineHeight: 17 },
+  dishFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' },
+  dishPrice: { fontSize: 15, fontWeight: '700' },
+  prepLine: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  prepLabel: { fontSize: 11 },
+  dishBtnGroup: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   message: { fontSize: 13, lineHeight: 19 },
   survey: { gap: 12, paddingTop: 4 },
   progress: { fontSize: 12, fontWeight: '700' },
