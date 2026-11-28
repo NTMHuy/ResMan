@@ -249,7 +249,7 @@ Khách hàng chỉ hủy món AWAITING_ACCEPTANCE thuộc phiên được gán c
 
 ### 3.6.5. Bếp cập nhật trạng thái món
 
-**Hình 3.13. Sequence – Bếp cập nhật trạng thái và xử lý cạnh tranh.**
+**Hình 3.18. Sequence – Bếp cập nhật trạng thái và xử lý cạnh tranh.**
 
 **Mã nguồn sơ đồ:** [sequence-kitchen-status.mmd](diagrams/sequence-kitchen-status.mmd).
 
@@ -257,7 +257,7 @@ KitchenService đọc trạng thái hiện tại và phiên, kiểm tra transiti
 
 ### 3.6.6. Khách yêu cầu thanh toán
 
-**Hình 3.14. Sequence – Tạo hoặc tái sử dụng PaymentRequest.**
+**Hình 3.19. Sequence – Tạo hoặc tái sử dụng PaymentRequest.**
 
 **Mã nguồn sơ đồ:** [sequence-payment-request.mmd](diagrams/sequence-payment-request.mmd).
 
@@ -265,7 +265,7 @@ PaymentsService xác định bàn qua TableDevice, tìm phiên OPEN và kiểm t
 
 ### 3.6.7. Nhập kho và kiểm kê
 
-**Hình 3.15. Sequence – Nhập kho và điều chỉnh tồn theo kiểm kê.**
+**Hình 3.20. Sequence – Nhập kho và điều chỉnh tồn theo kiểm kê.**
 
 **Mã nguồn sơ đồ:** [sequence-inventory-operations.mmd](diagrams/sequence-inventory-operations.mmd).
 
@@ -295,7 +295,7 @@ Các trạng thái lưu trong `OrderItem.status` là String và được giới 
 
 ### 3.7.2. Sai khác liên quan đến hủy món
 
-Mục 4.2 của `docs/11-confirmed-business-rules.md` xác nhận bếp không cần nhập lý do khi hủy món. Tuy nhiên, `KitchenService.updateStatus()` hiện từ chối CANCELLED nếu `reason` rỗng; KDS screen cũng hiển thị trường lý do bắt buộc. Đây là sai khác giữa nghiệp vụ đã xác nhận và triển khai. Báo cáo ghi nhận sai khác, không tự sửa backend/frontend trong phạm vi tài liệu.
+Quy tắc nghiệp vụ 4.2 quy định lý do hủy món do bếp là không bắt buộc. Trên triển khai hiện tại, KitchenService.updateStatus() từ chối CANCELLED nếu reason rỗng; KitchenScreen cũng kiểm tra lý do trước khi gửi request. Vì vậy, giao diện và backend hiện thực thi điều kiện chặt hơn quy tắc nghiệp vụ. Thiết kế mục tiêu là cho phép hủy không có lý do, đồng thời lưu reason nếu người dùng chủ động nhập. Trạng thái hiện tại: Triển khai một phần; điều chỉnh code là công việc cần thực hiện.
 
 ### 3.7.3. Trạng thái phiên, bàn và yêu cầu thanh toán
 
@@ -581,6 +581,151 @@ Các route trên tương ứng 60 thao tác HTTP. Endpoint cập nhật trạng 
 - Customer session/order API xác định bàn từ JWT principal và TableDevice; không nhận tableId/sessionCode từ client.
 - Upload ảnh chỉ nhận JPG/JPEG/PNG/WEBP, tối đa 5 MB theo cấu hình controller.
 - Không đưa `PATCH /orders/:id/items/status` vào API hợp lệ: frontend ApiOrderRepository đang gọi route này nhưng StaffOrdersController không khai báo. Đây là sai khác hợp đồng, chi tiết ở TD-01.
+
+### 3.9.4. Thiết kế thanh toán theo mô hình hiện tại
+
+Luồng hiện tại là ghi nhận nhân viên đã thu tiền, không phải xử lý thanh toán trực tuyến. Payment lưu amount, paymentMethod tùy chọn, transactionRef tùy chọn, status, paidAt và recordedBy. ConfirmPaymentDto chỉ chấp nhận CASH, CARD hoặc BANK_TRANSFER; không có API/SDK cổng thanh toán được tìm thấy trong PaymentsService.
+
+Công thức hiện tại:
+
+- Thành tiền từng dòng được tạo từ giá MenuItem trong database nhân với quantity; giá được snapshot vào OrderItem.unitPrice và OrderItem.lineTotal.
+- Tổng phiên là tổng lineTotal của các món có trạng thái ACCEPTED, IN_PREPARATION hoặc COMPLETED; CANCELLED không tính.
+- PaymentsService.confirmForSession() từ chối xác nhận nếu còn món AWAITING_ACCEPTANCE, rồi tính lại tổng các món không CANCELLED trước khi tạo Payment.
+- Phép tính dùng Prisma.Decimal. Schema khai báo Decimal(14,2); không thấy quy tắc làm tròn nghiệp vụ riêng hoặc bước round/toFixed trong service.
+
+**Không có trong schema hiện tại:** discount amount/percent, VAT/tax rate và amount, service fee, cash received, change due, payment split hoặc nhiều Payment cho một Order. Payment.orderId unique giới hạn một Payment/Order. Nếu đồ án cần các nghiệp vụ này, cần chốt yêu cầu và thiết kế migration riêng; không suy diễn các trường này từ amount hiện tại.
+
+**Căn cứ:** prisma/schema.prisma (OrderItem, Payment); backend/src/orders/orders.service.ts (addGuestItems, addStaffItems); backend/src/payments/payments.service.ts (getSessionSummary, confirmForSession); backend/src/payments/dto/confirm-payment.dto.ts.
+
+### 3.9.5. Ví dụ request/response và mã lỗi
+
+Các JSON dưới đây là body/giá trị trả trực tiếp từ controller/service; không giả định response envelope riêng. NestJS mặc định trả HTTP 201 cho POST nếu controller không khai báo @HttpCode; GET/PATCH/DELETE mặc định 200.
+
+**Đăng nhập – POST /api/v1/auth/login**
+
+Request:
+
+    {
+      "username": "manager",
+      "password": "********"
+    }
+
+Response HTTP 201 (token minh họa):
+
+    {
+      "accessToken": "<JWT>",
+      "tokenType": "Bearer",
+      "expiresIn": 86400,
+      "user": {
+        "id": "1",
+        "username": "manager",
+        "email": null,
+        "isActive": true,
+        "role": { "id": "1", "code": "MANAGER", "name": "Quản lý" },
+        "employee": null,
+        "permissions": ["users:read", "orders:read", "reports:read"]
+      }
+    }
+
+**Gửi món – POST /api/v1/customer/session/items**
+
+Header: Authorization: Bearer <JWT>
+
+Request:
+
+    {
+      "items": [
+        { "menuItemId": 12, "quantity": 2, "note": "Ít cay" }
+      ]
+    }
+
+Response HTTP 201:
+
+    {
+      "orderCode": "ORD-...",
+      "items": [
+        {
+          "id": "101",
+          "itemName": "Món minh họa",
+          "quantity": 2,
+          "unitPrice": "50000",
+          "lineTotal": "100000",
+          "note": "Ít cay",
+          "status": "AWAITING_ACCEPTANCE",
+          "createdAt": "2026-11-28T02:00:00.000Z"
+        }
+      ]
+    }
+
+**Hủy món khách – DELETE /api/v1/customer/session/items/101**
+
+Header: Authorization: Bearer <JWT>
+
+Response HTTP 200:
+
+    { "id": "101", "status": "CANCELLED" }
+
+**Bếp cập nhật trạng thái – PATCH /api/v1/kitchen/items/101/status**
+
+Header: Authorization: Bearer <JWT>
+
+Request:
+
+    { "status": "IN_PREPARATION" }
+
+Response HTTP 200:
+
+    { "id": "101", "status": "IN_PREPARATION" }
+
+Khi hủy bởi bếp, body hiện tại cần có reason vì KitchenService kiểm tra reason không rỗng:
+
+    { "status": "CANCELLED", "reason": "Thiếu nguyên liệu" }
+
+**Xác nhận thanh toán – POST /api/v1/payments/sessions/55/confirm**
+
+Header: Authorization: Bearer <JWT>
+
+Request:
+
+    { "paymentMethod": "CASH", "transactionRef": "POS-20261128-001" }
+
+Response HTTP 201:
+
+    {
+      "session": {
+        "id": "55",
+        "status": "CLOSED",
+        "closedAt": "2026-11-28T02:00:00.000Z",
+        "table": {
+          "id": "8",
+          "code": "T08",
+          "name": "Bàn 08",
+          "status": "AVAILABLE"
+        }
+      },
+      "payment": {
+        "id": "77",
+        "orderId": "90",
+        "amount": "100000",
+        "paymentMethod": "CASH",
+        "transactionRef": "POS-20261128-001",
+        "status": "PAID",
+        "paidAt": "2026-11-28T02:00:00.000Z"
+      }
+    }
+
+| HTTP status | Ngữ cảnh thường gặp | Nguồn phát sinh |
+|---|---|---|
+| 400 | DTO sai kiểu, thiếu trường, trường ngoài whitelist, ID không parse được | Global ValidationPipe, DTO, ParseIntPipe/ParseBigIntPipe |
+| 401 | Username/password sai; token thiếu, sai, hết hạn; user bị khóa | AuthService.login(), JwtStrategy.validate() |
+| 403 | JWT hợp lệ nhưng thiếu permission | PermissionsGuard.canActivate() |
+| 404 | Không có user/table/session/order/item/ingredient hoặc TableDevice hợp lệ | Các Service ném NotFoundException |
+| 409 | Trạng thái nghiệp vụ không hợp lệ, món vừa bị cập nhật, thanh toán trùng, transaction conflict | ConflictException; Prisma P2002/P2034 được một số service ánh xạ |
+| 500 | Lỗi không dự kiến hoặc lỗi tích hợp ngoài | NestJS exception handling |
+
+Frontend apiClient.normalizeApiError() còn ánh xạ timeout thành REQUEST_TIMEOUT (408), mất kết nối thành NETWORK_ERROR (503), và chuẩn hóa 401/403/404/400 thành mã UI riêng; các mã này không phải permission code hoặc mã lỗi nghiệp vụ do backend định nghĩa.
+
+**Căn cứ:** backend/src/auth/auth.controller.ts, auth.service.ts, auth.module.ts; backend/src/orders/orders.controller.ts; backend/src/kitchen/kitchen.controller.ts, kitchen.service.ts; backend/src/payments/payments.controller.ts, payments.service.ts; frontend/src/services/api/apiClient.ts.
 
 ## 3.10. Thiết kế phân quyền RBAC
 
