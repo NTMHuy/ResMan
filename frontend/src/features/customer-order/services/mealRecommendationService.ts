@@ -2,14 +2,32 @@ import type { MenuItem } from '@/src/features/menu/types/menu.types';
 import { resolveMenuImageUrl } from '@/src/constants/config';
 import { apiClient } from '@/src/services/api/apiClient';
 
+export interface MealRecommendationSurvey {
+  party_size?: number;
+  companions?: 'family' | 'friends';
+  wants_drinking?: boolean;
+  wants_novelty?: boolean;
+  answers?: Record<string, boolean>;
+}
+
+export interface SurveyQuestionOption {
+  value?: string;
+  attribute?: string;
+  text: string;
+}
+
+export interface SurveyQuestion {
+  id: string;
+  text: string;
+  kind: 'number' | 'single' | 'yes_no' | 'multi';
+  field?: 'party_size' | 'companions' | 'wants_drinking' | 'wants_novelty';
+  options?: SurveyQuestionOption[];
+  none_option?: string;
+  show_if?: { party_size_min?: number };
+}
+
 export interface MealRecommendationRequest {
-  survey?: {
-    party_size?: number;
-    companions?: 'family' | 'friends';
-    wants_drinking?: boolean;
-    wants_novelty?: boolean;
-    answers?: Record<string, boolean>;
-  };
+  survey?: MealRecommendationSurvey;
   k?: number;
 }
 
@@ -38,10 +56,16 @@ interface RecommendationApiResponse {
 }
 
 export interface MealRecommendationService {
+  getSurveyQuestions(): Promise<SurveyQuestion[]>;
   getRecommendations(request?: MealRecommendationRequest): Promise<MealRecommendationResult>;
 }
 
 export const mealRecommendationService: MealRecommendationService = {
+  async getSurveyQuestions() {
+    const response = await apiClient.get<SurveyQuestion[]>('/recommendations/customer/survey/questions');
+    return response.data;
+  },
+
   async getRecommendations(request = {}) {
     const response = await apiClient.post<RecommendationApiResponse>(
       '/recommendations/customer',
