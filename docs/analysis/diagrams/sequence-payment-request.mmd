@@ -32,4 +32,4 @@ sequenceDiagram
         Ctrl-->>Repo: HTTP 201
         Repo-->>UI: Xác nhận đã gửi yêu cầu
     end
-    Note over Svc,DB: Luồng request dùng kiểm tra + upsert; không được bọc trong transaction nhiều bước.
+    Note over Svc,DB: Luồng request dùng kiểm tra + upsert. Không được bọc trong transaction nhiều bước.
