@@ -1136,7 +1136,9 @@ Việc đối chiếu dưới đây là kiểm tra tĩnh theo source và nội d
 4. Sequence payment trước đây không thể hiện guard ở hai route đọc tổng kết/xác nhận; đã bổ sung `payments:read` và `payments:confirm`.
 5. Activity customer-order trước đây khiến luồng polling có thể bị hiểu là kích hoạt xử lý bếp; đã tách vòng polling thành hoạt động đọc snapshot độc lập.
 6. Use Case diagram trước đây thiếu các liên kết Manager với UC-02…UC-06 so với ma trận tác nhân trong Chương 2; đã đồng bộ.
-7. Chưa có state diagram cho DiningSession, DiningTable và PaymentRequest; đã bổ sung trong `state-lifecycle.mmd`.
+7. Sequence PaymentRequest trước đây ghi HTTP 200 ở nhánh POST tái sử dụng request PENDING; controller không khai báo `@HttpCode`, nên đã sửa về HTTP 201 mặc định của NestJS.
+8. Sequence hủy món khách trước đây ghi transaction Serializable; `cancelGuestItem()` không chỉ định isolation level, nên đã sửa thành transaction mặc định. KitchenService và PaymentsService vẫn dùng Serializable ở các luồng tương ứng.
+9. Chưa có state diagram cho DiningSession, DiningTable và PaymentRequest; đã bổ sung trong `state-lifecycle.mmd`.
 
 **Giới hạn xác minh cú pháp:** môi trường thao tác không có executable `mmdc`; lệnh `npx @mermaid-js/mermaid-cli --version` bị timeout khi tải package do môi trường không truy cập được npm registry. Vì vậy, 18 tệp `.mmd` đã được rà soát thủ công về loại diagram, cấu trúc khối, cặp `alt/end`, node/edge, tên entity và liên kết; **chưa thể xác nhận parser Mermaid CLI đã render thành công**. Không tuyên bố sơ đồ đã qua kiểm tra renderer. PlantUML cũng chưa được render bằng PlantUML server/CLI.
 
