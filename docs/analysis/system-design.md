@@ -570,6 +570,25 @@ Bảng liệt kê route được khai báo trong Controller. Tiền tố toàn c
 | Inventory | GET | /inventory/movements; /inventory/counts | inventory:read |
 | Reports | GET | /reports/overview; /reports/revenue; /reports/best-sellers; /reports/orders; /reports/inventory | reports:read (class-level decorator) |
 
+**Bản đồ file nguồn của route inventory:**
+
+| Phân hệ | File nguồn | Route / handler được khai báo |
+|---|---|---|
+| App | backend/src/app.controller.ts | GET health – getHealth() |
+| Auth | backend/src/auth/auth.controller.ts | POST login – login(); GET profile – profile() |
+| Users | backend/src/users/users.controller.ts | GET/POST users; PATCH users/:id; PATCH/DELETE users/:id/tablet; PATCH users/:id/role; PATCH users/:id/status |
+| Menu categories | backend/src/menu-categories/menu-categories.controller.ts | GET/POST menu-categories; GET/PATCH/DELETE menu-categories/:id |
+| Menu items | backend/src/menu-items/menu-items.controller.ts | GET/POST menu-items; GET/PATCH/DELETE menu-items/:id; PATCH status; POST/DELETE image |
+| Customer menu | backend/src/menu-items/guest-menu.controller.ts | GET menu-items/customer/menu – findCustomerMenu() |
+| Tables | backend/src/tables/tables.controller.ts | GET/POST tables; GET/PATCH/DELETE tables/:id |
+| Sessions | backend/src/sessions/sessions.controller.ts | POST sessions; GET customer/active; POST customer/open; GET table/:tableId/active; PATCH :id/close; GET :id |
+| Customer orders | backend/src/orders/orders.controller.ts | GET customer/session; POST customer/session/items; DELETE customer/session/items/:itemId |
+| Staff orders | backend/src/orders/staff-orders.controller.ts | GET orders/active; POST :orderId/items; PATCH items/:itemId/note; DELETE items/:itemId |
+| Kitchen | backend/src/kitchen/kitchen.controller.ts | GET kitchen/queue; PATCH kitchen/items/:itemId/status |
+| Payments | backend/src/payments/payments.controller.ts | POST customer/request; GET requests; GET sessions/:sessionId/summary; POST sessions/:sessionId/confirm |
+| Inventory | backend/src/inventory/inventory.controller.ts | GET/POST ingredients; PATCH ingredient; POST stock-in; POST count; GET movements/counts |
+| Reports | backend/src/reports/reports.controller.ts | GET overview, revenue, best-sellers, orders, inventory |
+
 Các route trên tương ứng 60 thao tác HTTP. Endpoint cập nhật trạng thái tổng đơn PATCH /orders/:id/items/status không nằm trong danh sách vì StaffOrdersController không khai báo route này; frontend ApiOrderRepository vẫn gọi endpoint đó tại các hàm update/reject/cancel order. Đây là lỗi hợp đồng frontend–backend, không phải endpoint backend đang hoạt động.
 
 **Căn cứ:** từng Controller tại backend/src; đặc biệt backend/src/sessions/sessions.controller.ts (GET customer/active), backend/src/orders/staff-orders.controller.ts, frontend/src/repositories/api/ApiOrderRepository.ts.
