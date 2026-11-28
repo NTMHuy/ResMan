@@ -7,12 +7,12 @@
 | Kiến trúc / module | `architecture.mmd`, `module-dependencies.mmd`, `deployment.puml` |
 | Use Case | `use-cases.puml` |
 | Activity | `activity-customer-order.mmd`, `activity-kitchen.mmd`, `activity-payment.mmd` |
-| Sequence | `sequence-login.mmd`, `sequence-customer-order.mmd`, `sequence-payment.mmd` |
+| Sequence | `sequence-login.mmd`, `sequence-customer-order.mmd`, `sequence-payment.mmd`, `sequence-cancel-item.mmd`, `sequence-kitchen-status.mmd`, `sequence-payment-request.mmd`, `sequence-inventory-operations.mmd` |
 | State transition | `state-order-item.mmd` |
 | ERD | `erd-overview.mmd`, `erd-account-rbac.mmd`, `erd-session-order-payment.mmd`, `erd-menu-inventory.mmd` |
 | Class | `class-domain.puml` |
 
-Không có Activity Diagram đăng nhập; luồng đăng nhập được biểu diễn bằng Sequence. Mũi tên `IN_PREPARATION → ACCEPTED` được ghi chú là quy tắc nghiệp vụ chưa triển khai. Các ERD chi tiết được tách thành ba nhóm với số thực thể giới hạn để dễ đọc.
+Không có Activity Diagram đăng nhập; luồng đăng nhập được biểu diễn bằng Sequence. Các sequence bổ sung mô tả hủy món theo vai trò, cập nhật trạng thái bếp, yêu cầu thanh toán, nhập kho và kiểm kê. Mũi tên `IN_PREPARATION → ACCEPTED` được ghi chú là quy tắc nghiệp vụ chưa triển khai. Các ERD chi tiết được tách thành ba nhóm với số thực thể giới hạn để dễ đọc.
 
 ## Wireframe SVG
 
