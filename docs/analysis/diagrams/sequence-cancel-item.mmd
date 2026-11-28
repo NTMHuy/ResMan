@@ -1,110 +1,100 @@
-@startuml
-left to right direction
-skinparam packageStyle rectangle
-skinparam nodesep 40
-skinparam ranksep 90
-skinparam shadowing false
-skinparam usecase {
-  BackgroundColor #F8FAFC
-  BorderColor #334155
-  ArrowColor #475569
-}
-skinparam rectangle {
-  BackgroundColor #FFFFFF
-  BorderColor #94A3B8
-}
-skinparam note {
-  BackgroundColor #FEF9C3
-  BorderColor #A16207
-}
+```mermaid
+flowchart LR
+    %% ===== Actor bên trái (2) =====
+    Customer("👤 Khách hàng")
+    OrderStaff("👤 Nhân viên Order")
 
-' ===== BÊN TRÁI (2 actor) =====
-actor "Khách hàng\n(CUSTOMER)" as Customer
-actor "Nhân viên Order" as OrderStaff
+    %% ===== Use case =====
+    subgraph SYS["ResMan"]
+        direction LR
 
-' ===== BÊN PHẢI (3 actor) =====
-actor "Nhân viên Bếp" as Kitchen
-actor "Nhân viên Kho" as Inventory
-actor "Quản lý" as Manager
+        subgraph G1["Xác thực và thực đơn"]
+            UC01(["UC-01<br/>Đăng nhập"])
+            UC02(["UC-02<br/>Xem thực đơn"])
+        end
 
-rectangle "ResMan" {
+        subgraph G2["Phiên, gọi món và thanh toán"]
+            UC03(["UC-03<br/>Mở phiên"])
+            UC04(["UC-04<br/>Gọi món"])
+            UC05(["UC-05<br/>Theo dõi đơn/món"])
+            UC06(["UC-06<br/>Hủy món"])
+            UC11(["UC-11<br/>Yêu cầu thanh toán"])
+            UC12(["UC-12<br/>Xác nhận thanh toán"])
+        end
 
-  rectangle "Xác thực và thực đơn" as G1 {
-    usecase "UC-01\nĐăng nhập" as UC01
-    usecase "UC-02\nXem thực đơn" as UC02
-  }
+        subgraph G3["Vận hành"]
+            UC07(["UC-07<br/>Quản lý bàn"])
+            UC09(["UC-09<br/>Xử lý KDS"])
+            UC10(["UC-10<br/>Quản lý kho"])
+        end
 
-  rectangle "Phiên, gọi món và thanh toán" as G2 {
-    usecase "UC-03\nMở phiên" as UC03
-    usecase "UC-04\nGọi món" as UC04
-    usecase "UC-05\nTheo dõi đơn/món" as UC05
-    usecase "UC-06\nHủy món" as UC06
-    usecase "UC-11\nYêu cầu thanh toán" as UC11
-    usecase "UC-12\nXác nhận thanh toán" as UC12
-  }
+        subgraph G4["Quản trị và báo cáo"]
+            UC08(["UC-08<br/>Quản lý thực đơn"])
+            UC13(["UC-13<br/>Quản lý tài khoản"])
+            UC14(["UC-14<br/>Xem báo cáo"])
+            UC15(["UC-15<br/>Tra cứu nhật ký kiểm toán<br/>(Đề xuất)"])
+        end
+    end
 
-  rectangle "Vận hành" as G3 {
-    usecase "UC-07\nQuản lý bàn" as UC07
-    usecase "UC-09\nXử lý KDS" as UC09
-    usecase "UC-10\nQuản lý kho" as UC10
-  }
+    %% ===== Actor bên phải (3) =====
+    Kitchen("👤 Nhân viên Bếp")
+    Inventory("👤 Nhân viên Kho")
+    Manager("👤 Quản lý")
 
-  rectangle "Quản trị và báo cáo" as G4 {
-    usecase "UC-08\nQuản lý thực đơn" as UC08
-    usecase "UC-13\nQuản lý tài khoản" as UC13
-    usecase "UC-14\nXem báo cáo" as UC14
-    usecase "UC-15\nTra cứu nhật ký kiểm toán\n(Đề xuất)" as UC15
-  }
-}
+    NOTE15["Đề xuất để đáp ứng phần tra cứu của FR-24.<br/>Hiện chưa có API đọc nhật ký kiểm toán."]
 
-' ===== Bố cục: ép thứ tự các nhóm từ trái sang phải =====
-G1 -[hidden]right- G2
-G2 -[hidden]right- G3
-G3 -[hidden]right- G4
+    %% ===== Khách hàng =====
+    Customer --- UC01
+    Customer --- UC02
+    Customer --- UC03
+    Customer --- UC04
+    Customer --- UC05
+    Customer --- UC06
+    Customer --- UC11
 
-' ===== Actor bên trái -> use case =====
-Customer -- UC01
-Customer -- UC02
-Customer -- UC03
-Customer -- UC04
-Customer -- UC05
-Customer -- UC06
-Customer -- UC11
+    %% ===== Nhân viên Order =====
+    OrderStaff --- UC01
+    OrderStaff --- UC02
+    OrderStaff --- UC03
+    OrderStaff --- UC04
+    OrderStaff --- UC05
+    OrderStaff --- UC06
+    OrderStaff --- UC07
+    OrderStaff --- UC12
 
-OrderStaff -- UC01
-OrderStaff -- UC02
-OrderStaff -- UC03
-OrderStaff -- UC04
-OrderStaff -- UC05
-OrderStaff -- UC06
-OrderStaff -- UC07
-OrderStaff -- UC12
+    %% ===== Nhân viên Bếp =====
+    UC01 --- Kitchen
+    UC06 --- Kitchen
+    UC09 --- Kitchen
 
-' ===== Actor bên phải (viết use case trước để actor nằm bên phải) =====
-UC01 -- Kitchen
-UC06 -- Kitchen
-UC09 -- Kitchen
+    %% ===== Nhân viên Kho =====
+    UC01 --- Inventory
+    UC10 --- Inventory
 
-UC01 -- Inventory
-UC10 -- Inventory
+    %% ===== Quản lý =====
+    UC01 --- Manager
+    UC02 --- Manager
+    UC03 --- Manager
+    UC04 --- Manager
+    UC05 --- Manager
+    UC06 --- Manager
+    UC07 --- Manager
+    UC08 --- Manager
+    UC09 --- Manager
+    UC10 --- Manager
+    UC12 --- Manager
+    UC13 --- Manager
+    UC14 --- Manager
+    UC15 --- Manager
 
-UC01 -- Manager
-UC02 -- Manager
-UC03 -- Manager
-UC04 -- Manager
-UC05 -- Manager
-UC06 -- Manager
-UC07 -- Manager
-UC08 -- Manager
-UC09 -- Manager
-UC10 -- Manager
-UC12 -- Manager
-UC13 -- Manager
-UC14 -- Manager
-UC15 -- Manager
+    NOTE15 -.- UC15
 
-note bottom of UC15
-  Đề xuất để đáp ứng phần tra cứu của FR-24.
-  Hiện chưa có endpoint/controller đọc AuditLog.
-end note
-@enduml
+    %% ===== Định dạng =====
+    classDef actor fill:#E0F2FE,stroke:#0369A1,stroke-width:2px,color:#0C4A6E;
+    classDef uc fill:#F8FAFC,stroke:#334155,color:#0F172A;
+    classDef note fill:#FEF9C3,stroke:#A16207,color:#713F12;
+
+    class Customer,OrderStaff,Kitchen,Inventory,Manager actor;
+    class UC01,UC02,UC03,UC04,UC05,UC06,UC07,UC08,UC09,UC10,UC11,UC12,UC13,UC14,UC15 uc;
+    class NOTE15 note;
+```
