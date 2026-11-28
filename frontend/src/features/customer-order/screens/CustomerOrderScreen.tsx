@@ -95,6 +95,7 @@ export function CustomerOrderScreen() {
     mealSuggestions,
     suggestionMessage,
     recommendationAvailable,
+    setSurveyRecommendations,
     addToCart,
     updateCartQuantity,
     removeFromCart,
@@ -680,22 +681,30 @@ export function CustomerOrderScreen() {
                 onChange={setSelectedCategoryId}
                 options={[
                   { key: 'ALL', label: 'Tất cả' },
+                  { key: 'RECOMMENDATIONS', label: 'Gợi ý' },
                   ...categories.map((cat) => ({ key: cat.id, label: cat.name })),
                 ]}
               />
             </Card>
 
-            <MealSuggestionCard
-              items={mealSuggestions}
-              message={suggestionMessage}
-              available={recommendationAvailable}
-              onAdd={(dish) => {
-                addToCart(dish, 1, [], '');
-                showToast('Đã thêm món được gợi ý vào giỏ', 'success', dish.name);
-              }}
-            />
+            {selectedCategoryId === 'RECOMMENDATIONS' ? (
+              <MealSuggestionCard
+                items={mealSuggestions}
+                message={suggestionMessage}
+                available={recommendationAvailable}
+                onRecommendations={(nextItems, nextMessage, nextAvailable) => {
+                  // Survey answers are kept only in this component's memory, not persisted.
+                  // The hook state is refreshed with the returned recommendation list.
+                  setSurveyRecommendations(nextItems, nextMessage, nextAvailable);
+                }}
+                onAdd={(dish) => {
+                  addToCart(dish, 1, [], '');
+                  showToast('Đã thêm món được gợi ý vào giỏ', 'success', dish.name);
+                }}
+              />
+            ) : null}
 
-            {items.length === 0 ? (
+            {selectedCategoryId !== 'RECOMMENDATIONS' && (items.length === 0 ? (
               <EmptyState
                 title="Không có món ăn phù hợp"
                 description="Vui lòng chọn danh mục khác hoặc xóa từ khóa tìm kiếm."
@@ -823,7 +832,7 @@ export function CustomerOrderScreen() {
                   );
                 })}
               </View>
-            )}
+            ))}
           </View>
         ) : null}
 
