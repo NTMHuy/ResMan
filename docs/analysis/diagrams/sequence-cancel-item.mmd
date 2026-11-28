@@ -20,7 +20,7 @@ sequenceDiagram
         CustomerCtrl->>Orders: cancelCustomerItem(userId, itemId)
         Orders->>DB: Tìm TableDevice, phiên OPEN, OrderItem thuộc Order
         Orders->>Orders: Kiểm tra status = AWAITING_ACCEPTANCE
-        Orders->>DB: BEGIN Serializable
+        Orders->>DB: BEGIN transaction (default isolation)
         Orders->>DB: UPDATE OrderItem.status = CANCELLED
         Orders->>DB: INSERT OrderItemStatusHistory + AuditLog
         Orders->>DB: COMMIT
