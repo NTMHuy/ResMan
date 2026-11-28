@@ -39,5 +39,5 @@ sequenceDiagram
             UI-->>Kitchen: Hiển thị queue mới
         end
     end
-    Note over Svc: Code cho phép AWAITING_ACCEPTANCE→ACCEPTED/CANCELLED; ACCEPTED→IN_PREPARATION/CANCELLED; IN_PREPARATION→COMPLETED/CANCELLED.
-    Note over Svc: IN_PREPARATION→ACCEPTED là Quy tắc nghiệp vụ, chưa triển khai.
+    Note over Svc: Code cho phép AWAITING_ACCEPTANCE to ACCEPTED or CANCELLED, ACCEPTED to IN_PREPARATION or CANCELLED, IN_PREPARATION to COMPLETED or CANCELLED.
+    Note over Svc: IN_PREPARATION to ACCEPTED là Quy tắc nghiệp vụ, chưa triển khai.
