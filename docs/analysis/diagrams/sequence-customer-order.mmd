@@ -25,7 +25,7 @@ sequenceDiagram
   alt Có phiên OPEN
     SS->>DB: Lấy phiên và Order hiện tại
   else Bàn AVAILABLE
-    SS->>DB: Transaction tạo DiningSession + Order; cập nhật OCCUPIED
+    SS->>DB: Transaction tạo DiningSession + Order và cập nhật trạng thái bàn thành OCCUPIED
   end
   DB-->>SS: Session snapshot
   SS-->>Repo: Session id
