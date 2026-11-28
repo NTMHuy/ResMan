@@ -35,8 +35,10 @@ sequenceDiagram
   Order->>OS: addCustomerItems(userId, items)
   OS->>DB: Kiểm tra bàn/phiên/món/giá
   OS->>DB: Transaction tạo OrderItem + history + audit
-  DB-->>OS: Created items (JSON key itemName)
-  OS-->>UI: Order result
+  DB-->>OS: Created items (Prisma itemNameSnapshot)
+  OS-->>Order: Response maps itemNameSnapshot to JSON itemName
+  Order-->>Repo: HTTP 201
+  Repo-->>UI: Order result
   loop Polling 5 giây
     UI->>Repo: loadCustomerData(true) + getActiveSession()
     Repo->>Menu: GET /api/v1/menu-items/customer/menu (public)
@@ -50,6 +52,9 @@ sequenceDiagram
     Guard-->>Session: Cho phép
     Session->>SS: getActiveForCustomer(userId)
     SS->>DB: Đọc phiên OPEN theo TableDevice
-    DB-->>UI: Menu + current order + active session snapshot
+    DB-->>OS: Session, Order and OrderItems
+    OS-->>Order: Current customer session
+    Order-->>Repo: HTTP 200
+    Repo-->>UI: Menu + current order + active session snapshot
   end
   UI-->>Customer: Hiển thị món và trạng thái mới
