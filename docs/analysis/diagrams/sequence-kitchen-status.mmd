@@ -9,23 +9,24 @@ sequenceDiagram
     participant DB as Cơ sở dữ liệu
 
     Kitchen->>UI: Chọn món và trạng thái tiếp theo
-    UI->>UI: Quy đổi trạng thái hiển thị sang trạng thái nghiệp vụ (Hủy bỏ thành Đã hủy)
+    UI->>UI: Quy đổi trạng thái hiển thị sang trạng thái nghiệp vụ
     UI->>Auth: Gửi yêu cầu đổi trạng thái món kèm thông tin đăng nhập
     Auth->>Auth: Kiểm tra đăng nhập và quyền cập nhật món tại bếp
     Auth-->>UI: Cho phép
-    UI->>KitchenSvc: Yêu cầu chuyển món sang trạng thái mới (kèm lý do nếu có)
+    UI->>KitchenSvc: Yêu cầu chuyển món sang trạng thái mới
 
-    KitchenSvc->>DB: Mở giao dịch có kiểm soát xung đột khi nhiều người cùng thao tác
+    KitchenSvc->>DB: Mở giao dịch có kiểm soát xung đột
     KitchenSvc->>DB: Đọc món, đơn hàng và phiên phục vụ liên quan
     DB-->>KitchenSvc: Trạng thái hiện tại của món và trạng thái phiên
     KitchenSvc->>KitchenSvc: Kiểm tra phiên đang mở và việc chuyển trạng thái được phép
 
     alt Không hợp lệ, phiên đã đóng hoặc thiếu lý do khi hủy
         KitchenSvc->>DB: Hủy bỏ giao dịch
-        KitchenSvc-->>UI: Báo lỗi (xung đột hoặc không tìm thấy)
+        KitchenSvc-->>UI: Báo lỗi
         UI-->>Kitchen: Hiển thị thông báo lỗi
     else Hợp lệ
-        KitchenSvc->>DB: Chuyển món sang trạng thái mới, chỉ khi trạng thái chưa bị thay đổi
+        KitchenSvc->>DB: Cập nhật trạng thái món nếu trạng thái chưa bị thay đổi
+
         alt Không cập nhật được đúng một món
             KitchenSvc->>DB: Hủy bỏ giao dịch
             KitchenSvc-->>UI: Báo xung đột do có người khác vừa cập nhật món
@@ -41,5 +42,7 @@ sequenceDiagram
         end
     end
 
-    Note over KitchenSvc: Hệ thống hiện cho phép: Chờ tiếp nhận sang Đã tiếp nhận hoặc Đã hủy; Đã tiếp nhận sang Đang chế biến hoặc Đã hủy; Đang chế biến sang Hoàn thành hoặc Đã hủy
-    Note over KitchenSvc: Đang chế biến quay lại Đã tiếp nhận là quy tắc nghiệp vụ đã xác nhận, chưa triển khai
+    Note over KitchenSvc: Chờ tiếp nhận có thể chuyển sang Đã tiếp nhận hoặc Đã hủy
+    Note over KitchenSvc: Đã tiếp nhận có thể chuyển sang Đang chế biến hoặc Đã hủy
+    Note over KitchenSvc: Đang chế biến có thể chuyển sang Hoàn thành hoặc Đã hủy
+    Note over KitchenSvc: Chuyển từ Đang chế biến về Đã tiếp nhận chưa được triển khai
