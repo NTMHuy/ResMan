@@ -41,6 +41,8 @@ export function useCustomerOrder() {
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
   const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
+  const activeSessionIdRef = useRef(activeSessionId);
+  activeSessionIdRef.current = activeSessionId;
   const surveyRequestRef = useRef<MealRecommendationRequest | null>(null);
   const recommendationRequestRef = useRef(0);
   const previousSessionIdRef = useRef(activeSessionId);
@@ -159,10 +161,10 @@ export function useCustomerOrder() {
         try {
           const session = await repositories.customerOrder.getActiveSession();
 
-          // Bỏ qua phản hồi của lần polling cũ nếu activeSessionId đã đổi.
-          // Nếu không, request bắt đầu trước lúc mở phiên có thể trả null muộn
-          // và ghi đè phiên mới, kéo theo việc xóa kết quả khảo sát.
-          if (!effectActive) return;
+          // Bỏ qua phản hồi cũ nếu component đã cleanup hoặc state phiên đã đổi
+          // trong lúc request đang chạy. Đặc biệt tránh response null cũ ghi đè
+          // phiên vừa mở và làm mất kết quả khảo sát.
+          if (!effectActive || activeSessionIdRef.current !== activeSessionId) return;
           if (session?.id === activeSessionId) return;
 
           setActiveSessionId(session?.id ?? null);
