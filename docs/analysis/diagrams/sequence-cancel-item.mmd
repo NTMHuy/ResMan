@@ -54,4 +54,4 @@ sequenceDiagram
         KitchenSvc-->>KitchenCtrl: { id, status: CANCELLED }
         KitchenCtrl-->>UI: HTTP 200
     end
-    Note over Orders,DB: Hủy là cập nhật trạng thái; không DELETE vật lý OrderItem.
+    Note over Orders, DB: Hủy chỉ cập nhật trạng thái; OrderItem không bị xóa vật lý
