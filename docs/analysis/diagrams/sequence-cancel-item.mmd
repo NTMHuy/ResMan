@@ -22,7 +22,7 @@ sequenceDiagram
         Orders->>Orders: Kiểm tra status = AWAITING_ACCEPTANCE
         Orders->>DB: BEGIN transaction (default isolation)
         Orders->>DB: UPDATE OrderItem.status = CANCELLED
-        Orders->>DB: INSERT OrderItemStatusHistory và AuditLog
+        Orders->>DB: INSERT OrderItemStatusHistory + AuditLog
         Orders->>DB: COMMIT
         Orders-->>CustomerCtrl: { id, status: CANCELLED }
         CustomerCtrl-->>UI: HTTP 200
@@ -36,7 +36,7 @@ sequenceDiagram
         Orders->>Orders: Kiểm tra phiên OPEN, status AWAITING_ACCEPTANCE hoặc ACCEPTED
         Orders->>DB: BEGIN transaction
         Orders->>DB: Conditional UPDATE status = CANCELLED
-        Orders->>DB: INSERT History và AuditLog
+        Orders->>DB: INSERT History + AuditLog
         Orders->>DB: COMMIT
         Orders-->>StaffCtrl: { id, status: CANCELLED }
         StaffCtrl-->>UI: HTTP 200
@@ -46,12 +46,13 @@ sequenceDiagram
         KitchenCtrl->>Guard: JWT + kitchen:update-item
         Guard-->>KitchenCtrl: Cho phép
         KitchenCtrl->>KitchenSvc: updateStatus(itemId, CANCELLED, reason, actorId)
-        KitchenSvc->>DB: Bắt đầu transaction Serializable, đọc OrderItem và DiningSession
+        KitchenSvc->>DB: BEGIN Serializable; đọc OrderItem + DiningSession
         KitchenSvc->>KitchenSvc: Kiểm tra trạng thái cho phép và reason bắt buộc
         KitchenSvc->>DB: Conditional UPDATE status = CANCELLED
-        KitchenSvc->>DB: INSERT History và AuditLog
+        KitchenSvc->>DB: INSERT History + AuditLog
         KitchenSvc->>DB: COMMIT
         KitchenSvc-->>KitchenCtrl: { id, status: CANCELLED }
         KitchenCtrl-->>UI: HTTP 200
     end
-    Note over Orders, DB: Hủy chỉ cập nhật trạng thái; OrderItem không bị xóa vật lý
+
+    Note right of Orders: Hủy chỉ cập nhật trạng thái; OrderItem không bị xóa vật lý
