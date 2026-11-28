@@ -2,16 +2,22 @@ sequenceDiagram
   actor Staff as Nhân viên Order
   participant UI as OrdersScreen / PaymentModal
   participant C as PaymentsController
+  participant Guard as JwtAuthGuard + PermissionsGuard
   participant S as PaymentsService
   participant DB as PostgreSQL / Prisma
   Staff->>UI: Xem yêu cầu và tổng kết phiên
   UI->>C: GET /api/v1/payments/sessions/:id/summary [Bearer]
+  C->>Guard: JWT + payments:read
+  Guard-->>C: Cho phép
   C->>S: getSessionSummary(sessionId)
   S->>DB: Load session, order, items
-  DB-->>UI: Summary
+  DB-->>S: Summary snapshot
+  S-->>UI: Summary
   Staff->>UI: Xác nhận đã nhận tiền
   UI->>C: POST /api/v1/payments/sessions/:id/confirm [Bearer]
-  C->>S: confirmForSession(sessionId, actorId, method, ref)
+  C->>Guard: JWT + payments:confirm
+  Guard-->>C: Cho phép
+  C->>S: confirmForSession(sessionId, actorId, method?, ref?)
   S->>DB: BEGIN SERIALIZABLE
   S->>DB: Load session/order/items/payment
   S->>S: Check OPEN, no payment, no AWAITING_ACCEPTANCE
@@ -19,8 +25,8 @@ sequenceDiagram
     S->>DB: ROLLBACK
     S-->>UI: HTTP conflict / not found
   else Điều kiện đạt
-    S->>DB: Create Payment PAID
-    S->>DB: PaymentRequest PENDING -> COMPLETED
+    S->>DB: Create Payment PAID (paymentMethod may be null)
+    S->>DB: PaymentRequest PENDING -> COMPLETED (if present)
     S->>DB: DiningSession OPEN -> CLOSED
     S->>DB: DiningTable OCCUPIED -> AVAILABLE
     S->>DB: Create AuditLog; COMMIT
