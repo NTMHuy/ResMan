@@ -3,6 +3,7 @@ import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
 import { mealRecommendationService } from '@/src/features/customer-order/services/mealRecommendationService';
+import type { MealRecommendationRequest } from '@/src/features/customer-order/services/mealRecommendationService';
 import type {
   CartItem,
   CustomerOrderTracking,
@@ -40,9 +41,15 @@ export function useCustomerOrder() {
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
   const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
-  const recommendationSourceRef = useRef<'AUTO' | 'SURVEY' | null>(null);
+  const surveyRequestRef = useRef<MealRecommendationRequest | null>(null);
   const recommendationRequestRef = useRef(0);
   const previousSessionIdRef = useRef(activeSessionId);
+  const orderedItemsSignature = useMemo(() => tableOrders
+    .flatMap((order) => order.items)
+    .filter((item) => item.kitchenStatus !== 'VOIDED')
+    .map((item) => `${item.menuItemId}:${item.quantity}`)
+    .sort()
+    .join('|'), [tableOrders]);
 
   const loadCustomerData = useCallback(
     async (silent = false) => {
@@ -178,7 +185,7 @@ export function useCustomerOrder() {
   useEffect(() => {
     if (previousSessionIdRef.current === activeSessionId) return;
     previousSessionIdRef.current = activeSessionId;
-    recommendationSourceRef.current = null;
+    surveyRequestRef.current = null;
     recommendationRequestRef.current += 1;
     setMealSuggestions([]);
     setRecommendationAvailable(false);
@@ -186,23 +193,31 @@ export function useCustomerOrder() {
   }, [activeSessionId]);
 
   useEffect(() => {
-    if (recommendationSourceRef.current === 'SURVEY') return;
-
     let active = true;
     const requestId = ++recommendationRequestRef.current;
-    const hasOrderedItems = tableOrders.some((order) =>
-      order.items.some((item) => item.kitchenStatus !== 'VOIDED'),
-    );
-    if (!activeSessionId || !hasOrderedItems) {
+
+    if (!activeSessionId) {
       setMealSuggestions([]);
       setRecommendationAvailable(false);
       setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
       return () => { active = false; };
     }
 
-    void mealRecommendationService.getRecommendations({ k: 6 }).then((result) => {
-      if (!active || requestId !== recommendationRequestRef.current ||
-        recommendationSourceRef.current === 'SURVEY') return;
+    if (!orderedItemsSignature) {
+      if (!surveyRequestRef.current) {
+        setMealSuggestions([]);
+        setRecommendationAvailable(false);
+        setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+      }
+      return () => { active = false; };
+    }
+
+    const surveyRequest = surveyRequestRef.current;
+    void mealRecommendationService.getRecommendations({
+      ...(surveyRequest ?? {}),
+      k: surveyRequest?.k ?? 6,
+    }).then((result) => {
+      if (!active || requestId !== recommendationRequestRef.current) return;
       setMealSuggestions(result.items.filter((item) =>
         item.price > 0 &&
         item.pricingType !== 'MARKET_PRICE' &&
@@ -211,14 +226,12 @@ export function useCustomerOrder() {
       setSuggestionMessage(result.message);
       setRecommendationAvailable(result.available);
     }).catch(() => {
-      if (!active || requestId !== recommendationRequestRef.current ||
-        recommendationSourceRef.current === 'SURVEY') return;
-      setMealSuggestions([]);
+      if (!active || requestId !== recommendationRequestRef.current) return;
       setSuggestionMessage('Chưa thể tải gợi ý AI. Bạn vẫn có thể chọn món trong thực đơn.');
       setRecommendationAvailable(false);
     });
     return () => { active = false; };
-  }, [activeSessionId, tableOrders]);
+  }, [activeSessionId, orderedItemsSignature]);
 
   const changeTable = useCallback(
     (nextTable: string) => {
@@ -408,9 +421,14 @@ export function useCustomerOrder() {
     mealSuggestions,
     suggestionMessage,
     recommendationAvailable,
-    setSurveyRecommendations: (nextItems: MenuItem[], nextMessage: string, nextAvailable: boolean) => {
+    setSurveyRecommendations: (
+      nextItems: MenuItem[],
+      nextMessage: string,
+      nextAvailable: boolean,
+      request: MealRecommendationRequest,
+    ) => {
       recommendationRequestRef.current += 1;
-      recommendationSourceRef.current = 'SURVEY';
+      surveyRequestRef.current = request;
       setMealSuggestions(nextItems);
       setSuggestionMessage(nextMessage);
       setRecommendationAvailable(nextAvailable);
