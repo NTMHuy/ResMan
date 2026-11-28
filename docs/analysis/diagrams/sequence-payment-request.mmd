@@ -1,35 +1,34 @@
 sequenceDiagram
     autonumber
+
     actor Customer as Khách hàng
-    participant UI as CustomerOrderScreen
-    participant Repo as ApiCustomerOrderRepository
-    participant Ctrl as PaymentsController
-    participant Guard as JwtAuthGuard + PermissionsGuard
-    participant Svc as PaymentsService
-    participant DB as Prisma / PostgreSQL
+
+    participant UI as Giao diện ứng dụng
+    participant Auth as Xác thực và phân quyền
+    participant Pay as Xử lý thanh toán
+    participant DB as Cơ sở dữ liệu
 
     Customer->>UI: Chọn yêu cầu thanh toán
-    UI->>Repo: requestPayment()
-    Repo->>Ctrl: POST /api/v1/payments/customer/request
-    Ctrl->>Guard: JWT + payments:request
-    Guard-->>Ctrl: Cho phép
-    Ctrl->>Svc: requestForCustomer(userId)
-    Svc->>DB: Tìm TableDevice theo userId
-    Svc->>DB: Tìm DiningSession OPEN theo diningTableId
-    Svc->>DB: Kiểm tra Payment đã tồn tại
-    alt Không có thiết bị / phiên hoặc đã thanh toán
-        Svc-->>Ctrl: NotFoundException / ConflictException
-        Ctrl-->>Repo: HTTP lỗi
-        Repo-->>UI: Hiển thị lỗi
-    else PaymentRequest đang PENDING
-        Svc-->>Ctrl: Trả lại request hiện tại
-        Ctrl-->>Repo: HTTP 201 (NestJS POST default)
-        Repo-->>UI: Hiển thị đã gửi yêu cầu
-    else Chưa có request hoặc request đã được xử lý
-        Svc->>DB: PaymentRequest.upsert(status=PENDING)
-        DB-->>Svc: PaymentRequest
-        Svc-->>Ctrl: { id, status, requestedAt }
-        Ctrl-->>Repo: HTTP 201
-        Repo-->>UI: Xác nhận đã gửi yêu cầu
+    UI->>Auth: Gửi yêu cầu thanh toán kèm thông tin đăng nhập
+    Auth->>Auth: Kiểm tra đăng nhập và quyền yêu cầu thanh toán
+    Auth-->>UI: Cho phép
+    UI->>Pay: Yêu cầu thanh toán của khách
+
+    Pay->>DB: Xác định bàn được gán cho tài khoản khách
+    Pay->>DB: Tìm phiên phục vụ đang mở của bàn
+    Pay->>DB: Kiểm tra phiên đã có giao dịch thanh toán chưa
+
+    alt Không có bàn được gán, không có phiên đang mở hoặc đã thanh toán
+        Pay-->>UI: Từ chối (không tìm thấy hoặc xung đột)
+        UI-->>Customer: Hiển thị thông báo lỗi
+    else Yêu cầu thanh toán đang ở trạng thái Chờ xử lý
+        Pay-->>UI: Trả lại yêu cầu thanh toán hiện có
+        UI-->>Customer: Hiển thị đã gửi yêu cầu
+    else Chưa có yêu cầu hoặc yêu cầu trước đã được xử lý
+        Pay->>DB: Tạo mới hoặc cập nhật yêu cầu thanh toán về trạng thái Chờ xử lý
+        DB-->>Pay: Yêu cầu thanh toán
+        Pay-->>UI: Mã yêu cầu, trạng thái và thời điểm yêu cầu
+        UI-->>Customer: Xác nhận đã gửi yêu cầu
     end
-    Note over Svc,DB: Luồng request dùng kiểm tra + upsert. Không được bọc trong transaction nhiều bước.
+
+    Note over Pay,DB: Luồng này kiểm tra rồi tạo mới hoặc cập nhật yêu cầu, không bọc trong một giao dịch nhiều bước
