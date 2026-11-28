@@ -390,6 +390,11 @@ export function useCustomerOrder() {
     mealSuggestions,
     suggestionMessage,
     recommendationAvailable,
+    setSurveyRecommendations: (nextItems: MenuItem[], nextMessage: string, nextAvailable: boolean) => {
+      setMealSuggestions(nextItems);
+      setSuggestionMessage(nextMessage);
+      setRecommendationAvailable(nextAvailable);
+    },
     addToCart,
     updateCartQuantity,
     removeFromCart,
