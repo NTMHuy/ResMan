@@ -629,7 +629,7 @@ Response HTTP 201 (token minh họa):
 
 **Gửi món – POST /api/v1/customer/session/items**
 
-Header: Authorization: Bearer <JWT>
+Header: Authorization: Bearer `<JWT>`
 
 Request:
 
@@ -659,7 +659,7 @@ Response HTTP 201:
 
 **Hủy món khách – DELETE /api/v1/customer/session/items/101**
 
-Header: Authorization: Bearer <JWT>
+Header: Authorization: Bearer `<JWT>`
 
 Response HTTP 200:
 
@@ -667,7 +667,7 @@ Response HTTP 200:
 
 **Bếp cập nhật trạng thái – PATCH /api/v1/kitchen/items/101/status**
 
-Header: Authorization: Bearer <JWT>
+Header: Authorization: Bearer `<JWT>`
 
 Request:
 
@@ -683,7 +683,7 @@ Khi hủy bởi bếp, body hiện tại cần có reason vì KitchenService ki�
 
 **Xác nhận thanh toán – POST /api/v1/payments/sessions/55/confirm**
 
-Header: Authorization: Bearer <JWT>
+Header: Authorization: Bearer `<JWT>`
 
 Request:
 
