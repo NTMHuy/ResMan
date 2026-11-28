@@ -4,19 +4,22 @@ sequenceDiagram
   participant Repo as ApiCustomerOrderRepository
   participant Menu as GuestMenuController
   participant Session as SessionsController
+  participant Guard as JwtAuthGuard + PermissionsGuard
   participant SS as SessionsService
   participant Order as OrdersController
   participant OS as OrdersService
   participant DB as PostgreSQL / Prisma
   Customer->>UI: Mở màn hình đặt món
   UI->>Repo: getCustomerMenu()
-  Repo->>Menu: GET /api/v1/menu-items/customer/menu (public)
+  Repo->>Menu: GET /api/v1/menu-items/customer/menu (public read-only)
   Menu->>DB: findCustomerMenu()
   DB-->>Menu: Categories + available items
   Menu-->>Repo: HTTP 200
   Customer->>UI: Chọn món và gửi
   UI->>Repo: startSession()
   Repo->>Session: POST /api/v1/sessions/customer/open [Bearer]
+  Session->>Guard: JWT + customer:session:start
+  Guard-->>Session: Cho phép
   Session->>SS: openForCustomer(userId)
   SS->>DB: Tìm TableDevice theo userId
   alt Có phiên OPEN
@@ -27,9 +30,21 @@ sequenceDiagram
   DB-->>SS: Session snapshot
   SS-->>Repo: Session id
   Repo->>Order: POST /api/v1/customer/session/items [Bearer]
+  Order->>Guard: JWT + customer:order:create-item
+  Guard-->>Order: Cho phép
   Order->>OS: addCustomerItems(userId, items)
   OS->>DB: Kiểm tra bàn/phiên/món/giá
   OS->>DB: Transaction tạo OrderItem + history + audit
-  DB-->>OS: Created items
+  DB-->>OS: Created items (JSON key itemName)
   OS-->>UI: Order result
-  UI-->>Customer: Hiển thị món đã gửi
+  loop Polling 5 giây
+    UI->>Repo: getCustomerMenu() + getRecentTableOrders()
+    Repo->>Menu: GET public menu
+    Repo->>Order: GET /api/v1/customer/session [Bearer]
+    Order->>Guard: JWT + customer:session:read
+    Guard-->>Order: Cho phép
+    Order->>OS: getCustomerSession(userId)
+    OS->>DB: Đọc phiên, Order và OrderItems
+    DB-->>UI: Menu + current order snapshot
+  end
+  UI-->>Customer: Hiển thị món và trạng thái mới
