@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách hàng
+    participant UI as CustomerOrderScreen
+    participant Repo as ApiCustomerOrderRepository
+    participant Ctrl as PaymentsController
+    participant Guard as JwtAuthGuard + PermissionsGuard
+    participant Svc as PaymentsService
+    participant DB as Prisma / PostgreSQL
+
+    Customer->>UI: Chọn yêu cầu thanh toán
+    UI->>Repo: requestPayment()
+    Repo->>Ctrl: POST /api/v1/payments/customer/request
+    Ctrl->>Guard: JWT + payments:request
+    Guard-->>Ctrl: Cho phép
+    Ctrl->>Svc: requestForCustomer(userId)
+    Svc->>DB: Tìm TableDevice theo userId
+    Svc->>DB: Tìm DiningSession OPEN theo diningTableId
+    Svc->>DB: Kiểm tra Payment đã tồn tại
+    alt Không có thiết bị / phiên hoặc đã thanh toán
+        Svc-->>Ctrl: NotFoundException / ConflictException
+        Ctrl-->>Repo: HTTP lỗi
+        Repo-->>UI: Hiển thị lỗi
+    else PaymentRequest đang PENDING
+        Svc-->>Ctrl: Trả lại request hiện tại
+        Ctrl-->>Repo: HTTP 200
+        Repo-->>UI: Hiển thị đã gửi yêu cầu
+    else Chưa có request hoặc request đã được xử lý
+        Svc->>DB: PaymentRequest.upsert(status=PENDING)
+        DB-->>Svc: PaymentRequest
+        Svc-->>Ctrl: { id, status, requestedAt }
+        Ctrl-->>Repo: HTTP 201
+        Repo-->>UI: Xác nhận đã gửi yêu cầu
+    end
+    Note over Svc,DB: Luồng request dùng kiểm tra + upsert; không được bọc trong transaction nhiều bước.
