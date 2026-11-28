@@ -49,6 +49,11 @@ Kitchen --> UC09
 Inventory --> UC01
 Inventory --> UC10
 Manager --> UC01
+Manager --> UC02
+Manager --> UC03
+Manager --> UC04
+Manager --> UC05
+Manager --> UC06
 Manager --> UC07
 Manager --> UC08
 Manager --> UC09
