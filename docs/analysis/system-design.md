@@ -937,7 +937,7 @@ Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữ
 | TD-04 | kitchen.service.ts:56–60; Business Rules 4.2 | Bếp được hủy từ ba trạng thái; phạm vi trạng thái được phép chưa được chốt đầy đủ | Chủ dự án xác nhận ma trận hủy và bổ sung test | Chưa xác nhận quy tắc | Trung bình |
 | TD-05 | auth.controller.ts:8–16; không tìm thấy Throttler/RateLimit trong backend/src | Login có thể bị thử mật khẩu lặp lại | Thêm rate limit theo IP/tài khoản và audit an toàn | Còn tồn tại | Cao |
 | TD-06 | auth.controller.ts:8–18; auth.module.ts:20; AuthContext.tsx:155–164 | Không có endpoint logout/refresh/revoke; token có hiệu lực đến hết hạn nếu chưa khóa user | Xem xét refresh rotation, revoke hoặc session version | Còn tồn tại | Trung bình |
-| TD-07 | prisma/migrations/20261126170000_add_payment_requests/migration.sql; schema.prisma:294–301 | PaymentRequest.status là VARCHAR không có CHECK constraint trong migration | Chốt miền trạng thái và thêm CHECK/migration an toàn | Còn tồn tại | Trung bình |
+| TD-07 | prisma/migrations/20261126170000_add_payment_requests/migration.sql; schema.prisma:285–295 | PaymentRequest.status là VARCHAR không có CHECK constraint trong migration | Chốt miền trạng thái và thêm CHECK/migration an toàn | Còn tồn tại | Trung bình |
 | TD-08 | orders.service.ts:45–86; OrdersController.ts và StaffOrdersController.ts không expose helper | Helper legacy T01–T20 không phù hợp mô hình tablet gán cố định, không cho khách chọn bàn | Xác nhận không có consumer ngoài repository rồi loại bỏ helper | Còn tồn tại | Trung bình |
 | TD-09 | guest-menu.controller.ts:1–14; GuestMenuController không gắn guard | Chưa rõ menu read được chủ ý public hay phải yêu cầu CUSTOMER JWT | Chốt chính sách truy cập; nếu private thì thêm guard và test | Cần quyết định chính sách | Trung bình |
 | TD-10 | main.ts:55; ApiCustomerOrderRepository.ts không gửi X-Session-Code trong flow hiện tại | Header CORS dư thừa có thể gây nhầm với cơ chế xác thực cũ | Loại bỏ sau khi xác nhận không còn client legacy | Còn tồn tại | Thấp |
@@ -950,6 +950,7 @@ Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữ
 | TD-17 | useKds.ts:48–50; useCustomerOrder.ts:151–183 | Polling 8s/5s gây trễ và tải đọc định kỳ; không có push realtime | Cân nhắc SSE/WebSocket sau khi có yêu cầu tải và realtime rõ ràng | Mới phát hiện | Thấp |
 | TD-18 | schema.prisma:190–207, 286–302; payments.service.ts:85–211 | Payment không có discount, VAT, cash received hoặc change due; chưa hỗ trợ chia nhiều lần | Chỉ mở rộng khi requirement nghiệp vụ yêu cầu; thiết kế migration và quy tắc tính tiền | Mới phát hiện / cần xác nhận phạm vi | Trung bình |
 | TD-19 | backend-validation.yml:1–35; frontend-validation.yml:1–29; backend/package.json scripts | CI hiện validate/build/typecheck, chưa có test tự động; chưa thấy CD workflow | Bổ sung unit/integration/e2e và pipeline deploy có approval/rollback | Mới phát hiện | Trung bình |
+| TD-20 | schema.prisma:269–276; inventory-count.dto.ts:3–8; inventory.service.ts:208–228; migration 20261126180000_add_inventory_count_type/migration.sql | Prisma model mặc định countType=GENERAL, DTO API chỉ nhận OPENING/CLOSING; migration cho phép cả ba giá trị. API hiện yêu cầu countType nên default GENERAL chỉ có thể xuất hiện ở thao tác ghi trực tiếp không qua DTO | Thống nhất miền giá trị và default theo hợp đồng API; giữ GENERAL chỉ khi có luồng khởi tạo dữ liệu cần dùng | Mới phát hiện | Thấp |
 
 
 ### 3.13.1. Các điểm đã kiểm tra riêng
@@ -959,6 +960,7 @@ Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữ
 - **Realtime:** KDS polling 8 giây và customer polling 5 giây; không thấy WebSocket/SSE.
 - **Payment:** Payment lưu amount/paymentMethod/transactionRef/status; không lưu discount, VAT, tiền nhận hoặc tiền thối.
 - **CI/CD:** hai workflow hiện chỉ validate/build backend và typecheck frontend; chưa thấy test suite tự động hoặc CD deployment workflow.
+- **InventoryCountRecord.countType:** schema default GENERAL; API DTO chỉ nhận OPENING/CLOSING; migration cho phép OPENING/CLOSING/GENERAL. Cần thống nhất default với hợp đồng API.
 
 - **PaymentRequest.status CHECK:** không có CHECK trong migration `20261126170000_add_payment_requests`; chỉ có cột VARCHAR, unique index theo session và index theo status/requested_at.
 - **Login throttling:** không tìm thấy `Throttler` hoặc `RateLimit` trong repository; AuthController không khai báo throttle.
