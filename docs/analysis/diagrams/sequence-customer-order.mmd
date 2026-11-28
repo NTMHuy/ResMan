@@ -38,13 +38,18 @@ sequenceDiagram
   DB-->>OS: Created items (JSON key itemName)
   OS-->>UI: Order result
   loop Polling 5 giây
-    UI->>Repo: getCustomerMenu() + getRecentTableOrders()
-    Repo->>Menu: GET public menu
+    UI->>Repo: loadCustomerData(true) + getActiveSession()
+    Repo->>Menu: GET /api/v1/menu-items/customer/menu (public)
     Repo->>Order: GET /api/v1/customer/session [Bearer]
     Order->>Guard: JWT + customer:session:read
     Guard-->>Order: Cho phép
     Order->>OS: getCustomerSession(userId)
     OS->>DB: Đọc phiên, Order và OrderItems
-    DB-->>UI: Menu + current order snapshot
+    Repo->>Session: GET /api/v1/sessions/customer/active [Bearer]
+    Session->>Guard: JWT + customer:session:start
+    Guard-->>Session: Cho phép
+    Session->>SS: getActiveForCustomer(userId)
+    SS->>DB: Đọc phiên OPEN theo TableDevice
+    DB-->>UI: Menu + current order + active session snapshot
   end
   UI-->>Customer: Hiển thị món và trạng thái mới
