@@ -1,3 +1,4 @@
+
 sequenceDiagram
     autonumber
 
@@ -10,20 +11,21 @@ sequenceDiagram
 
     U->>UI: Nhập tên đăng nhập và mật khẩu
     UI->>Auth: Gửi yêu cầu đăng nhập
-    Auth->>DB: Tìm tài khoản theo tên đăng nhập (kèm vai trò, quyền và hồ sơ nhân viên)
-    DB-->>Auth: Tài khoản, vai trò và danh sách quyền
-    Auth->>Auth: Kiểm tra tài khoản đang hoạt động và mật khẩu khớp với mật khẩu đã mã hóa
+    Auth->>DB: Tìm tài khoản theo tên đăng nhập, kèm vai trò và quyền
+    DB-->>Auth: Trả về tài khoản, vai trò và danh sách quyền
+    Auth->>Auth: Kiểm tra trạng thái tài khoản và mật khẩu
 
     alt Tài khoản không hợp lệ
-        Auth-->>UI: Từ chối: chưa xác thực được tài khoản
+        Auth-->>UI: Từ chối xác thực tài khoản
         UI-->>U: Hiển thị thông báo lỗi đăng nhập
-    else Hợp lệ
+    else Tài khoản hợp lệ
         Auth->>DB: Cập nhật thời điểm đăng nhập gần nhất
-        Auth->>Token: Yêu cầu cấp mã truy cập cho tài khoản
-        Token-->>Auth: Mã truy cập (hiệu lực 1 ngày)
-        Auth-->>UI: Mã truy cập, thông tin tài khoản, vai trò và danh sách quyền
+        Auth->>Token: Yêu cầu cấp mã truy cập
+        Token-->>Auth: Trả về mã truy cập có hiệu lực 1 ngày
+        Auth-->>UI: Trả về mã truy cập, thông tin tài khoản và quyền
         UI->>UI: Lưu mã truy cập và thông tin tài khoản
         UI-->>U: Chuyển vào màn hình theo vai trò
     end
 
-    Note over Auth,Token: Các yêu cầu sau đó gửi kèm mã truy cập; hệ thống xác minh mã và tải lại tài khoản cùng danh sách quyền từ cơ sở dữ liệu
+    Note over Auth,Token: Các yêu cầu tiếp theo gửi kèm mã truy cập
+    Note over Auth,DB: Hệ thống xác minh mã và tải lại tài khoản cùng danh sách quyền từ cơ sở dữ liệu
