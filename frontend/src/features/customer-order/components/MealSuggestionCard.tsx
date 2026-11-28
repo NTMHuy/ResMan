@@ -143,11 +143,6 @@ export function MealSuggestionCard({ items, message, available, onAdd, onRecomme
           return renderChoice(option.text, Boolean(answers[key]), () => {
             const next = !answers[key];
             updateAnswer(key, next);
-            if (currentQuestion.id === 'table_members' && next) {
-              (currentQuestion.options ?? []).forEach((entry) => {
-                if (entry.attribute && entry.attribute !== key) updateAnswer(entry.attribute, false);
-              });
-            }
           });
         })}
         {currentQuestion.none_option ? renderChoice(currentQuestion.none_option,
