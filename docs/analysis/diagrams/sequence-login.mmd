@@ -1,27 +1,29 @@
 sequenceDiagram
-  actor U as Người dùng
-  participant UI as LoginScreen
-  participant R as ApiAuthRepository
-  participant C as AuthController
-  participant S as AuthService
-  participant DB as PrismaService / PostgreSQL
-  participant JWT as JwtService
-  U->>UI: Nhập username và password
-  UI->>R: login(credentials)
-  R->>C: POST /api/v1/auth/login
-  C->>S: login(LoginDto)
-  S->>DB: user.findUnique(username, role.permissions, employee)
-  DB-->>S: User / Role / Permission
-  S->>S: isActive && bcrypt.compare()
-  alt Tài khoản không hợp lệ
-    S-->>C: UnauthorizedException
-    C-->>R: HTTP 401
-    R-->>UI: Hiển thị lỗi
-  else Hợp lệ
-    S->>DB: update(lastLoginAt)
-    S->>JWT: signAsync({sub, username})
-    JWT-->>S: accessToken (1 ngày)
-    S-->>C: token + user + role + permissions
-    C-->>R: HTTP 201 (NestJS POST default)
-    R-->>UI: Lưu token / user
-  end
+    autonumber
+
+    actor U as Người dùng
+
+    participant UI as Giao diện ứng dụng
+    participant Auth as Xử lý đăng nhập
+    participant Token as Cấp mã truy cập
+    participant DB as Cơ sở dữ liệu
+
+    U->>UI: Nhập tên đăng nhập và mật khẩu
+    UI->>Auth: Gửi yêu cầu đăng nhập
+    Auth->>DB: Tìm tài khoản theo tên đăng nhập (kèm vai trò, quyền và hồ sơ nhân viên)
+    DB-->>Auth: Tài khoản, vai trò và danh sách quyền
+    Auth->>Auth: Kiểm tra tài khoản đang hoạt động và mật khẩu khớp với mật khẩu đã mã hóa
+
+    alt Tài khoản không hợp lệ
+        Auth-->>UI: Từ chối: chưa xác thực được tài khoản
+        UI-->>U: Hiển thị thông báo lỗi đăng nhập
+    else Hợp lệ
+        Auth->>DB: Cập nhật thời điểm đăng nhập gần nhất
+        Auth->>Token: Yêu cầu cấp mã truy cập cho tài khoản
+        Token-->>Auth: Mã truy cập (hiệu lực 1 ngày)
+        Auth-->>UI: Mã truy cập, thông tin tài khoản, vai trò và danh sách quyền
+        UI->>UI: Lưu mã truy cập và thông tin tài khoản
+        UI-->>U: Chuyển vào màn hình theo vai trò
+    end
+
+    Note over Auth,Token: Các yêu cầu sau đó gửi kèm mã truy cập; hệ thống xác minh mã và tải lại tài khoản cùng danh sách quyền từ cơ sở dữ liệu
