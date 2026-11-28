@@ -31,7 +31,8 @@ sequenceDiagram
     S->>DB: PaymentRequest PENDING -> COMPLETED (if present)
     S->>DB: DiningSession OPEN -> CLOSED
     S->>DB: DiningTable OCCUPIED -> AVAILABLE
-    S->>DB: Create AuditLog; COMMIT
+    S->>DB: Create AuditLog
+    S->>DB: COMMIT
     S-->>C: Payment + closed session
     C-->>UI: Payment + closed session
   end
