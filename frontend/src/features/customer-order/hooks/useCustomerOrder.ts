@@ -184,9 +184,18 @@ export function useCustomerOrder() {
 
   useEffect(() => {
     if (previousSessionIdRef.current === activeSessionId) return;
+
+    const previousSessionId = previousSessionIdRef.current;
     previousSessionIdRef.current = activeSessionId;
-    surveyRequestRef.current = null;
     recommendationRequestRef.current += 1;
+
+    // Khách có thể khảo sát trước khi mở phiên. Khi phiên đầu tiên được mở,
+    // phải giữ nguyên tiêu chí và kết quả khảo sát để tiếp tục dùng cho AI.
+    if (previousSessionId === null && activeSessionId !== null) return;
+
+    // Chỉ xóa khảo sát khi phiên hiện tại thực sự kết thúc hoặc chuyển sang
+    // một phiên khác, tránh mang tiêu chí của bàn/phiên cũ sang phiên mới.
+    surveyRequestRef.current = null;
     setMealSuggestions([]);
     setRecommendationAvailable(false);
     setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
