@@ -1,77 +1,110 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 90
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #475569
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #94A3B8
+}
+skinparam note {
+  BackgroundColor #FEF9C3
+  BorderColor #A16207
+}
 
-sequenceDiagram
-    autonumber
+' ===== BÊN TRÁI (2 actor) =====
+actor "Khách hàng\n(CUSTOMER)" as Customer
+actor "Nhân viên Order" as OrderStaff
 
-    actor Customer as Khách hàng
-    actor OrderStaff as Nhân viên Order
-    actor Kitchen as Nhân viên Bếp
+' ===== BÊN PHẢI (3 actor) =====
+actor "Nhân viên Bếp" as Kitchen
+actor "Nhân viên Kho" as Inventory
+actor "Quản lý" as Manager
 
-    participant UI as Frontend
-    participant Guard as JwtAuthGuard + PermissionsGuard
-    participant CustomerCtrl as OrdersController
-    participant StaffCtrl as StaffOrdersController
-    participant KitchenCtrl as KitchenController
-    participant Orders as OrdersService
-    participant KitchenSvc as KitchenService
-    participant DB as PostgreSQL / Prisma
+rectangle "ResMan" {
 
-    alt Khách hàng hủy món
-        Customer->>UI: Chọn hủy món
-        UI->>CustomerCtrl: DELETE /customer/session/items/:itemId
-        CustomerCtrl->>Guard: JWT + customer:order:cancel-item
-        Guard-->>CustomerCtrl: Cho phép
-        CustomerCtrl->>Orders: cancelCustomerItem(userId, itemId)
+  rectangle "Xác thực và thực đơn" as G1 {
+    usecase "UC-01\nĐăng nhập" as UC01
+    usecase "UC-02\nXem thực đơn" as UC02
+  }
 
-        Orders->>DB: Tìm TableDevice, phiên OPEN và OrderItem
-        Orders->>Orders: Kiểm tra status = AWAITING_ACCEPTANCE
+  rectangle "Phiên, gọi món và thanh toán" as G2 {
+    usecase "UC-03\nMở phiên" as UC03
+    usecase "UC-04\nGọi món" as UC04
+    usecase "UC-05\nTheo dõi đơn/món" as UC05
+    usecase "UC-06\nHủy món" as UC06
+    usecase "UC-11\nYêu cầu thanh toán" as UC11
+    usecase "UC-12\nXác nhận thanh toán" as UC12
+  }
 
-        Orders->>DB: BEGIN transaction (default isolation)
-        Orders->>DB: UPDATE OrderItem.status = CANCELLED
-        Orders->>DB: INSERT OrderItemStatusHistory
-        Orders->>DB: INSERT AuditLog
-        Orders->>DB: COMMIT
+  rectangle "Vận hành" as G3 {
+    usecase "UC-07\nQuản lý bàn" as UC07
+    usecase "UC-09\nXử lý KDS" as UC09
+    usecase "UC-10\nQuản lý kho" as UC10
+  }
 
-        Orders-->>CustomerCtrl: { id, status: CANCELLED }
-        CustomerCtrl-->>UI: HTTP 200
+  rectangle "Quản trị và báo cáo" as G4 {
+    usecase "UC-08\nQuản lý thực đơn" as UC08
+    usecase "UC-13\nQuản lý tài khoản" as UC13
+    usecase "UC-14\nXem báo cáo" as UC14
+    usecase "UC-15\nTra cứu nhật ký kiểm toán\n(Đề xuất)" as UC15
+  }
+}
 
-    else Nhân viên Order hủy món
-        OrderStaff->>UI: Chọn hủy món
-        UI->>StaffCtrl: DELETE /orders/items/:itemId
-        StaffCtrl->>Guard: JWT + orders:manage-item
-        Guard-->>StaffCtrl: Cho phép
-        StaffCtrl->>Orders: cancelByOrderStaff(itemId, actorId)
+' ===== Bố cục: ép thứ tự các nhóm từ trái sang phải =====
+G1 -[hidden]right- G2
+G2 -[hidden]right- G3
+G3 -[hidden]right- G4
 
-        Orders->>DB: Tìm OrderItem và DiningSession
-        Orders->>Orders: Kiểm tra phiên OPEN
-        Orders->>Orders: Kiểm tra status AWAITING_ACCEPTANCE hoặc ACCEPTED
+' ===== Actor bên trái -> use case =====
+Customer -- UC01
+Customer -- UC02
+Customer -- UC03
+Customer -- UC04
+Customer -- UC05
+Customer -- UC06
+Customer -- UC11
 
-        Orders->>DB: BEGIN transaction
-        Orders->>DB: Conditional UPDATE status = CANCELLED
-        Orders->>DB: INSERT OrderItemStatusHistory
-        Orders->>DB: INSERT AuditLog
-        Orders->>DB: COMMIT
+OrderStaff -- UC01
+OrderStaff -- UC02
+OrderStaff -- UC03
+OrderStaff -- UC04
+OrderStaff -- UC05
+OrderStaff -- UC06
+OrderStaff -- UC07
+OrderStaff -- UC12
 
-        Orders-->>StaffCtrl: { id, status: CANCELLED }
-        StaffCtrl-->>UI: HTTP 200
+' ===== Actor bên phải (viết use case trước để actor nằm bên phải) =====
+UC01 -- Kitchen
+UC06 -- Kitchen
+UC09 -- Kitchen
 
-    else Nhân viên Bếp hủy món
-        Kitchen->>UI: Chọn CANCELLED và nhập reason
-        UI->>KitchenCtrl: PATCH /kitchen/items/:itemId/status
-        KitchenCtrl->>Guard: JWT + kitchen:update-item
-        Guard-->>KitchenCtrl: Cho phép
-        KitchenCtrl->>KitchenSvc: updateStatus(itemId, CANCELLED, reason, actorId)
+UC01 -- Inventory
+UC10 -- Inventory
 
-        KitchenSvc->>DB: BEGIN Serializable transaction
-        KitchenSvc->>DB: Đọc OrderItem và DiningSession
-        KitchenSvc->>KitchenSvc: Kiểm tra trạng thái cho phép
-        KitchenSvc->>KitchenSvc: Kiểm tra reason bắt buộc
-        KitchenSvc->>DB: Conditional UPDATE status = CANCELLED
-        KitchenSvc->>DB: INSERT OrderItemStatusHistory
-        KitchenSvc->>DB: INSERT AuditLog
-        KitchenSvc->>DB: COMMIT
+UC01 -- Manager
+UC02 -- Manager
+UC03 -- Manager
+UC04 -- Manager
+UC05 -- Manager
+UC06 -- Manager
+UC07 -- Manager
+UC08 -- Manager
+UC09 -- Manager
+UC10 -- Manager
+UC12 -- Manager
+UC13 -- Manager
+UC14 -- Manager
+UC15 -- Manager
 
-        KitchenSvc-->>KitchenCtrl: { id, status: CANCELLED }
-        KitchenCtrl-->>UI: HTTP 200
-    end
-
-    Note over Orders,DB: Hủy là cập nhật trạng thái, không DELETE vật lý OrderItem
+note bottom of UC15
+  Đề xuất để đáp ứng phần tra cứu của FR-24.
+  Hiện chưa có endpoint/controller đọc AuditLog.
+end note
+@enduml
