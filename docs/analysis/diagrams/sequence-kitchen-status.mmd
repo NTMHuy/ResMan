@@ -10,6 +10,7 @@ sequenceDiagram
 
     Kitchen->>UI: Chọn món và trạng thái tiếp theo
     UI->>Repo: updateItemStatus(itemId, nextStatus, reason?)
+    Repo->>Repo: toBackendStatus(VOIDED) = CANCELLED\n(when kitchen UI requests cancellation)
     Repo->>Ctrl: PATCH /api/v1/kitchen/items/:itemId/status
     Ctrl->>Guard: Xác thực JWT và kitchen:update-item
     Guard-->>Ctrl: Cho phép
