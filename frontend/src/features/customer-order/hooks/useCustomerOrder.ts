@@ -152,18 +152,26 @@ export function useCustomerOrder() {
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
+    let effectActive = true;
     const interval = setInterval(() => {
       void loadCustomerData(true);
       void (async () => {
         try {
           const session = await repositories.customerOrder.getActiveSession();
+
+          // Bỏ qua phản hồi của lần polling cũ nếu activeSessionId đã đổi.
+          // Nếu không, request bắt đầu trước lúc mở phiên có thể trả null muộn
+          // và ghi đè phiên mới, kéo theo việc xóa kết quả khảo sát.
+          if (!effectActive) return;
           if (session?.id === activeSessionId) return;
+
           setActiveSessionId(session?.id ?? null);
           if (session) {
             setTableNumber(session.tableNumber);
             const savedCart = await storageService.getJson<{ sessionId: string; items: CartItem[] }>(
               storageService.KEYS.CUSTOMER_CART,
             );
+            if (!effectActive) return;
             const restored = Array.isArray(savedCart?.items) &&
               (savedCart.sessionId === session.id || savedCart.sessionId == null)
               ? savedCart.items
@@ -179,7 +187,10 @@ export function useCustomerOrder() {
         }
       })();
     }, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      effectActive = false;
+      clearInterval(interval);
+    };
   }, [activeSessionId, loadCustomerData]);
 
   useEffect(() => {
