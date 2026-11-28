@@ -38,7 +38,7 @@ export function useCustomerOrder() {
   const [search, setSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
-  const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý món ăn thông minh sẽ xuất hiện tại đây khi hệ thống được kết nối AI.');
+  const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
 
   const loadCustomerData = useCallback(
@@ -57,7 +57,6 @@ export function useCustomerOrder() {
           setTableOrders(recentOrders);
           if (recentOrders[0]) setTableNumber(recentOrders[0].tableNumber);
         } catch {
-          // No active session is a normal state before the customer starts ordering.
           setTableOrders([]);
         }
       } catch (err) {
@@ -86,9 +85,6 @@ export function useCustomerOrder() {
           items: CartItem[];
         }>(storageService.KEYS.CUSTOMER_CART);
         if (!mounted) return;
-        // A cart created before the first dining session has sessionId=null.
-        // Keep it when no session exists, and bind it to the session if one was
-        // just opened. Only discard carts belonging to a different old session.
         if (Array.isArray(savedCart?.items) &&
           (!session || savedCart.sessionId === session.id || savedCart.sessionId == null)) {
           setCart(savedCart.items);
@@ -133,8 +129,6 @@ export function useCustomerOrder() {
         setTableNumber(session.tableNumber);
       }
       setActiveSessionId(sessionId);
-      // Keep items selected before the first session was opened. Rebind the
-      // local cart to the newly-created session instead of discarding it.
       await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
         sessionId,
         items: cart,
@@ -160,8 +154,6 @@ export function useCustomerOrder() {
             const savedCart = await storageService.getJson<{ sessionId: string; items: CartItem[] }>(
               storageService.KEYS.CUSTOMER_CART,
             );
-            // Preserve a pre-session cart (sessionId=null) when the first
-            // session appears; bind it instead of clearing the customer's choices.
             const restored = Array.isArray(savedCart?.items) &&
               (savedCart.sessionId === session.id || savedCart.sessionId == null)
               ? savedCart.items
@@ -171,13 +163,9 @@ export function useCustomerOrder() {
               sessionId: session.id,
               items: restored,
             });
-          } else {
-            // A missing/closed session is not a reason to discard an unsent cart.
-            // Keep the cart available so the customer can open a new session or
-            // submit the first order without losing selected dishes.
           }
         } catch {
-          // A temporary network failure must not clear the currently restored session.
+          // Keep the currently restored session during temporary network failures.
         }
       })();
     }, 5000);
@@ -186,30 +174,33 @@ export function useCustomerOrder() {
 
   useEffect(() => {
     let active = true;
-    void mealRecommendationService.getRecommendations({
-      menuItems: items,
-      selectedCategoryId: selectedCategoryId === 'ALL' ? null : selectedCategoryId,
-      searchKeyword: search.trim(),
-    }).then((result) => {
+    const hasOrderedItems = tableOrders.some((order) =>
+      order.items.some((item) => item.kitchenStatus !== 'VOIDED'),
+    );
+    if (!activeSessionId || !hasOrderedItems) {
+      setMealSuggestions([]);
+      setRecommendationAvailable(false);
+      setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+      return () => { active = false; };
+    }
+
+    void mealRecommendationService.getRecommendations({ k: 6 }).then((result) => {
       if (!active) return;
       setMealSuggestions(result.items.filter((item) =>
         item.price > 0 &&
-        item.pricingType !== "MARKET_PRICE" &&
-        item.pricingType !== "UNSET"
+        item.pricingType !== 'MARKET_PRICE' &&
+        item.pricingType !== 'UNSET'
       ));
       setSuggestionMessage(result.message);
       setRecommendationAvailable(result.available);
     }).catch(() => {
       if (!active) return;
       setMealSuggestions([]);
-      setSuggestionMessage('Chưa thể tải gợi ý món ăn. Bạn vẫn có thể chọn món trong thực đơn.');
+      setSuggestionMessage('Chưa thể tải gợi ý AI. Bạn vẫn có thể chọn món trong thực đơn.');
       setRecommendationAvailable(false);
     });
-    return () => {
-      active = false;
-    };
-  }, [items, selectedCategoryId, search]);
-
+    return () => { active = false; };
+  }, [activeSessionId, tableOrders]);
 
   const changeTable = useCallback(
     (nextTable: string) => {
@@ -234,8 +225,8 @@ export function useCustomerOrder() {
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
       if (
         menuItem.price <= 0 ||
-        menuItem.pricingType === "MARKET_PRICE" ||
-        menuItem.pricingType === "UNSET"
+        menuItem.pricingType === 'MARKET_PRICE' ||
+        menuItem.pricingType === 'UNSET'
       ) return;
       const extraPrice = menuItem.modifiers
         .filter((modifier) => selectedModifiers.includes(modifier.label))
