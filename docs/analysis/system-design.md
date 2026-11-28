@@ -124,9 +124,9 @@ Danh sách giữ nguyên mã UC đã xác định trong Chương 2 để đảm 
 |---|---|---|---|
 | UC-01 Đăng nhập | Cả năm vai trò | Nhận JWT và thông tin role/permission | Đã triển khai |
 | UC-02 Xem thực đơn | Khách hàng, Order, Quản lý | Xem danh mục/món theo API tương ứng | Đã triển khai |
-| UC-03 Mở phiên | Khách hàng, Order | Tạo hoặc tái sử dụng phiên bàn và Order | Đã triển khai |
-| UC-04 Gọi món | Khách hàng, Order | Tạo OrderItem mới trong phiên OPEN | Đã triển khai |
-| UC-05 Theo dõi đơn/món | Khách hàng, Order | Xem món và trạng thái hiện tại | Đã triển khai |
+| UC-03 Mở phiên | Khách hàng, Order, Quản lý (permission được seed) | Tạo hoặc tái sử dụng phiên bàn và Order | Đã triển khai |
+| UC-04 Gọi món | Khách hàng, Order, Quản lý (permission được seed) | Tạo OrderItem mới trong phiên OPEN | Đã triển khai |
+| UC-05 Theo dõi đơn/món | Khách hàng, Order, Quản lý (permission được seed) | Xem món và trạng thái hiện tại | Đã triển khai |
 | UC-06 Hủy món | Khách hàng, Order, Bếp, Quản lý | Hủy theo quyền và trạng thái | Triển khai một phần; có sai khác nghiệp vụ |
 | UC-07 Quản lý bàn | Quản lý; Order (đọc) | Quản lý thông tin bàn và xem trạng thái | Đã triển khai |
 | UC-08 Quản lý thực đơn | Quản lý | Quản lý danh mục, món, giá, ảnh | Đã triển khai |
@@ -136,7 +136,9 @@ Danh sách giữ nguyên mã UC đã xác định trong Chương 2 để đảm 
 | UC-12 Xác nhận thanh toán | Order, Quản lý | Tạo Payment, đóng phiên, giải phóng bàn | Đã triển khai |
 | UC-13 Quản lý tài khoản | Quản lý | Tạo/cập nhật user, role và trạng thái | Đã triển khai |
 | UC-14 Xem báo cáo | Quản lý | Xem tổng quan, doanh thu, đơn, món bán chạy, kho | Đã triển khai |
-| UC-15 Tra cứu nhật ký kiểm toán | Quản lý | Xem AuditLog theo thời gian, tác nhân và entity; đây là UC đề xuất để truy vết FR-24, chưa có endpoint/controller đọc | Chưa có trong code |
+| UC-15 Tra cứu nhật ký kiểm toán | Quản lý | Xem AuditLog theo thời gian, tác nhân và entity; đây là UC đề xuất để truy vết FR-24, chưa có endpoint/controller đọc | Đề xuất |
+
+**Căn cứ UC:** `docs/analysis/requirements-analysis.md:144–178`; quyền role thực tế được seed tại `backend/src/seed.ts:16–57`. UC-15 không có trong Chương 2 và được đánh dấu Đề xuất vì backend hiện chưa có route đọc AuditLog.
 
 ### 3.4.3. Biểu đồ Use Case
 
