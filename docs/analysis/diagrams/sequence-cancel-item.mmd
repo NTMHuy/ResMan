@@ -1,0 +1,57 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách hàng
+    actor OrderStaff as Nhân viên Order
+    actor Kitchen as Nhân viên Bếp
+    participant UI as Frontend
+    participant Guard as JwtAuthGuard + PermissionsGuard
+    participant CustomerCtrl as OrdersController
+    participant StaffCtrl as StaffOrdersController
+    participant KitchenCtrl as KitchenController
+    participant Orders as OrdersService
+    participant KitchenSvc as KitchenService
+    participant DB as PostgreSQL / Prisma
+
+    alt Khách hàng hủy món
+        Customer->>UI: Chọn hủy món
+        UI->>CustomerCtrl: DELETE /customer/session/items/:itemId
+        CustomerCtrl->>Guard: JWT + customer:order:cancel-item
+        Guard-->>CustomerCtrl: Cho phép
+        CustomerCtrl->>Orders: cancelCustomerItem(userId, itemId)
+        Orders->>DB: Tìm TableDevice, phiên OPEN, OrderItem thuộc Order
+        Orders->>Orders: Kiểm tra status = AWAITING_ACCEPTANCE
+        Orders->>DB: BEGIN Serializable
+        Orders->>DB: UPDATE OrderItem.status = CANCELLED
+        Orders->>DB: INSERT OrderItemStatusHistory + AuditLog
+        Orders->>DB: COMMIT
+        Orders-->>CustomerCtrl: { id, status: CANCELLED }
+        CustomerCtrl-->>UI: HTTP 200
+    else Nhân viên Order hủy món
+        OrderStaff->>UI: Chọn hủy món
+        UI->>StaffCtrl: DELETE /orders/items/:itemId
+        StaffCtrl->>Guard: JWT + orders:manage-item
+        Guard-->>StaffCtrl: Cho phép
+        StaffCtrl->>Orders: cancelByOrderStaff(itemId, actorId)
+        Orders->>DB: Tìm OrderItem và DiningSession
+        Orders->>Orders: Kiểm tra phiên OPEN, status AWAITING_ACCEPTANCE hoặc ACCEPTED
+        Orders->>DB: BEGIN transaction
+        Orders->>DB: Conditional UPDATE status = CANCELLED
+        Orders->>DB: INSERT History + AuditLog
+        Orders->>DB: COMMIT
+        Orders-->>StaffCtrl: { id, status: CANCELLED }
+        StaffCtrl-->>UI: HTTP 200
+    else Nhân viên Bếp hủy món
+        Kitchen->>UI: Chọn CANCELLED và nhập reason
+        UI->>KitchenCtrl: PATCH /kitchen/items/:itemId/status
+        KitchenCtrl->>Guard: JWT + kitchen:update-item
+        Guard-->>KitchenCtrl: Cho phép
+        KitchenCtrl->>KitchenSvc: updateStatus(itemId, CANCELLED, reason, actorId)
+        KitchenSvc->>DB: BEGIN Serializable; đọc OrderItem + DiningSession
+        KitchenSvc->>KitchenSvc: Kiểm tra trạng thái cho phép và reason bắt buộc
+        KitchenSvc->>DB: Conditional UPDATE status = CANCELLED
+        KitchenSvc->>DB: INSERT History + AuditLog
+        KitchenSvc->>DB: COMMIT
+        KitchenSvc-->>KitchenCtrl: { id, status: CANCELLED }
+        KitchenCtrl-->>UI: HTTP 200
+    end
+    Note over Orders,DB: Hủy là cập nhật trạng thái; không DELETE vật lý OrderItem.
