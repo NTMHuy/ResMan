@@ -272,7 +272,7 @@ PaymentsService xác định bàn qua TableDevice, tìm phiên OPEN và kiểm t
 
 Nhập kho cộng số lượng vào InventoryBalance, tạo StockMovement loại IN và AuditLog trong transaction Serializable. Kiểm kê đọc số dư cũ, tính delta, cập nhật số dư bằng số thực tế, tạo InventoryCountRecord, tạo StockMovement loại ADJUSTMENT nếu delta khác 0 và ghi AuditLog trong cùng transaction.
 
-**Căn cứ:** `backend/src/orders/orders.service.ts:137–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:1–120`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/inventory/inventory.service.ts:1–260`.
+**Căn cứ:** `backend/src/orders/orders.service.ts:137–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/inventory/inventory.service.ts:1–260`.
 
 ## 3.7. Thiết kế trạng thái và điều kiện chuyển đổi
 
@@ -290,9 +290,6 @@ Các trạng thái lưu trong `OrderItem.status` là String và được giới 
 | AWAITING_ACCEPTANCE / ACCEPTED | CANCELLED | Nhân viên Order; phiên còn OPEN | Đã triển khai |
 | AWAITING_ACCEPTANCE / ACCEPTED / IN_PREPARATION | CANCELLED | Nhân viên Bếp; code cho phép nhưng quy tắc nghiệp vụ chưa chốt đầy đủ trạng thái được hủy | Có trong code; cần xác nhận phạm vi nghiệp vụ |
 
-**Hình 3.15. State diagram – DiningSession, DiningTable và PaymentRequest.** Các trạng thái và chuyển đổi được giới hạn theo service hiện tại; phần OrderItem được biểu diễn ở sơ đồ phụ trợ bên dưới.
-
-**State lifecycle – mã nguồn:** [state-lifecycle.mmd](diagrams/state-lifecycle.mmd).  
 **Sơ đồ transition OrderItem – mã nguồn:** [state-order-item.mmd](diagrams/state-order-item.mmd); nét đứt biểu diễn IN_PREPARATION → ACCEPTED là Quy tắc nghiệp vụ chưa có trong KitchenService.
 
 ### 3.7.2. Sai khác liên quan đến hủy món
@@ -313,9 +310,9 @@ Không có bằng chứng về endpoint độc lập cho phép đóng phiên mà
 
 **Căn cứ:** `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/orders/orders.service.ts:328–374,714–755`; `backend/src/sessions/sessions.service.ts:10–52,139–186`; `backend/src/tables/tables.service.ts:62–143`; `backend/src/payments/payments.service.ts:11–45,85–211`; `prisma/schema.prisma:147–190,297–312`.
 
-**Hình 3.15** tổng hợp bốn state machine. DiningSession chuyển OPEN → CLOSED; SessionsService.close() yêu cầu Payment.status=PAID, và PaymentsService.confirmForSession() thực hiện đóng phiên trong cùng transaction với ghi Payment. DiningTable chuyển AVAILABLE → OCCUPIED khi mở phiên và OCCUPIED → AVAILABLE khi đóng phiên đã thanh toán. PaymentRequest được tạo/upsert ở PENDING; khi xác nhận thanh toán, request PENDING được chuyển COMPLETED. Request đang PENDING được trả lại như thao tác idempotent, không tạo thêm bản ghi. OrderItem giữ các transition ở bảng 3.7.1; sơ đồ phụ trợ `state-order-item.mmd` dùng nét đứt cho IN_PREPARATION → ACCEPTED, là Quy tắc nghiệp vụ chưa triển khai.
+**Hình 3.15. State diagram – DiningSession, DiningTable và PaymentRequest.** DiningSession chuyển OPEN → CLOSED; SessionsService.close() yêu cầu Payment.status=PAID, và PaymentsService.confirmForSession() thực hiện đóng phiên trong cùng transaction với ghi Payment. DiningTable chuyển AVAILABLE → OCCUPIED khi mở phiên và OCCUPIED → AVAILABLE khi đóng phiên đã thanh toán. PaymentRequest được tạo/upsert ở PENDING; khi xác nhận thanh toán, request PENDING được chuyển COMPLETED. Request đang PENDING được trả lại như thao tác idempotent, không tạo thêm bản ghi. OrderItem giữ các transition ở bảng 3.7.1; sơ đồ phụ trợ `state-order-item.mmd` dùng nét đứt cho IN_PREPARATION → ACCEPTED, là Quy tắc nghiệp vụ chưa triển khai.
 
-**State machines – mã nguồn:** [state-lifecycle.mmd](diagrams/state-lifecycle.mmd).
+**State lifecycle – mã nguồn:** [state-lifecycle.mmd](diagrams/state-lifecycle.mmd).
 
 ## 3.8. Thiết kế cơ sở dữ liệu
 
@@ -682,7 +679,7 @@ Bảng liệt kê route được khai báo trong Controller. Tiền tố toàn c
 
 Các route trên tương ứng 60 thao tác HTTP. Endpoint cập nhật trạng thái tổng đơn PATCH /orders/:id/items/status không nằm trong danh sách vì StaffOrdersController không khai báo route này; frontend ApiOrderRepository vẫn gọi endpoint đó tại các hàm update/reject/cancel order. Đây là lỗi hợp đồng frontend–backend, không phải endpoint backend đang hoạt động.
 
-**Căn cứ:** `backend/src/app.controller.ts:1–20`; `backend/src/auth/auth.controller.ts:1–30`; `backend/src/users/users.controller.ts:1–140`; `backend/src/menu-categories/menu-categories.controller.ts:1–100`; `backend/src/menu-items/menu-items.controller.ts:1–200`; `backend/src/sessions/sessions.controller.ts:9–49`; `backend/src/orders/orders.controller.ts:18–46`; `backend/src/orders/staff-orders.controller.ts:10–49`; `backend/src/kitchen/kitchen.controller.ts:1–60`; `backend/src/payments/payments.controller.ts:9–46`; `backend/src/inventory/inventory.controller.ts:1–140`; `backend/src/reports/reports.controller.ts:1–100`; `frontend/src/repositories/api/ApiOrderRepository.ts:130–167`.
+**Căn cứ:** `backend/src/app.controller.ts:4–10`; `backend/src/auth/auth.controller.ts:7–16`; `backend/src/users/users.controller.ts:12–55`; `backend/src/menu-categories/menu-categories.controller.ts:25–60`; `backend/src/menu-items/menu-items.controller.ts:40–177`; `backend/src/menu-items/guest-menu.controller.ts:8–14`; `backend/src/tables/tables.controller.ts:9–28`; `backend/src/sessions/sessions.controller.ts:9–46`; `backend/src/orders/orders.controller.ts:18–45`; `backend/src/orders/staff-orders.controller.ts:10–47`; `backend/src/kitchen/kitchen.controller.ts:9–21`; `backend/src/payments/payments.controller.ts:9–44`; `backend/src/inventory/inventory.controller.ts:12–66`; `backend/src/reports/reports.controller.ts:7–46`; `frontend/src/repositories/api/ApiOrderRepository.ts:130–167`.
 
 ### 3.9.3. Request validation và ranh giới tin cậy
 
@@ -839,7 +836,7 @@ Response HTTP 201:
 
 Frontend apiClient.normalizeApiError() còn ánh xạ timeout thành REQUEST_TIMEOUT (408), mất kết nối thành NETWORK_ERROR (503), và chuẩn hóa 401/403/404/400 thành mã UI riêng; các mã này không phải permission code hoặc mã lỗi nghiệp vụ do backend định nghĩa.
 
-**Căn cứ:** `backend/src/auth/auth.controller.ts:1–25`; `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/orders/orders.controller.ts:18–46`; `backend/src/kitchen/kitchen.controller.ts:1–60`; `backend/src/kitchen/kitchen.service.ts:1–120`; `backend/src/payments/payments.controller.ts:9–46`; `backend/src/payments/payments.service.ts:85–211`; `frontend/src/services/api/apiClient.ts:1–200`.
+**Căn cứ:** `backend/src/auth/auth.controller.ts:7–16`; `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/orders/orders.controller.ts:18–45`; `backend/src/kitchen/kitchen.controller.ts:9–21`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.controller.ts:9–44`; `backend/src/payments/payments.service.ts:85–211`; `frontend/src/services/api/apiClient.ts:1–200`.
 
 ## 3.10. Thiết kế phân quyền RBAC
 
