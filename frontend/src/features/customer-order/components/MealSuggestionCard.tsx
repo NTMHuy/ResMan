@@ -8,7 +8,7 @@ import { Button } from '@/src/components/common/Button';
 import { formatVND } from '@/src/utils/formatters';
 import type { MenuItem } from '@/src/features/menu/types/menu.types';
 import { mealRecommendationService } from '@/src/features/customer-order/services/mealRecommendationService';
-import type { MealRecommendationSurvey, SurveyQuestion } from '@/src/features/customer-order/services/mealRecommendationService';
+import type { MealRecommendationRequest, MealRecommendationSurvey, SurveyQuestion } from '@/src/features/customer-order/services/mealRecommendationService';
 
 interface MealSuggestionCardProps {
   items: MenuItem[];
@@ -16,7 +16,7 @@ interface MealSuggestionCardProps {
   available: boolean;
   onAdd: (item: MenuItem) => void;
   onSelect: (item: MenuItem) => void;
-  onRecommendations: (items: MenuItem[], message: string, available: boolean) => void;
+  onRecommendations: (items: MenuItem[], message: string, available: boolean, request: MealRecommendationRequest) => void;
 }
 
 export function MealSuggestionCard({ items, message, available, onAdd, onSelect, onRecommendations }: MealSuggestionCardProps) {
@@ -82,7 +82,10 @@ export function MealSuggestionCard({ items, message, available, onAdd, onSelect,
         survey,
         k: count >= 7 ? 10 : 6,
       });
-      onRecommendations(result.items, result.message, result.available);
+      onRecommendations(result.items, result.message, result.available, {
+        survey,
+        k: count >= 7 ? 10 : 6,
+      });
       setSurveyOpen(false);
     } catch (error) {
       setSurveyError(error instanceof Error ? error.message : 'Không thể lấy gợi ý lúc này.');
