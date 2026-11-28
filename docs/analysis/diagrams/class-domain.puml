@@ -22,7 +22,8 @@ class ReportsService
 class PrismaService
 AuthController --> AuthService
 JwtStrategy --> PrismaService
-PermissionsGuard ..> JwtStrategy : permissions from request user
+PermissionsGuard --> Reflector : metadata lookup
+class Reflector
 SessionsController --> SessionsService
 OrdersController --> OrdersService
 StaffOrdersController --> OrdersService
