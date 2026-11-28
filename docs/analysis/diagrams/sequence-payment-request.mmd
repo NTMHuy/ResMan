@@ -23,7 +23,7 @@ sequenceDiagram
         Repo-->>UI: Hiển thị lỗi
     else PaymentRequest đang PENDING
         Svc-->>Ctrl: Trả lại request hiện tại
-        Ctrl-->>Repo: HTTP 200
+        Ctrl-->>Repo: HTTP 201 (NestJS POST default)
         Repo-->>UI: Hiển thị đã gửi yêu cầu
     else Chưa có request hoặc request đã được xử lý
         Svc->>DB: PaymentRequest.upsert(status=PENDING)
