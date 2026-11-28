@@ -1094,6 +1094,41 @@ Bảng dưới đây là đánh giá kỹ thuật dựa trên khác biệt giữ
 - **.env.example:** backend/.env.example vẫn có merge conflict markers và biến Cloudinary lặp; không sử dụng làm cấu hình triển khai trước khi làm sạch. Không đưa giá trị credential vào tài liệu.
 
 
+### 3.13.2. Đối chiếu sơ đồ với mô tả và sai khác đã xử lý
+
+Việc đối chiếu dưới đây là kiểm tra tĩnh theo source và nội dung Chương 3. Số nhánh được đếm theo các khối `alt/else/end` hoặc decision node trong sơ đồ; không phải kết quả render bằng Mermaid CLI.
+
+| Sơ đồ | Nhánh / điều kiện thể hiện | Đối chiếu với mô tả và source |
+|---|---|---|
+| Activity customer order | 2 decision: bàn có phiên OPEN?; còn món AWAITING_ACCEPTANCE khi xác nhận thanh toán? | Khớp `SessionsService.openForCustomer()` và điều kiện `PaymentsService.confirmForSession()`; đã thể hiện polling customer 5 giây, không phải server push |
+| Activity kitchen | 1 decision: transition có trong `KitchenService.allowed`? | Khớp kiểm tra transition, cập nhật có điều kiện, history và audit |
+| Activity payment | 2 decision: session/order/payment hợp lệ?; còn món AWAITING_ACCEPTANCE? | Khớp điều kiện trước khi tính tổng và ghi Payment |
+| Sequence login | 1 `alt`, 2 nhánh: credential không hợp lệ / hợp lệ | Khớp kiểm tra `isActive`, bcrypt, cập nhật `lastLoginAt` và ký JWT |
+| Sequence customer order | 1 `alt`, 2 nhánh: phiên OPEN đã có / tạo phiên mới; thêm loop polling 5 giây | Đã bổ sung guard cho mở phiên, gửi món và đọc phiên; GET menu vẫn public read-only |
+| Sequence payment | 1 `alt`, 2 nhánh: điều kiện thanh toán không đạt / đạt | Đã bổ sung `payments:read` và `payments:confirm`; PaymentRequest chỉ chuyển COMPLETED nếu có bản ghi PENDING |
+| Sequence cancel item | 1 `alt`, 3 nhánh: CUSTOMER / ORDER_STAFF / KITCHEN_STAFF | Khớp ba endpoint và điều kiện trạng thái; cả ba cập nhật `CANCELLED`, không xóa vật lý OrderItem |
+| Sequence kitchen status | 1 `alt` ngoài, 2 nhánh hợp lệ/không hợp lệ; 1 `alt` lồng, 2 nhánh cập nhật được đúng một dòng / race conflict | Khớp transaction Serializable, conditional update, history và audit |
+| Sequence payment request | 1 `alt`, 3 nhánh: không có thiết bị/phiên hoặc đã thanh toán; request đang PENDING; tạo/upsert request | Khớp service; thao tác request không nằm trong transaction nhiều bước |
+| Sequence inventory | 1 `alt`, 2 nhánh nhập kho/kiểm kê; 1 `opt` tạo movement khi delta khác 0 | Khớp hai transaction Serializable và điều kiện tạo ADJUSTMENT |
+| ERD | Cardinality từ FK/unique/optional | Một DiningSession có tối đa một Order và một PaymentRequest; một Order có tối đa một Payment; một DiningTable có tối đa một TableDevice; một Ingredient có tối đa một InventoryBalance. Nhiều phiên lịch sử có thể thuộc một bàn; partial unique index chỉ giới hạn một phiên OPEN/bàn |
+| Class diagram | Dependency Controller → Service → PrismaService; PermissionsGuard → Reflector | Đã sửa dependency sai trước đó từ PermissionsGuard → JwtStrategy thành PermissionsGuard → Reflector theo constructor thực tế |
+| Use Case | 15 UC; UC-15 là đề xuất | Manager được nối UC-02…UC-06 theo ma trận tác nhân/yêu cầu; UC-15 chỉ biểu diễn khoảng trống tra cứu FR-24 |
+
+**Sai khác phát hiện và đã chỉnh trong lần rà soát này:**
+
+1. Các ERD nhóm trước đây khai báo nhiều thuộc tính trên cùng một dòng entity; đã tách mỗi thuộc tính thành một dòng theo cấu trúc ER Diagram.
+2. Class diagram trước đây biểu diễn PermissionsGuard phụ thuộc JwtStrategy; source cho thấy guard inject Reflector và đọc `request.user.permissions`, nên dependency đã được sửa.
+3. Sequence customer-order trước đây thiếu bước kiểm tra guard cho các endpoint có JWT và chưa thể hiện rõ polling tải lại menu/đơn/active session; đã bổ sung.
+4. Sequence payment trước đây không thể hiện guard ở hai route đọc tổng kết/xác nhận; đã bổ sung `payments:read` và `payments:confirm`.
+5. Activity customer-order trước đây khiến luồng polling có thể bị hiểu là kích hoạt xử lý bếp; đã tách vòng polling thành hoạt động đọc snapshot độc lập.
+6. Use Case diagram trước đây thiếu các liên kết Manager với UC-02…UC-06 so với ma trận tác nhân trong Chương 2; đã đồng bộ.
+7. Chưa có state diagram cho DiningSession, DiningTable và PaymentRequest; đã bổ sung trong `state-lifecycle.mmd`.
+
+**Giới hạn xác minh cú pháp:** môi trường thao tác không có executable `mmdc`; lệnh `npx @mermaid-js/mermaid-cli --version` bị timeout khi tải package do môi trường không truy cập được npm registry. Vì vậy, 18 tệp `.mmd` đã được rà soát thủ công về loại diagram, cấu trúc khối, cặp `alt/end`, node/edge, tên entity và liên kết; **chưa thể xác nhận parser Mermaid CLI đã render thành công**. Không tuyên bố sơ đồ đã qua kiểm tra renderer. PlantUML cũng chưa được render bằng PlantUML server/CLI.
+
+**Căn cứ đối chiếu:** `backend/src/sessions/sessions.service.ts:10–118,139–186`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/orders/orders.service.ts:245–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/inventory/inventory.service.ts:162–198,208–267`; `backend/src/auth/guards/permissions.guard.ts:1–24`; `prisma/schema.prisma:147–208,210–326`; `prisma/migrations/20261117190000_one_open_session_per_table/migration.sql:1–6`; `docs/analysis/requirements-analysis.md:144–178`.
+
+
 ## 3.14. Tổng kết chương
 
 Chương 3 đã trình bày phạm vi và nguyên tắc thiết kế, kiến trúc frontend–backend–database, ranh giới module, Use Case, quy trình nghiệp vụ, Sequence, state transition, mô hình dữ liệu, API, RBAC, điều hướng và wireframe theo vai trò/thiết bị. Thiết kế phản ánh source code ở nhánh khảo sát và đối chiếu các quyết định nghiệp vụ đã xác nhận. Những điểm chưa đồng nhất được tách thành tồn tại kỹ thuật và hướng hoàn thiện, không mô tả như chức năng đã hoàn thành. Các sơ đồ Mermaid/PlantUML là nguồn có thể chỉnh sửa; wireframe SVG là minh họa vector, không phải ảnh chụp ứng dụng runtime.
