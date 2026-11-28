@@ -697,6 +697,7 @@ export function CustomerOrderScreen() {
                   // The hook state is refreshed with the returned recommendation list.
                   setSurveyRecommendations(nextItems, nextMessage, nextAvailable);
                 }}
+                onSelect={(dish) => setSelectedDish(dish)}
                 onAdd={(dish) => {
                   addToCart(dish, 1, [], '');
                   showToast('Đã thêm món được gợi ý vào giỏ', 'success', dish.name);
