@@ -47,14 +47,14 @@ sequenceDiagram
     Guard-->>Order: Cho phép
     Order->>OS: getCustomerSession(userId)
     OS->>DB: Đọc phiên, Order và OrderItems
+    DB-->>OS: Customer session snapshot
+    OS-->>Order: Current customer session
+    Order-->>Repo: HTTP 200
     Repo->>Session: GET /api/v1/sessions/customer/active [Bearer]
     Session->>Guard: JWT + customer:session:start
     Guard-->>Session: Cho phép
     Session->>SS: getActiveForCustomer(userId)
     SS->>DB: Đọc phiên OPEN theo TableDevice
-    DB-->>OS: Customer session snapshot
-    OS-->>Order: Current customer session
-    Order-->>Repo: HTTP 200
     DB-->>SS: Active session snapshot
     SS-->>Session: Active session
     Session-->>Repo: HTTP 200
