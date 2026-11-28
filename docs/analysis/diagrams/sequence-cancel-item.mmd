@@ -1,100 +1,73 @@
+sequenceDiagram
+    autonumber
 
-flowchart LR
-    %% ===== Actor bên trái (2) =====
-    Customer("👤 Khách hàng")
-    OrderStaff("👤 Nhân viên Order")
+    actor Customer as Khách hàng
+    actor OrderStaff as Nhân viên Order
+    actor Kitchen as Nhân viên Bếp
 
-    %% ===== Use case =====
-    subgraph SYS["ResMan"]
-        direction LR
+    participant UI as Giao diện ứng dụng
+    participant Auth as Xác thực và phân quyền
+    participant Order as Xử lý đơn hàng
+    participant KitchenSvc as Xử lý bếp
+    participant DB as Cơ sở dữ liệu
 
-        subgraph G1["Xác thực và thực đơn"]
-            UC01(["UC-01<br/>Đăng nhập"])
-            UC02(["UC-02<br/>Xem thực đơn"])
-        end
+    alt Khách hàng hủy món
+        Customer->>UI: Chọn hủy món
+        UI->>Auth: Gửi yêu cầu hủy món kèm thông tin đăng nhập
+        Auth->>Auth: Kiểm tra đăng nhập và quyền hủy món của khách
+        Auth-->>UI: Cho phép
+        UI->>Order: Yêu cầu hủy món của khách
 
-        subgraph G2["Phiên, gọi món và thanh toán"]
-            UC03(["UC-03<br/>Mở phiên"])
-            UC04(["UC-04<br/>Gọi món"])
-            UC05(["UC-05<br/>Theo dõi đơn/món"])
-            UC06(["UC-06<br/>Hủy món"])
-            UC11(["UC-11<br/>Yêu cầu thanh toán"])
-            UC12(["UC-12<br/>Xác nhận thanh toán"])
-        end
+        Order->>DB: Tìm bàn được gán, phiên đang mở và món cần hủy
+        Order->>Order: Kiểm tra món đang ở trạng thái Chờ tiếp nhận
 
-        subgraph G3["Vận hành"]
-            UC07(["UC-07<br/>Quản lý bàn"])
-            UC09(["UC-09<br/>Xử lý KDS"])
-            UC10(["UC-10<br/>Quản lý kho"])
-        end
+        Order->>DB: Mở giao dịch xử lý
+        Order->>DB: Chuyển món sang trạng thái Đã hủy
+        Order->>DB: Ghi lịch sử chuyển trạng thái món
+        Order->>DB: Ghi nhật ký kiểm toán
+        Order->>DB: Xác nhận hoàn tất giao dịch
 
-        subgraph G4["Quản trị và báo cáo"]
-            UC08(["UC-08<br/>Quản lý thực đơn"])
-            UC13(["UC-13<br/>Quản lý tài khoản"])
-            UC14(["UC-14<br/>Xem báo cáo"])
-            UC15(["UC-15<br/>Tra cứu nhật ký kiểm toán<br/>(Đề xuất)"])
-        end
+        Order-->>UI: Kết quả hủy món thành công
+        UI-->>Customer: Hiển thị món đã hủy
+
+    else Nhân viên Order hủy món
+        OrderStaff->>UI: Chọn hủy món
+        UI->>Auth: Gửi yêu cầu hủy món kèm thông tin đăng nhập
+        Auth->>Auth: Kiểm tra đăng nhập và quyền quản lý món trong đơn
+        Auth-->>UI: Cho phép
+        UI->>Order: Yêu cầu hủy món của nhân viên Order
+
+        Order->>DB: Tìm món cần hủy và phiên phục vụ liên quan
+        Order->>Order: Kiểm tra phiên đang mở
+        Order->>Order: Kiểm tra món ở trạng thái Chờ tiếp nhận hoặc Đã tiếp nhận
+
+        Order->>DB: Mở giao dịch xử lý
+        Order->>DB: Chuyển món sang Đã hủy, chỉ khi trạng thái chưa bị thay đổi
+        Order->>DB: Ghi lịch sử chuyển trạng thái món
+        Order->>DB: Ghi nhật ký kiểm toán
+        Order->>DB: Xác nhận hoàn tất giao dịch
+
+        Order-->>UI: Kết quả hủy món thành công
+        UI-->>OrderStaff: Hiển thị món đã hủy
+
+    else Nhân viên Bếp hủy món
+        Kitchen->>UI: Chọn trạng thái Đã hủy và nhập lý do
+        UI->>Auth: Gửi yêu cầu đổi trạng thái món kèm thông tin đăng nhập
+        Auth->>Auth: Kiểm tra đăng nhập và quyền cập nhật món tại bếp
+        Auth-->>UI: Cho phép
+        UI->>KitchenSvc: Yêu cầu chuyển món sang Đã hủy
+
+        KitchenSvc->>DB: Mở giao dịch có kiểm soát xung đột khi nhiều người cùng thao tác
+        KitchenSvc->>DB: Đọc trạng thái hiện tại của món và phiên phục vụ
+        KitchenSvc->>KitchenSvc: Kiểm tra việc chuyển trạng thái được phép
+        KitchenSvc->>KitchenSvc: Kiểm tra bắt buộc có lý do hủy
+        KitchenSvc->>DB: Chuyển món sang Đã hủy, chỉ khi trạng thái chưa bị thay đổi
+        KitchenSvc->>DB: Ghi lịch sử chuyển trạng thái món kèm lý do
+        KitchenSvc->>DB: Ghi nhật ký kiểm toán
+        KitchenSvc->>DB: Xác nhận hoàn tất giao dịch
+
+        KitchenSvc-->>UI: Kết quả hủy món thành công
+        UI-->>Kitchen: Cập nhật hàng đợi bếp
     end
 
-    %% ===== Actor bên phải (3) =====
-    Kitchen("👤 Nhân viên Bếp")
-    Inventory("👤 Nhân viên Kho")
-    Manager("👤 Quản lý")
-
-    NOTE15["Đề xuất để đáp ứng phần tra cứu của FR-24.<br/>Hiện chưa có API đọc nhật ký kiểm toán."]
-
-    %% ===== Khách hàng =====
-    Customer --- UC01
-    Customer --- UC02
-    Customer --- UC03
-    Customer --- UC04
-    Customer --- UC05
-    Customer --- UC06
-    Customer --- UC11
-
-    %% ===== Nhân viên Order =====
-    OrderStaff --- UC01
-    OrderStaff --- UC02
-    OrderStaff --- UC03
-    OrderStaff --- UC04
-    OrderStaff --- UC05
-    OrderStaff --- UC06
-    OrderStaff --- UC07
-    OrderStaff --- UC12
-
-    %% ===== Nhân viên Bếp =====
-    UC01 --- Kitchen
-    UC06 --- Kitchen
-    UC09 --- Kitchen
-
-    %% ===== Nhân viên Kho =====
-    UC01 --- Inventory
-    UC10 --- Inventory
-
-    %% ===== Quản lý =====
-    UC01 --- Manager
-    UC02 --- Manager
-    UC03 --- Manager
-    UC04 --- Manager
-    UC05 --- Manager
-    UC06 --- Manager
-    UC07 --- Manager
-    UC08 --- Manager
-    UC09 --- Manager
-    UC10 --- Manager
-    UC12 --- Manager
-    UC13 --- Manager
-    UC14 --- Manager
-    UC15 --- Manager
-
-    NOTE15 -.- UC15
-
-    %% ===== Định dạng =====
-    classDef actor fill:#E0F2FE,stroke:#0369A1,stroke-width:2px,color:#0C4A6E;
-    classDef uc fill:#F8FAFC,stroke:#334155,color:#0F172A;
-    classDef note fill:#FEF9C3,stroke:#A16207,color:#713F12;
-
-    class Customer,OrderStaff,Kitchen,Inventory,Manager actor;
-    class UC01,UC02,UC03,UC04,UC05,UC06,UC07,UC08,UC09,UC10,UC11,UC12,UC13,UC14,UC15 uc;
-    class NOTE15 note;
-
+    Note over Order,DB: Hủy món là chuyển trạng thái sang Đã hủy, không xóa món khỏi đơn hàng
