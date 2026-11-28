@@ -5,10 +5,50 @@ erDiagram
   INGREDIENT ||--o{ INVENTORY_COUNT_RECORD : count
   USER ||--o{ STOCK_MOVEMENT : creates
   USER ||--o{ INVENTORY_COUNT_RECORD : performs
-  MENU_CATEGORY { bigint id PK string code UK string name boolean isActive }
-  MENU_ITEM { bigint id PK bigint categoryId FK string code UK string name decimal price string pricingType string availabilityStatus string imageUrl }
-  INGREDIENT { bigint id PK string code UK string name string unit decimal lowStockThreshold }
-  INVENTORY_BALANCE { bigint ingredientId PK,FK decimal quantityOnHand }
-  STOCK_MOVEMENT { bigint id PK bigint ingredientId FK bigint createdBy FK string movementType decimal quantityDelta string reason }
-  INVENTORY_COUNT_RECORD { bigint id PK bigint ingredientId FK bigint countedBy FK decimal actualQuantity string countType }
-  USER { bigint id PK string username UK }
+
+  MENU_CATEGORY {
+    bigint id PK
+    string code UK
+    string name
+    boolean isActive
+  }
+  MENU_ITEM {
+    bigint id PK
+    bigint categoryId FK
+    string code UK
+    string name
+    decimal price
+    string pricingType
+    string availabilityStatus
+    string imageUrl
+  }
+  INGREDIENT {
+    bigint id PK
+    string code UK
+    string name
+    string unit
+    decimal lowStockThreshold
+  }
+  INVENTORY_BALANCE {
+    bigint ingredientId PK,FK
+    decimal quantityOnHand
+  }
+  STOCK_MOVEMENT {
+    bigint id PK
+    bigint ingredientId FK
+    bigint createdBy FK
+    string movementType
+    decimal quantityDelta
+    string reason
+  }
+  INVENTORY_COUNT_RECORD {
+    bigint id PK
+    bigint ingredientId FK
+    bigint countedBy FK
+    decimal actualQuantity
+    string countType
+  }
+  USER {
+    bigint id PK
+    string username UK
+  }
