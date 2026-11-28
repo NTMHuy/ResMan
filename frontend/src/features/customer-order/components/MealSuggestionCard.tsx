@@ -195,7 +195,7 @@ export function MealSuggestionCard({ items, message, available, onAdd, onSelect,
                   <Card
                     key={item.id}
                     padding="md"
-                    style={[styles.dishCard, isOut ? styles.dishCardUnavailable : null]}
+                    style={isOut ? { ...styles.dishCard, ...styles.dishCardUnavailable } : styles.dishCard}
                   >
                     <Pressable onPress={() => onSelect(item)} style={styles.dishRow}>
                       <Image source={{ uri: item.imageUrl }} style={styles.dishImg} resizeMode="cover" />
