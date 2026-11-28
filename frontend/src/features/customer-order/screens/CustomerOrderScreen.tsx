@@ -692,10 +692,10 @@ export function CustomerOrderScreen() {
                 items={mealSuggestions}
                 message={suggestionMessage}
                 available={recommendationAvailable}
-                onRecommendations={(nextItems, nextMessage, nextAvailable) => {
+                onRecommendations={(nextItems, nextMessage, nextAvailable, request) => {
                   // Survey answers are kept only in this component's memory, not persisted.
                   // The hook state is refreshed with the returned recommendation list.
-                  setSurveyRecommendations(nextItems, nextMessage, nextAvailable);
+                  setSurveyRecommendations(nextItems, nextMessage, nextAvailable, request);
                 }}
                 onSelect={(dish) => setSelectedDish(dish)}
                 onAdd={(dish) => {
