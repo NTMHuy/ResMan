@@ -10,12 +10,59 @@ erDiagram
   DINING_SESSION ||--o| PAYMENT_REQUEST : requests
   ORDER ||--o| PAYMENT : settled
   USER ||--o{ PAYMENT : records
-  DINING_TABLE { bigint id PK string code UK string status }
-  DINING_SESSION { bigint id PK bigint tableId FK string sessionCode UK string status bigint openedBy FK bigint closedBy FK }
-  ORDER { bigint id PK bigint diningSessionId FK,UK string orderCode UK }
-  ORDER_ITEM { bigint id PK bigint orderId FK bigint menuItemId FK string itemNameSnapshot int quantity decimal unitPrice decimal lineTotal string status }
-  ORDER_ITEM_STATUS_HISTORY { bigint id PK bigint orderItemId FK bigint actorId FK string fromStatus string toStatus }
-  PAYMENT_REQUEST { bigint id PK bigint diningSessionId FK,UK string status }
-  PAYMENT { bigint id PK bigint orderId FK,UK bigint recordedBy FK decimal amount string status }
-  USER { bigint id PK string username UK }
-  MENU_ITEM { bigint id PK string name }
+
+  DINING_TABLE {
+    bigint id PK
+    string code UK
+    string status
+  }
+  DINING_SESSION {
+    bigint id PK
+    bigint tableId FK
+    string sessionCode UK
+    string status
+    bigint openedBy FK
+    bigint closedBy FK
+  }
+  ORDER {
+    bigint id PK
+    bigint diningSessionId FK,UK
+    string orderCode UK
+  }
+  ORDER_ITEM {
+    bigint id PK
+    bigint orderId FK
+    bigint menuItemId FK
+    string itemNameSnapshot
+    int quantity
+    decimal unitPrice
+    decimal lineTotal
+    string status
+  }
+  ORDER_ITEM_STATUS_HISTORY {
+    bigint id PK
+    bigint orderItemId FK
+    bigint actorId FK
+    string fromStatus
+    string toStatus
+  }
+  PAYMENT_REQUEST {
+    bigint id PK
+    bigint diningSessionId FK,UK
+    string status
+  }
+  PAYMENT {
+    bigint id PK
+    bigint orderId FK,UK
+    bigint recordedBy FK
+    decimal amount
+    string status
+  }
+  USER {
+    bigint id PK
+    string username UK
+  }
+  MENU_ITEM {
+    bigint id PK
+    string name
+  }
