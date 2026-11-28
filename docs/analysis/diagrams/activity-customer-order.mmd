@@ -1,34 +1,39 @@
+
 flowchart TB
   subgraph C["Khách hàng"]
-    C1([Mở chức năng gọi món]) --> C2["Xem menu / chọn món / nhập số lượng và ghi chú"]
-    C2 --> C3["Gửi yêu cầu gọi món"]
+    C1([Truy cập chức năng gọi món]) --> C2["Xem thực đơn / chọn món / nhập số lượng và ghi chú"]
+    C2 --> C3["Gửi yêu cầu đặt món"]
     C4["Theo dõi trạng thái món"]
-    C5["Yêu cầu thanh toán"]
+    C5["Gửi yêu cầu thanh toán"]
   end
+
   subgraph O["Nhân viên Order"]
-    O1["Theo dõi bàn và phiên"]
-    O2["Hỗ trợ khách / thêm món khi cần"]
+    O1["Theo dõi tình trạng bàn và phiên phục vụ"]
+    O2["Hỗ trợ khách hàng / gọi thêm món khi cần"]
     O3["Tiếp nhận yêu cầu thanh toán"]
     O4["Thu tiền và xác nhận thanh toán"]
   end
+
   subgraph K["Nhân viên Bếp"]
-    K1["Tiếp nhận món"]
-    K2["Chế biến và cập nhật trạng thái"]
-    K3["Hoàn thành món"]
+    K1["Tiếp nhận món chờ chế biến"]
+    K2["Chế biến món và cập nhật trạng thái"]
+    K3["Xác nhận hoàn thành món"]
   end
+
   subgraph S["Hệ thống"]
-    S1["Tải menu"]
-    S2["Xác định TableDevice từ user CUSTOMER"]
-    S3{"Bàn có phiên OPEN?"}
-    S4["Tái sử dụng phiên và Order"]
-    S5["Tạo DiningSession + Order; đánh dấu bàn OCCUPIED"]
-    S6["Kiểm tra menu, giá và phiên; tạo OrderItem + history"]
-    S7["Polling 5 giây: tải lại menu, recent orders và active session"]
-    S8["PaymentRequest PENDING"]
-    S9{"Còn món AWAITING_ACCEPTANCE?"}
-    S10["Từ chối xác nhận; yêu cầu xử lý món chờ"]
-    S11["Tạo Payment; đóng phiên; trả bàn AVAILABLE"]
+    S1["Tải thực đơn"]
+    S2["Xác định TableDevice từ tài khoản CUSTOMER"]
+    S3{"Bàn có phiên phục vụ đang mở (OPEN)?"}
+    S4["Sử dụng lại phiên phục vụ và đơn hàng hiện có"]
+    S5["Tạo DiningSession + Order; chuyển bàn sang OCCUPIED"]
+    S6["Kiểm tra thực đơn, giá và phiên; tạo OrderItem + lịch sử trạng thái"]
+    S7["Polling 5 giây: tải lại thực đơn, đơn hàng gần đây và phiên phục vụ hiện tại"]
+    S8["PaymentRequest ở trạng thái PENDING"]
+    S9{"Còn món ở trạng thái AWAITING_ACCEPTANCE?"}
+    S10["Từ chối xác nhận; yêu cầu xử lý món đang chờ tiếp nhận"]
+    S11["Tạo Payment; đóng phiên phục vụ; chuyển bàn về AVAILABLE"]
   end
+
   C1 --> S1 --> C2
   C3 --> S2 --> S3
   S3 -- Có --> S4
