@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { repositories } from '@/src/repositories';
 import { storageService } from '@/src/services/storage/storageService';
 import type { MenuCategory, MenuItem } from '@/src/features/menu/types/menu.types';
 import { mealRecommendationService } from '@/src/features/customer-order/services/mealRecommendationService';
+import type { MealRecommendationRequest } from '@/src/features/customer-order/services/mealRecommendationService';
 import type {
   CartItem,
   CustomerOrderTracking,
@@ -38,8 +39,19 @@ export function useCustomerOrder() {
   const [search, setSearch] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [mealSuggestions, setMealSuggestions] = useState<MenuItem[]>([]);
-  const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý món ăn thông minh sẽ xuất hiện tại đây khi hệ thống được kết nối AI.');
+  const [suggestionMessage, setSuggestionMessage] = useState('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
   const [recommendationAvailable, setRecommendationAvailable] = useState(false);
+  const activeSessionIdRef = useRef(activeSessionId);
+  activeSessionIdRef.current = activeSessionId;
+  const surveyRequestRef = useRef<MealRecommendationRequest | null>(null);
+  const recommendationRequestRef = useRef(0);
+  const previousSessionIdRef = useRef(activeSessionId);
+  const orderedItemsSignature = useMemo(() => tableOrders
+    .flatMap((order) => order.items)
+    .filter((item) => item.kitchenStatus !== 'VOIDED')
+    .map((item) => `${item.menuItemId}:${item.quantity}`)
+    .sort()
+    .join('|'), [tableOrders]);
 
   const loadCustomerData = useCallback(
     async (silent = false) => {
@@ -57,7 +69,6 @@ export function useCustomerOrder() {
           setTableOrders(recentOrders);
           if (recentOrders[0]) setTableNumber(recentOrders[0].tableNumber);
         } catch {
-          // No active session is a normal state before the customer starts ordering.
           setTableOrders([]);
         }
       } catch (err) {
@@ -86,9 +97,6 @@ export function useCustomerOrder() {
           items: CartItem[];
         }>(storageService.KEYS.CUSTOMER_CART);
         if (!mounted) return;
-        // A cart created before the first dining session has sessionId=null.
-        // Keep it when no session exists, and bind it to the session if one was
-        // just opened. Only discard carts belonging to a different old session.
         if (Array.isArray(savedCart?.items) &&
           (!session || savedCart.sessionId === session.id || savedCart.sessionId == null)) {
           setCart(savedCart.items);
@@ -133,8 +141,6 @@ export function useCustomerOrder() {
         setTableNumber(session.tableNumber);
       }
       setActiveSessionId(sessionId);
-      // Keep items selected before the first session was opened. Rebind the
-      // local cart to the newly-created session instead of discarding it.
       await storageService.setJson(storageService.KEYS.CUSTOMER_CART, {
         sessionId,
         items: cart,
@@ -148,20 +154,26 @@ export function useCustomerOrder() {
 
   useEffect(() => {
     if (USE_MOCK_CUSTOMER_ORDER) return;
+    let effectActive = true;
     const interval = setInterval(() => {
       void loadCustomerData(true);
       void (async () => {
         try {
           const session = await repositories.customerOrder.getActiveSession();
+
+          // Bỏ qua phản hồi cũ nếu component đã cleanup hoặc state phiên đã đổi
+          // trong lúc request đang chạy. Đặc biệt tránh response null cũ ghi đè
+          // phiên vừa mở và làm mất kết quả khảo sát.
+          if (!effectActive || activeSessionIdRef.current !== activeSessionId) return;
           if (session?.id === activeSessionId) return;
+
           setActiveSessionId(session?.id ?? null);
           if (session) {
             setTableNumber(session.tableNumber);
             const savedCart = await storageService.getJson<{ sessionId: string; items: CartItem[] }>(
               storageService.KEYS.CUSTOMER_CART,
             );
-            // Preserve a pre-session cart (sessionId=null) when the first
-            // session appears; bind it instead of clearing the customer's choices.
+            if (!effectActive) return;
             const restored = Array.isArray(savedCart?.items) &&
               (savedCart.sessionId === session.id || savedCart.sessionId == null)
               ? savedCart.items
@@ -171,45 +183,77 @@ export function useCustomerOrder() {
               sessionId: session.id,
               items: restored,
             });
-          } else {
-            // A missing/closed session is not a reason to discard an unsent cart.
-            // Keep the cart available so the customer can open a new session or
-            // submit the first order without losing selected dishes.
           }
         } catch {
-          // A temporary network failure must not clear the currently restored session.
+          // Keep the currently restored session during temporary network failures.
         }
       })();
     }, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      effectActive = false;
+      clearInterval(interval);
+    };
   }, [activeSessionId, loadCustomerData]);
 
   useEffect(() => {
+    if (previousSessionIdRef.current === activeSessionId) return;
+
+    const previousSessionId = previousSessionIdRef.current;
+    previousSessionIdRef.current = activeSessionId;
+    recommendationRequestRef.current += 1;
+
+    // Khách có thể khảo sát trước khi mở phiên. Khi phiên đầu tiên được mở,
+    // phải giữ nguyên tiêu chí và kết quả khảo sát để tiếp tục dùng cho AI.
+    if (previousSessionId === null && activeSessionId !== null) return;
+
+    // Chỉ xóa khảo sát khi phiên hiện tại thực sự kết thúc hoặc chuyển sang
+    // một phiên khác, tránh mang tiêu chí của bàn/phiên cũ sang phiên mới.
+    surveyRequestRef.current = null;
+    setMealSuggestions([]);
+    setRecommendationAvailable(false);
+    setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+  }, [activeSessionId]);
+
+  useEffect(() => {
     let active = true;
+    const requestId = ++recommendationRequestRef.current;
+
+    if (!activeSessionId) {
+      setMealSuggestions([]);
+      setRecommendationAvailable(false);
+      setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+      return () => { active = false; };
+    }
+
+    if (!orderedItemsSignature) {
+      if (!surveyRequestRef.current) {
+        setMealSuggestions([]);
+        setRecommendationAvailable(false);
+        setSuggestionMessage('Gợi ý AI sẽ xuất hiện sau khi bàn có món đã gọi.');
+      }
+      return () => { active = false; };
+    }
+
+    const surveyRequest = surveyRequestRef.current;
     void mealRecommendationService.getRecommendations({
-      menuItems: items,
-      selectedCategoryId: selectedCategoryId === 'ALL' ? null : selectedCategoryId,
-      searchKeyword: search.trim(),
+      ...(surveyRequest ?? {}),
+      k: surveyRequest?.k ?? 6,
     }).then((result) => {
-      if (!active) return;
+      if (!active || requestId !== recommendationRequestRef.current) return;
       setMealSuggestions(result.items.filter((item) =>
         item.price > 0 &&
-        item.pricingType !== "MARKET_PRICE" &&
-        item.pricingType !== "UNSET"
+        item.pricingType !== 'MARKET_PRICE' &&
+        item.pricingType !== 'UNSET'
       ));
       setSuggestionMessage(result.message);
       setRecommendationAvailable(result.available);
     }).catch(() => {
-      if (!active) return;
-      setMealSuggestions([]);
-      setSuggestionMessage('Chưa thể tải gợi ý món ăn. Bạn vẫn có thể chọn món trong thực đơn.');
+      if (!active || requestId !== recommendationRequestRef.current) return;
+      setSuggestionMessage('Chưa thể tải gợi ý AI. Bạn vẫn có thể chọn món trong thực đơn.');
       setRecommendationAvailable(false);
     });
-    return () => {
-      active = false;
-    };
-  }, [items, selectedCategoryId, search]);
-
+    return () => { active = false; };
+  }, [activeSessionId, orderedItemsSignature]);
 
   const changeTable = useCallback(
     (nextTable: string) => {
@@ -234,8 +278,8 @@ export function useCustomerOrder() {
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
       if (
         menuItem.price <= 0 ||
-        menuItem.pricingType === "MARKET_PRICE" ||
-        menuItem.pricingType === "UNSET"
+        menuItem.pricingType === 'MARKET_PRICE' ||
+        menuItem.pricingType === 'UNSET'
       ) return;
       const extraPrice = menuItem.modifiers
         .filter((modifier) => selectedModifiers.includes(modifier.label))
@@ -399,6 +443,18 @@ export function useCustomerOrder() {
     mealSuggestions,
     suggestionMessage,
     recommendationAvailable,
+    setSurveyRecommendations: (
+      nextItems: MenuItem[],
+      nextMessage: string,
+      nextAvailable: boolean,
+      request: MealRecommendationRequest,
+    ) => {
+      recommendationRequestRef.current += 1;
+      surveyRequestRef.current = request;
+      setMealSuggestions(nextItems);
+      setSuggestionMessage(nextMessage);
+      setRecommendationAvailable(nextAvailable);
+    },
     addToCart,
     updateCartQuantity,
     removeFromCart,

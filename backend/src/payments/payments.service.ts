@@ -67,7 +67,10 @@ export class PaymentsService {
         id: request.id.toString(),
         requestedAt: request.requestedAt,
         sessionId: request.diningSession.id.toString(),
-        table: request.diningSession.table,
+        table: {
+          ...request.diningSession.table,
+          id: request.diningSession.table.id.toString(),
+        },
         orderId: order?.id.toString() ?? null,
         orderCode: order?.orderCode ?? null,
         totalAmount: totalAmount.toString(),
