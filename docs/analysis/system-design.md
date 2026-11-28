@@ -274,7 +274,7 @@ PaymentsService xác định bàn qua TableDevice, tìm phiên OPEN và kiểm t
 
 Nhập kho cộng số lượng vào InventoryBalance, tạo StockMovement loại IN và AuditLog trong transaction Serializable. Kiểm kê đọc số dư cũ, tính delta, cập nhật số dư bằng số thực tế, tạo InventoryCountRecord, tạo StockMovement loại ADJUSTMENT nếu delta khác 0 và ghi AuditLog trong cùng transaction.
 
-**Căn cứ:** `backend/src/orders/orders.service.ts:137–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/inventory/inventory.service.ts:1–260`.
+**Căn cứ:** `backend/src/orders/orders.service.ts:137–290,328–374,448–500,714–755`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.service.ts:11–45,85–211`; `backend/src/inventory/inventory.service.ts:162–198,208–267`.
 
 ## 3.7. Thiết kế trạng thái và điều kiện chuyển đổi
 
@@ -598,7 +598,7 @@ Bảng dưới đây tổng hợp metadata khai báo trong Prisma schema. Các t
 | occurredAt | Timestamptz(6) | NOT NULL, default now() | Thời điểm phát sinh |
 | Index | — | (entityType, entityId, occurredAt DESC), (actorId, occurredAt DESC) | Truy vấn audit theo entity hoặc actor |
 
-**Căn cứ schema:** `prisma/schema.prisma:1–326` (đường dẫn duy nhất tại thư mục gốc repository); `backend/src/orders/dto/create-guest-order-items.dto.ts:1–30` (quantity là số nguyên 1–99). **Căn cứ migration:** `prisma/migrations/20261117190000_one_open_session_per_table/migration.sql:1–20`; `prisma/migrations/20261126170000_add_payment_requests/migration.sql:1–12`; các migration trạng thái/quantity liên quan trong `prisma/migrations/`.
+**Căn cứ schema:** `prisma/schema.prisma:1–326` (đường dẫn duy nhất tại thư mục gốc repository); `backend/src/orders/dto/create-guest-order-items.dto.ts:1–30` (quantity là số nguyên 1–99). **Căn cứ migration:** `prisma/migrations/20261117190000_one_open_session_per_table/migration.sql:1–6`; `prisma/migrations/20261126170000_add_payment_requests/migration.sql:1–20`; các migration trạng thái/quantity liên quan trong `prisma/migrations/`.
 
 ## 3.9. Thiết kế API và hợp đồng giao tiếp
 
@@ -838,7 +838,7 @@ Response HTTP 201:
 
 Frontend apiClient.normalizeApiError() còn ánh xạ timeout thành REQUEST_TIMEOUT (408), mất kết nối thành NETWORK_ERROR (503), và chuẩn hóa 401/403/404/400 thành mã UI riêng; các mã này không phải permission code hoặc mã lỗi nghiệp vụ do backend định nghĩa.
 
-**Căn cứ:** `backend/src/auth/auth.controller.ts:7–16`; `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/orders/orders.controller.ts:18–45`; `backend/src/kitchen/kitchen.controller.ts:9–21`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.controller.ts:9–44`; `backend/src/payments/payments.service.ts:85–211`; `frontend/src/services/api/apiClient.ts:1–200`.
+**Căn cứ:** `backend/src/auth/auth.controller.ts:7–16`; `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/auth.module.ts:15–26`; `backend/src/orders/orders.controller.ts:18–45`; `backend/src/kitchen/kitchen.controller.ts:9–21`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.controller.ts:9–44`; `backend/src/payments/payments.service.ts:85–211`; `frontend/src/services/api/apiClient.ts:1–165`.
 
 ## 3.10. Thiết kế phân quyền RBAC
 
@@ -1044,7 +1044,7 @@ Chưa tìm thấy script hoặc workflow backup/restore PostgreSQL được đ�
 - .github/workflows/frontend-validation.yml: Node 24, npm ci và npm run typecheck.
 - Chưa thấy workflow deploy tự động hoặc release pipeline trong hai workflow validation này. Vì vậy CD hiện được ghi là chưa có bằng chứng trong code; triển khai production cần quy trình phê duyệt, migration, deploy, health check và rollback riêng.
 
-**Căn cứ:** `backend/package.json:1–40`; `backend/prisma.config.ts:1–13`; `backend/src/main.ts:19–67`; `backend/src/seed.ts:1–100`; `backend/.env.example:1–24`; `frontend/src/constants/config.ts:1–55`; `.github/workflows/backend-validation.yml:1–46`; `.github/workflows/frontend-validation.yml:1–38`.
+**Căn cứ:** `backend/package.json:1–63`; `backend/prisma.config.ts:1–13`; `backend/src/main.ts:19–67`; `backend/src/seed.ts:1–100`; `backend/.env.example:1–24`; `frontend/src/constants/config.ts:1–55`; `.github/workflows/backend-validation.yml:1–46`; `.github/workflows/frontend-validation.yml:1–38`.
 
 ## 3.13. Đánh giá tồn tại và hướng hoàn thiện
 
