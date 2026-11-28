@@ -5,10 +5,43 @@ erDiagram
   USER ||--o| EMPLOYEE : profile
   USER o|--o| TABLE_DEVICE : assigned
   DINING_TABLE ||--o| TABLE_DEVICE : owns
-  ROLE { bigint id PK string code UK string name }
-  PERMISSION { bigint id PK string code UK string module }
-  ROLE_PERMISSION { bigint roleId PK,FK bigint permissionId PK,FK }
-  USER { bigint id PK bigint roleId FK string username UK string passwordHash boolean isActive }
-  EMPLOYEE { bigint id PK bigint userId FK,UK string employeeCode UK string fullName }
-  TABLE_DEVICE { bigint id PK bigint diningTableId FK,UK bigint userId FK,UK string deviceCode UK boolean isActive }
-  DINING_TABLE { bigint id PK string code UK string status }
+
+  ROLE {
+    bigint id PK
+    string code UK
+    string name
+  }
+  PERMISSION {
+    bigint id PK
+    string code UK
+    string module
+  }
+  ROLE_PERMISSION {
+    bigint roleId PK,FK
+    bigint permissionId PK,FK
+  }
+  USER {
+    bigint id PK
+    bigint roleId FK
+    string username UK
+    string passwordHash
+    boolean isActive
+  }
+  EMPLOYEE {
+    bigint id PK
+    bigint userId FK,UK
+    string employeeCode UK
+    string fullName
+  }
+  TABLE_DEVICE {
+    bigint id PK
+    bigint diningTableId FK,UK
+    bigint userId FK,UK
+    string deviceCode UK
+    boolean isActive
+  }
+  DINING_TABLE {
+    bigint id PK
+    string code UK
+    string status
+  }
