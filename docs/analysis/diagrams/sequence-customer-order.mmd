@@ -4,47 +4,60 @@ sequenceDiagram
   participant Repo as ApiCustomerOrderRepository
   participant Menu as GuestMenuController
   participant Session as SessionsController
-  participant SessionSvc as SessionsService
+  participant Guard as JwtAuthGuard + PermissionsGuard
+  participant SS as SessionsService
   participant Order as OrdersController
-  participant OrderSvc as OrdersService
-  participant DB as PrismaService
-  Customer->>UI: Mở gọi món
+  participant OS as OrdersService
+  participant DB as PostgreSQL / Prisma
+  Customer->>UI: Mở màn hình đặt món
   UI->>Repo: getCustomerMenu()
-  Repo->>Menu: GET /menu-items/customer/menu
-  Menu->>DB: MenuItemsService.findCustomerMenu()
-  DB-->>Menu: Menu categories/items
-  Menu-->>Repo: HTTP 200 + menu
-  Repo-->>UI: Menu categories/items
-  Customer->>UI: Chọn món
+  Repo->>Menu: GET /api/v1/menu-items/customer/menu (public read-only)
+  Menu->>DB: findCustomerMenu()
+  DB-->>Menu: Categories + available items
+  Menu-->>Repo: HTTP 200
+  Customer->>UI: Chọn món và gửi
   UI->>Repo: startSession()
-  Repo->>Session: POST /sessions/customer/open [JWT]
-  Session->>SessionSvc: openForCustomer(userId)
-  SessionSvc->>DB: Tìm TableDevice + trạng thái DiningTable
-  alt Bàn OCCUPIED và có phiên OPEN
-    SessionSvc->>DB: Tìm phiên hiện tại theo tableId
-    DB-->>SessionSvc: Phiên hiện tại
+  Repo->>Session: POST /api/v1/sessions/customer/open [Bearer]
+  Session->>Guard: JWT + customer:session:start
+  Guard-->>Session: Cho phép
+  Session->>SS: openForCustomer(userId)
+  SS->>DB: Tìm TableDevice theo userId
+  alt Có phiên OPEN
+    SS->>DB: Lấy phiên và Order hiện tại
   else Bàn AVAILABLE
-    SessionSvc->>DB: Transaction tạo DiningSession, Order, cập nhật bàn
-    DB-->>SessionSvc: Phiên và Order mới
-  else Không có TableDevice hoặc OCCUPIED nhưng thiếu phiên OPEN
-    SessionSvc-->>Session: NotFoundException / ConflictException
-    Session-->>Repo: HTTP lỗi
-    Repo-->>UI: Hiển thị lỗi
+    SS->>DB: Transaction tạo DiningSession + Order và cập nhật trạng thái bàn thành OCCUPIED
   end
-  SessionSvc-->>Repo: Thông tin phiên, không trả sessionCode
-  UI->>Repo: submitOrder(items)
-  Repo->>Order: POST /customer/session/items [JWT]
-  Order->>OrderSvc: addCustomerItems(userId, items)
-  OrderSvc->>DB: Tìm TableDevice và phiên nội bộ
-  OrderSvc->>DB: Transaction kiểm tra và tạo OrderItem/History/AuditLog
-  DB-->>OrderSvc: Các item mới
-  OrderSvc-->>Order: orderCode + items
-  Order-->>Repo: HTTP 201 + kết quả
-  Repo->>Order: GET /customer/session [JWT]
-  Order->>OrderSvc: getCustomerSession(userId)
-  OrderSvc->>DB: Đọc phiên OPEN, Order và OrderItems
-  DB-->>OrderSvc: Dữ liệu phiên/đơn/món
-  OrderSvc-->>Order: Session snapshot
-  Order-->>Repo: HTTP 200 + session
-  Repo-->>UI: CustomerOrderTracking
-  UI-->>Customer: Hiển thị trạng thái món
+  DB-->>SS: Session snapshot
+  SS-->>Repo: Session id
+  Repo->>Order: POST /api/v1/customer/session/items [Bearer]
+  Order->>Guard: JWT + customer:order:create-item
+  Guard-->>Order: Cho phép
+  Order->>OS: addCustomerItems(userId, items)
+  OS->>DB: Kiểm tra bàn/phiên/món/giá
+  OS->>DB: Transaction tạo OrderItem + history + audit
+  DB-->>OS: Created items (Prisma itemNameSnapshot)
+  OS-->>Order: Response maps itemNameSnapshot to JSON itemName
+  Order-->>Repo: HTTP 201
+  Repo-->>UI: Order result
+  loop Polling 5 giây
+    UI->>Repo: loadCustomerData(true) + getActiveSession()
+    Repo->>Menu: GET /api/v1/menu-items/customer/menu (public)
+    Repo->>Order: GET /api/v1/customer/session [Bearer]
+    Order->>Guard: JWT + customer:session:read
+    Guard-->>Order: Cho phép
+    Order->>OS: getCustomerSession(userId)
+    OS->>DB: Đọc phiên, Order và OrderItems
+    DB-->>OS: Customer session snapshot
+    OS-->>Order: Current customer session
+    Order-->>Repo: HTTP 200
+    Repo->>Session: GET /api/v1/sessions/customer/active [Bearer]
+    Session->>Guard: JWT + customer:session:start
+    Guard-->>Session: Cho phép
+    Session->>SS: getActiveForCustomer(userId)
+    SS->>DB: Đọc phiên OPEN theo TableDevice
+    DB-->>SS: Active session snapshot
+    SS-->>Session: Active session
+    Session-->>Repo: HTTP 200
+    Repo-->>UI: Menu + current order + active session snapshot
+  end
+  UI-->>Customer: Hiển thị món và trạng thái mới

@@ -1,0 +1,50 @@
+sequenceDiagram
+    autonumber
+    actor Staff as Nhân viên Kho
+    participant UI as InventoryScreen
+    participant Repo as ApiInventoryRepository
+    participant Ctrl as InventoryController
+    participant Guard as JwtAuthGuard + PermissionsGuard
+    participant Svc as InventoryService
+    participant DB as Prisma / PostgreSQL
+
+    alt Nhập kho
+        Staff->>UI: Nhập số lượng và lý do
+        UI->>Repo: stockIn(input)
+        Repo->>Ctrl: POST /inventory/ingredients/:ingredientId/stock-in
+        Ctrl->>Guard: JWT + inventory:manage
+        Guard-->>Ctrl: Cho phép
+        Ctrl->>Svc: stockIn(ingredientId, dto, actorId)
+        Svc->>Svc: Kiểm tra quantity > 0, tối đa 3 chữ số thập phân, reason không rỗng
+        Svc->>DB: BEGIN Serializable
+        Svc->>DB: Kiểm tra Ingredient đang hoạt động
+        Svc->>DB: InventoryBalance.upsert / increment
+        Svc->>DB: INSERT StockMovement(IN)
+        Svc->>DB: INSERT AuditLog(INVENTORY_STOCK_IN)
+        Svc->>DB: COMMIT
+        Svc-->>Ctrl: quantityOnHand + movementId
+        Ctrl-->>Repo: HTTP 201
+        Repo-->>UI: Tải lại tồn kho
+    else Kiểm kê
+        Staff->>UI: Nhập số lượng thực tế và loại kiểm kê
+        UI->>Repo: countStock(input)
+        Repo->>Ctrl: POST /inventory/ingredients/:ingredientId/count
+        Ctrl->>Guard: JWT + inventory:count
+        Guard-->>Ctrl: Cho phép
+        Ctrl->>Svc: recordCount(ingredientId, dto, actorId)
+        Svc->>Svc: Kiểm tra actualQuantity không âm, tối đa 3 chữ số thập phân
+        Svc->>DB: BEGIN Serializable
+        Svc->>DB: Đọc Ingredient + InventoryBalance
+        Svc->>Svc: delta = actualQuantity - previousQuantity
+        Svc->>DB: InventoryBalance.upsert(actualQuantity)
+        Svc->>DB: INSERT InventoryCountRecord
+        opt delta khác 0
+            Svc->>DB: INSERT StockMovement(ADJUSTMENT, delta)
+        end
+        Svc->>DB: INSERT AuditLog(INVENTORY_COUNT_RECORDED)
+        Svc->>DB: COMMIT
+        Svc-->>Ctrl: previousQuantity + actualQuantity + adjustment
+        Ctrl-->>Repo: HTTP 201
+        Repo-->>UI: Tải lại tồn kho
+    end
+    Note over Svc,DB: Số dư, movement/count record và audit được ghi trong cùng transaction.

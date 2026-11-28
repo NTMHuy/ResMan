@@ -1,0 +1,69 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  ArrowColor #475569
+}
+actor "Khách hàng\n(CUSTOMER)" as Customer
+actor "Nhân viên Order" as OrderStaff
+actor "Nhân viên Bếp" as Kitchen
+actor "Nhân viên Kho" as Inventory
+actor "Quản lý" as Manager
+rectangle "ResMan" {
+  usecase "UC-01\nĐăng nhập" as UC01
+  usecase "UC-02\nXem thực đơn" as UC02
+  usecase "UC-03\nMở phiên" as UC03
+  usecase "UC-04\nGọi món" as UC04
+  usecase "UC-05\nTheo dõi đơn/món" as UC05
+  usecase "UC-06\nHủy món" as UC06
+  usecase "UC-07\nQuản lý bàn" as UC07
+  usecase "UC-08\nQuản lý thực đơn" as UC08
+  usecase "UC-09\nXử lý KDS" as UC09
+  usecase "UC-10\nQuản lý kho" as UC10
+  usecase "UC-11\nYêu cầu thanh toán" as UC11
+  usecase "UC-12\nXác nhận thanh toán" as UC12
+  usecase "UC-13\nQuản lý tài khoản" as UC13
+  usecase "UC-14\nXem báo cáo" as UC14
+  usecase "UC-15\nTra cứu nhật ký kiểm toán\n(Đề xuất)" as UC15
+}
+Customer --> UC01
+Customer --> UC02
+Customer --> UC03
+Customer --> UC04
+Customer --> UC05
+Customer --> UC06
+Customer --> UC11
+OrderStaff --> UC01
+OrderStaff --> UC02
+OrderStaff --> UC03
+OrderStaff --> UC04
+OrderStaff --> UC05
+OrderStaff --> UC06
+OrderStaff --> UC07
+OrderStaff --> UC12
+Kitchen --> UC01
+Kitchen --> UC06
+Kitchen --> UC09
+Inventory --> UC01
+Inventory --> UC10
+Manager --> UC01
+Manager --> UC02
+Manager --> UC03
+Manager --> UC04
+Manager --> UC05
+Manager --> UC06
+Manager --> UC07
+Manager --> UC08
+Manager --> UC09
+Manager --> UC10
+Manager --> UC12
+Manager --> UC13
+Manager --> UC14
+Manager --> UC15
+note right of UC15
+  Đề xuất để đáp ứng phần tra cứu của FR-24.
+  Hiện chưa có endpoint/controller đọc AuditLog.
+end note
+@enduml

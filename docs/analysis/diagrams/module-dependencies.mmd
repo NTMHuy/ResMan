@@ -1,0 +1,43 @@
+flowchart TB
+  APP["AppModule"]
+  CONFIG["ConfigModule · global"]
+  DB["DatabaseModule · @Global"]
+  AUTH["AuthModule"]
+  subgraph FEATURES["Feature modules imported by AppModule"]
+    TABLES["TablesModule"]
+    USERS["UsersModule"]
+    SESSIONS["SessionsModule"]
+    ORDERS["OrdersModule"]
+    KITCHEN["KitchenModule"]
+    PAYMENTS["PaymentsModule"]
+    INVENTORY["InventoryModule"]
+    REPORTS["ReportsModule"]
+    CATS["MenuCategoriesModule"]
+    ITEMS["MenuItemsModule"]
+  end
+  CLOUD["CloudinaryModule"]
+  APP --> CONFIG
+  APP --> DB
+  APP --> AUTH
+  APP --> TABLES
+  APP --> USERS
+  APP --> SESSIONS
+  APP --> ORDERS
+  APP --> KITCHEN
+  APP --> PAYMENTS
+  APP --> INVENTORY
+  APP --> REPORTS
+  APP --> CATS
+  APP --> ITEMS
+  TABLES --> AUTH
+  USERS --> AUTH
+  SESSIONS --> AUTH
+  ORDERS --> AUTH
+  KITCHEN --> AUTH
+  PAYMENTS --> AUTH
+  INVENTORY --> AUTH
+  REPORTS --> AUTH
+  ITEMS --> CLOUD
+  NOTE["Metadata lưu ý: MenuCategoriesModule không import AuthModule; MenuItemsModule chỉ import CloudinaryModule. DatabaseModule là global."]
+  CATS -.-> NOTE
+  ITEMS -.-> NOTE

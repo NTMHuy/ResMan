@@ -1,0 +1,44 @@
+project:
+  scope_path: "."
+  loc: 1203
+  languages: [python]
+  git: false
+  structure:
+    src: "Existing implementation source"
+    data: "Raw and processed menu feature data"
+    models: "Existing serialized recommendation artifacts"
+    tests: "Existing test suite"
+    .venv: "Local Python environment"
+  notes: "Python recommendation repository implementing an existing menu recommender; rewrite guided by README.md."
+
+assessment:
+  change_type: rewrite
+  rationale: |
+    README.md describes an end-to-end redesign of the recommendation system and explicitly identifies many unresolved implementation decisions.
+  transformations:
+    - fromStack: "Existing Python recommendation implementation"
+      fromStackVersion: ""
+      toStack: "Coherent Python recommender redesign per README.md"
+      toStackVersion: ""
+  grouping_needed: false
+  deep_planning: undecided
+
+progress_sync:
+  run_id: "f18c723e-fb70-49be-9edb-ab677d9938e0"
+  grouping_mode: none
+  execution_mode: all-at-once
+  plan_start_time: "2026-11-23T15:10:26Z"
+  plan_completed_time: ""
+  execution_start_time: ""
+  execution_completed_time: ""
+  validation_start_time: ""
+  validation_completed_time: ""
+  total_phases: 3
+  completed_phases: 0
+  total_modules: 4
+  completed_modules: 0
+  total_tasks: 3
+  completed_tasks: 0
+  total_commits: 0
+  build_verified: false
+  test_verified: false

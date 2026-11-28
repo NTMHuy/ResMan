@@ -1,15 +1,28 @@
-flowchart TD
-  A([Bắt đầu]) --> B["Khách POST /payments/customer/request"]
-  B --> C["Tạo/cập nhật PaymentRequest PENDING"]
-  C --> D["Nhân viên xem yêu cầu và tổng kết"]
-  D --> E["POST /payments/sessions/:id/confirm"]
-  E --> F{"Phiên OPEN, chưa thanh toán,<br/>không còn AWAITING_ACCEPTANCE?"}
-  F -- Không --> G["Trả lỗi nghiệp vụ"]
-  G --> H([Kết thúc chưa thanh toán])
-  F -- Có --> I["Tính tổng món không CANCELLED"]
-  I --> J["Tạo Payment PAID"]
-  J --> K["Hoàn tất PaymentRequest"]
-  K --> L["Đóng DiningSession"]
-  L --> M["Đặt DiningTable AVAILABLE"]
-  M --> N["Ghi AuditLog và commit transaction"]
-  N --> O([Kết thúc thành công])
+flowchart TB
+  subgraph C["Khách hàng"]
+    C1["Gửi yêu cầu thanh toán"]
+  end
+  subgraph O["Nhân viên Order"]
+    O1["Xem yêu cầu PENDING và tổng kết"]
+    O2["Nhận đủ tiền"]
+    O3["Xác nhận thanh toán"]
+  end
+  subgraph K["Nhân viên Bếp"]
+    K1["Tiếp nhận hoặc hủy món còn chờ"]
+  end
+  subgraph S["Hệ thống"]
+    S1["Tạo mới hoặc tái sử dụng PaymentRequest PENDING"]
+    S2{"Phiên OPEN, Order tồn tại, chưa có Payment?"}
+    S3{"Còn AWAITING_ACCEPTANCE?"}
+    S4["Trả lỗi nghiệp vụ"]
+    S5["Tính tổng: loại CANCELLED"]
+    S6["Transaction Serializable: tạo Payment PAID"]
+    S7["PaymentRequest COMPLETED"]
+    S8["DiningSession CLOSED; DiningTable AVAILABLE"]
+    S9["Ghi AuditLog và commit"]
+  end
+  C1 --> S1 --> O1 --> O2 --> O3 --> S2
+  S2 -- Không --> S4
+  S2 -- Có --> S3
+  S3 -- Có --> K1 --> S3
+  S3 -- Không --> S5 --> S6 --> S7 --> S8 --> S9

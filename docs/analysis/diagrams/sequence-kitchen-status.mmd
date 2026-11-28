@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    actor Kitchen as Nhân viên Bếp
+    participant UI as KitchenScreen / useKds
+    participant Repo as ApiKDSRepository
+    participant Ctrl as KitchenController
+    participant Guard as JwtAuthGuard + PermissionsGuard
+    participant Svc as KitchenService
+    participant DB as Prisma / PostgreSQL
+
+    Kitchen->>UI: Chọn món và trạng thái tiếp theo
+    UI->>Repo: updateItemStatus(itemId, nextStatus, reason?)
+    Repo->>Repo: toBackendStatus(VOIDED) maps to CANCELLED
+    Repo->>Ctrl: PATCH /api/v1/kitchen/items/:itemId/status
+    Ctrl->>Guard: Xác thực JWT và kitchen:update-item
+    Guard-->>Ctrl: Cho phép
+    Ctrl->>Svc: updateStatus(itemId, status, reason, actorId)
+    Svc->>DB: BEGIN TRANSACTION (Serializable)
+    Svc->>DB: Đọc OrderItem + Order + DiningSession
+    DB-->>Svc: Trạng thái hiện tại và trạng thái phiên
+    Svc->>Svc: Kiểm tra phiên OPEN và transition allowed
+    alt Không hợp lệ / phiên đóng / thiếu reason khi hủy
+        Svc-->>DB: ROLLBACK
+        Svc-->>Ctrl: ConflictException / NotFoundException
+        Ctrl-->>Repo: HTTP lỗi
+        Repo-->>UI: Hiển thị lỗi
+    else Hợp lệ
+        Svc->>DB: Conditional UPDATE OrderItem WHERE status = oldStatus
+        alt Không cập nhật được đúng một dòng
+            Svc-->>DB: ROLLBACK
+            Svc-->>Ctrl: ConflictException (race condition)
+        else Cập nhật thành công
+            Svc->>DB: INSERT OrderItemStatusHistory
+            Svc->>DB: INSERT AuditLog
+            Svc->>DB: COMMIT
+            Svc-->>Ctrl: { id, status }
+            Ctrl-->>Repo: HTTP 200
+            Repo->>UI: fetchQueue(true)
+            UI-->>Kitchen: Hiển thị queue mới
+        end
+    end
+    Note over Svc: Code cho phép AWAITING_ACCEPTANCE to ACCEPTED or CANCELLED, ACCEPTED to IN_PREPARATION or CANCELLED, IN_PREPARATION to COMPLETED or CANCELLED.
+    Note over Svc: IN_PREPARATION to ACCEPTED là Quy tắc nghiệp vụ, chưa triển khai.

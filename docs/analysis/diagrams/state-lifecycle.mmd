@@ -1,0 +1,38 @@
+stateDiagram-v2
+  direction LR
+
+  state "DiningSession" as DiningSession {
+    [*] --> DS_OPEN
+    state "OPEN" as DS_OPEN
+    state "CLOSED" as DS_CLOSED
+    DS_OPEN --> DS_CLOSED: Payment.status = PAID, then close session
+    DS_CLOSED --> [*]
+  }
+
+  state "DiningTable" as DiningTable {
+    [*] --> DT_AVAILABLE
+    state "AVAILABLE" as DT_AVAILABLE
+    state "OCCUPIED" as DT_OCCUPIED
+    DT_AVAILABLE --> DT_OCCUPIED: create/open DiningSession
+    DT_OCCUPIED --> DT_AVAILABLE: paid session closed
+  }
+
+  state "PaymentRequest" as PaymentRequest {
+    [*] --> PR_PENDING
+    state "PENDING" as PR_PENDING
+    state "COMPLETED" as PR_COMPLETED
+    PR_PENDING --> PR_COMPLETED: payment confirmed
+    PR_COMPLETED --> [*]
+  }
+
+  note right of DiningSession
+    A session is closed only after its Order
+    has a Payment with status PAID.
+    A later visit creates a new session record.
+  end note
+
+  note right of PaymentRequest
+    An existing PENDING request is returned
+    idempotently. Confirmation changes it
+    to COMPLETED in the payment transaction.
+  end note

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F8FAFC" stroke="#E2E8F0"/>
+<rect x="0" y="0" width="1280" height="62" rx="0" fill="#FFFFFF" stroke="#E2E8F0"/>
+<text x="28" y="39" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">ResMan</text>
+<text x="180" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0F172A">Báo cáo vận hành</text>
+<text x="1010" y="37" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#475569">MANAGER</text>
+<rect x="0" y="62" width="188" height="700" rx="0" fill="#F1F5F9" stroke="#E2E8F0"/>
+<rect x="14" y="88" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="113" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Tổng quan</text>
+<rect x="14" y="136" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="161" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Thực đơn</text>
+<rect x="14" y="184" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="209" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Bàn</text>
+<rect x="14" y="232" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="257" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Đơn hàng</text>
+<rect x="14" y="280" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="305" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Bếp KDS</text>
+<rect x="14" y="328" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="353" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Kho</text>
+<rect x="14" y="376" width="160" height="38" rx="8" fill="#F1F5F9" stroke="#F1F5F9"/>
+<text x="28" y="401" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#475569">Nhân sự</text>
+<rect x="14" y="424" width="160" height="38" rx="8" fill="#DBEAFE" stroke="#93C5FD"/>
+<text x="28" y="449" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1D4ED8">Báo cáo</text>
+<text x="214" y="104" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#0F172A">Báo cáo vận hành</text>
+<text x="214" y="130" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Thiết bị: desktop · ReportsScreen</text>
+<rect x="214" y="138" width="251" height="76" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="228" y="165" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Doanh thu đã thanh toán</text>
+<text x="228" y="195" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">24.500.000đ</text>
+<rect x="477" y="138" width="251" height="76" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="491" y="165" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Số món đã bán</text>
+<text x="491" y="195" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">186</text>
+<rect x="740" y="138" width="251" height="76" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="754" y="165" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Giá trị đơn TB</text>
+<text x="754" y="195" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">245.000đ</text>
+<rect x="1003" y="138" width="251" height="76" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="1017" y="165" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Cần chú ý tồn kho</text>
+<text x="1017" y="195" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">03</text>
+<rect x="214" y="232" width="513" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="230" y="262" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0F3B5D">Doanh thu theo ngày / tháng</text>
+<rect x="228" y="275" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="238" y="292" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Biểu đồ doanh thu theo kỳ</text>
+<rect x="228" y="302" width="485" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="238" y="319" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Ngày 01  ▂▃▅▃▆</text>
+<rect x="228" y="329" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="238" y="346" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Ngày 02  ▃▅▇▅</text>
+<rect x="228" y="356" width="485" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="238" y="373" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Ngày 03  ▂▄▆▇</text>
+<rect x="228" y="383" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="238" y="400" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Doanh thu chỉ tính Payment PAID</text>
+<rect x="741" y="232" width="513" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="757" y="262" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0F3B5D">Tồn kho và đơn hàng</text>
+<rect x="755" y="275" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="765" y="292" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Cảnh báo tồn kho thấp: 03</text>
+<rect x="755" y="302" width="485" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="765" y="319" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Nguyên liệu đang hoạt động: 24</text>
+<rect x="755" y="329" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="765" y="346" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Đơn ORD-001 · Bàn T01 · Đã thanh toán</text>
+<rect x="755" y="356" width="485" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="765" y="373" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Món bán chạy · số lượng / doanh thu</text>
+<rect x="755" y="383" width="485" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="765" y="400" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Khoảng thời gian báo cáo: từ – đến</text>
+<text x="24" y="786" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Wireframe thiết kế minh họa, không phải ảnh chụp giao diện sản phẩm</text>
+<text x="1100" y="786" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#94A3B8">ResMan · UI concept</text>
+</svg>

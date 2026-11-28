@@ -1,22 +1,22 @@
 flowchart TB
   U["Người dùng: CUSTOMER / ORDER_STAFF / KITCHEN_STAFF / INVENTORY_STAFF / MANAGER"]
-  subgraph FE["Frontend — Expo / React Native"]
-    UI["Expo Router + Screens"]
+  subgraph FE["Frontend · Expo / React Native"]
+    UI["Expo Router + Feature Screens"]
     CTX["AuthContext / NavigationContext"]
-    REPO["Api*Repository"]
+    REPO["Api*Repository + Axios"]
     UI <--> CTX
     UI <--> REPO
   end
-  subgraph BE["Backend — NestJS"]
-    CTRL["Controllers"]
+  subgraph BE["Backend · NestJS modular monolith"]
     GUARD["JwtAuthGuard + PermissionsGuard"]
-    SVC["Services nghiệp vụ"]
+    CTRL["Controllers + DTO"]
+    SVC["Business Services"]
     PRISMA["Prisma Client / PrismaService"]
     GUARD --> CTRL --> SVC --> PRISMA
   end
   DB[("PostgreSQL")]
-  CLOUD["Cloudinary"]
+  CLOUD["Cloudinary · menu images"]
   U <--> UI
-  REPO <-->|"REST /api/v1, JSON; Bearer JWT cho endpoint cần xác thực"| CTRL
+  REPO <-->|"REST /api/v1 · Bearer JWT where protected"| CTRL
   PRISMA <--> DB
-  SVC <-->|"Upload/delete ảnh"| CLOUD
+  SVC <-->|"upload / delete"| CLOUD

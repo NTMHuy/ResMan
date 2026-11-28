@@ -1,0 +1,19 @@
+flowchart LR
+  A["AWAITING_ACCEPTANCE"]
+  B["ACCEPTED"]
+  C["IN_PREPARATION"]
+  D["COMPLETED"]
+  X["CANCELLED"]
+  A -->|"Kitchen Staff · phiên OPEN · code allowed"| B
+  B -->|"Kitchen Staff · phiên OPEN · code allowed"| C
+  C -->|"Kitchen Staff · phiên OPEN · code allowed"| D
+  C -.->|"Kitchen Staff · Business Rule 4.1 · chưa triển khai"| B
+  A -->|"Customer · chỉ món của tài khoản · trước tiếp nhận"| X
+  A -->|"Order Staff · phiên OPEN"| X
+  B -->|"Order Staff · phiên OPEN"| X
+  A -->|"Kitchen Staff · code cho phép; phạm vi nghiệp vụ chưa chốt"| X
+  B -->|"Kitchen Staff · code cho phép; phạm vi nghiệp vụ chưa chốt"| X
+  C -->|"Kitchen Staff · code cho phép; phạm vi nghiệp vụ chưa chốt"| X
+  classDef proposed fill:#FFF7ED,stroke:#C2410C,stroke-width:2px,stroke-dasharray:5 5,color:#7C2D12
+  classDef current fill:#EFF6FF,stroke:#1D4ED8,color:#1E3A8A
+  class A,B,C,D,X current

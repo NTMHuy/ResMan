@@ -1,0 +1,25 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+node "Thiết bị người dùng" {
+  artifact "Tablet khách hàng\nExpo / React Native" as CustomerApp
+  artifact "Điện thoại / máy tính nhân viên\nExpo / React Native" as StaffApp
+}
+node "Backend application" {
+  component "NestJS API\n/api/v1" as API
+  component "Prisma Client + PrismaService" as Prisma
+}
+database "PostgreSQL" as DB
+cloud "Cloudinary" as Cloud
+CustomerApp --> API : REST / HTTPS\nBearer JWT cho API bảo vệ
+StaffApp --> API : REST / HTTPS\nBearer JWT
+API --> Prisma
+Prisma --> DB : PostgreSQL
+API --> Cloud : Upload / delete image
+note bottom of API
+  Sơ đồ khái niệm theo source code.
+  Số instance, reverse proxy, TLS termination,
+  network segmentation và deployment target
+  chưa được xác minh.
+end note
+@enduml

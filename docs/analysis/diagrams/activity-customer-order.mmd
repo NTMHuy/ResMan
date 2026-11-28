@@ -1,18 +1,43 @@
-flowchart TD
-  A([Bắt đầu]) --> B["GET /menu-items/customer/menu"]
-  B --> C["Khách chọn món, số lượng, ghi chú"]
-  C --> D["POST /sessions/customer/open"]
-  D --> E{"TableDevice hoạt động?"}
-  E -- Không --> X["Trả lỗi gán tablet/bàn"]
-  X --> Z([Kết thúc thất bại])
-  E -- Có --> F{"Đã có phiên OPEN?"}
-  F -- Có --> G["Tái sử dụng phiên"]
-  F -- Không --> H["Tạo DiningSession + Order<br/>và cập nhật DiningTable"]
-  G --> I["POST /customer/session/items"]
-  H --> I
-  I --> J{"Phiên mở, món khả dụng<br/>và giá hợp lệ?"}
-  J -- Không --> K["Trả lỗi nghiệp vụ"]
-  K --> Z
-  J -- Có --> L["Tạo OrderItem + History + AuditLog"]
-  L --> M["Trả kết quả đặt món"]
-  M --> N([Kết thúc])
+flowchart TB
+  subgraph C["Khách hàng"]
+    C1([Mở chức năng gọi món]) --> C2["Xem menu / chọn món / nhập số lượng và ghi chú"]
+    C2 --> C3["Gửi yêu cầu gọi món"]
+    C4["Theo dõi trạng thái món"]
+    C5["Yêu cầu thanh toán"]
+  end
+  subgraph O["Nhân viên Order"]
+    O1["Theo dõi bàn và phiên"]
+    O2["Hỗ trợ khách / thêm món khi cần"]
+    O3["Tiếp nhận yêu cầu thanh toán"]
+    O4["Thu tiền và xác nhận thanh toán"]
+  end
+  subgraph K["Nhân viên Bếp"]
+    K1["Tiếp nhận món"]
+    K2["Chế biến và cập nhật trạng thái"]
+    K3["Hoàn thành món"]
+  end
+  subgraph S["Hệ thống"]
+    S1["Tải menu"]
+    S2["Xác định TableDevice từ user CUSTOMER"]
+    S3{"Bàn có phiên OPEN?"}
+    S4["Tái sử dụng phiên và Order"]
+    S5["Tạo DiningSession + Order; đánh dấu bàn OCCUPIED"]
+    S6["Kiểm tra menu, giá và phiên; tạo OrderItem + history"]
+    S7["Polling 5 giây: tải lại menu, recent orders và active session"]
+    S8["PaymentRequest PENDING"]
+    S9{"Còn món AWAITING_ACCEPTANCE?"}
+    S10["Từ chối xác nhận; yêu cầu xử lý món chờ"]
+    S11["Tạo Payment; đóng phiên; trả bàn AVAILABLE"]
+  end
+  C1 --> S1 --> C2
+  C3 --> S2 --> S3
+  S3 -- Có --> S4
+  S3 -- Không --> S5
+  S4 --> S6
+  S5 --> S6
+  S6 --> C4 --> S7
+  S7 --> C4
+  K3 --> S7
+  C5 --> S8 --> O3 --> O4 --> S9
+  S9 -- Có --> S10 --> K1
+  S9 -- Không --> S11

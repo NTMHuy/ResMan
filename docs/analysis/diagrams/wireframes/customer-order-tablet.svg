@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F8FAFC" stroke="#E2E8F0"/>
+<rect x="0" y="0" width="1280" height="62" rx="0" fill="#FFFFFF" stroke="#E2E8F0"/>
+<text x="28" y="39" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0F3B5D">ResMan</text>
+<text x="180" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0F172A">Đặt món tại bàn</text>
+<text x="1010" y="37" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#475569">CUSTOMER · TABLET</text>
+<text x="24" y="104" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#0F172A">Thực đơn &amp; giỏ hàng</text>
+<text x="24" y="130" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Thiết bị: tablet ngang · CustomerOrderScreen</text>
+<rect x="24" y="82" width="116" height="30" rx="15" fill="#DBEAFE" stroke="#CBD5E1"/>
+<text x="38" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#1D4ED8">Bàn T01</text>
+<rect x="154" y="82" width="116" height="30" rx="15" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="168" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#475569">Thực đơn</text>
+<rect x="284" y="82" width="116" height="30" rx="15" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="298" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#475569">Đơn đã gọi</text>
+<rect x="24" y="138" width="401.3333333333333" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="40" y="168" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0F3B5D">Danh mục</text>
+<rect x="38" y="181" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="48" y="198" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Món khai vị</text>
+<rect x="38" y="208" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="48" y="225" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Món chính</text>
+<rect x="38" y="235" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="48" y="252" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Món ăn kèm</text>
+<rect x="38" y="262" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="48" y="279" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Đồ uống</text>
+<rect x="38" y="289" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="48" y="306" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Tráng miệng</text>
+<rect x="439.3333333333333" y="138" width="401.3333333333333" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="455.3333333333333" y="168" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0F3B5D">Thực đơn món</text>
+<rect x="453.3333333333333" y="181" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="463.3333333333333" y="198" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Tìm món theo tên...</text>
+<rect x="453.3333333333333" y="208" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="463.3333333333333" y="225" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">[Ảnh] Phở bò · 65.000đ  [+]</text>
+<rect x="453.3333333333333" y="235" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="463.3333333333333" y="252" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">[Ảnh] Cơm gà · 55.000đ  [+]</text>
+<rect x="453.3333333333333" y="262" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="463.3333333333333" y="279" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">[Ảnh] Gỏi cuốn · 45.000đ  [+]</text>
+<rect x="453.3333333333333" y="289" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="463.3333333333333" y="306" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">[Ảnh] Trà đào · 30.000đ  [+]</text>
+<rect x="854.6666666666666" y="138" width="401.3333333333333" height="260" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+<text x="870.6666666666666" y="168" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0F3B5D">Giỏ hàng · Bàn T01</text>
+<rect x="868.6666666666666" y="181" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="198" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Phở bò × 2 · 130.000đ</text>
+<rect x="868.6666666666666" y="208" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="225" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Cơm gà × 1 · 55.000đ</text>
+<rect x="868.6666666666666" y="235" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="252" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Ghi chú món: Ít hành</text>
+<rect x="868.6666666666666" y="262" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="279" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Tạm tính: 185.000đ</text>
+<rect x="868.6666666666666" y="289" width="373.3333333333333" height="22" rx="5" fill="#F1F5F9" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="306" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">[ Gửi đơn xuống bếp ]</text>
+<rect x="868.6666666666666" y="316" width="373.3333333333333" height="22" rx="5" fill="#F8FAFC" stroke="#E2E8F0"/>
+<text x="878.6666666666666" y="333" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#334155">Theo dõi món · Yêu cầu thanh toán</text>
+<text x="24" y="786" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#64748B">Wireframe thiết kế minh họa, không phải ảnh chụp giao diện sản phẩm</text>
+<text x="1100" y="786" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#94A3B8">ResMan · UI concept</text>
+</svg>

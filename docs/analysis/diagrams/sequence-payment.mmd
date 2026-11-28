@@ -1,31 +1,38 @@
 sequenceDiagram
-  actor Staff as Nhân viên
-  participant UI as Giao diện thanh toán
+  actor Staff as Nhân viên Order
+  participant UI as OrdersScreen / PaymentModal
+  participant C as PaymentsController
   participant Guard as JwtAuthGuard + PermissionsGuard
-  participant Ctrl as PaymentsController
-  participant Svc as PaymentsService
-  participant DB as PrismaService
-  Staff->>UI: Xác nhận thanh toán
-  UI->>Guard: POST /payments/sessions/:id/confirm [JWT]
-  Guard->>Guard: Xác thực JWT và permission payments:confirm
-  Guard->>Ctrl: Cho phép request
-  Ctrl->>Svc: confirmForSession(...)
-  Svc->>DB: BEGIN Serializable transaction
-  Svc->>DB: Đọc session, order, items, payment
-  DB-->>Svc: Dữ liệu phiên
-  Svc->>Svc: Kiểm tra trạng thái và điều kiện thanh toán
-  alt Không đủ điều kiện
-    Svc-->>DB: ROLLBACK
-    Svc-->>Ctrl: ConflictException / NotFoundException
-    Ctrl-->>UI: HTTP lỗi
-  else Đủ điều kiện
-    Svc->>DB: Tạo Payment PAID
-    Svc->>DB: Hoàn tất PaymentRequest
-    Svc->>DB: Đóng DiningSession
-    Svc->>DB: DiningTable = AVAILABLE
-    Svc->>DB: Tạo AuditLog
-    Svc->>DB: COMMIT transaction
-    DB-->>Svc: Thành công
-    Svc-->>Ctrl: Payment + phiên CLOSED
-    Ctrl-->>UI: HTTP 200
+  participant S as PaymentsService
+  participant DB as PostgreSQL / Prisma
+  Staff->>UI: Xem yêu cầu và tổng kết phiên
+  UI->>C: GET /api/v1/payments/sessions/:id/summary [Bearer]
+  C->>Guard: JWT + payments:read
+  Guard-->>C: Cho phép
+  C->>S: getSessionSummary(sessionId)
+  S->>DB: Load session, order, items
+  DB-->>S: Summary snapshot
+  S-->>C: Summary
+  C-->>UI: Summary
+  Staff->>UI: Xác nhận đã nhận tiền
+  UI->>C: POST /api/v1/payments/sessions/:id/confirm [Bearer]
+  C->>Guard: JWT + payments:confirm
+  Guard-->>C: Cho phép
+  C->>S: confirmForSession(sessionId, actorId, method?, ref?)
+  S->>DB: BEGIN SERIALIZABLE
+  S->>DB: Load session/order/items/payment
+  S->>S: Check OPEN, no payment, no AWAITING_ACCEPTANCE
+  alt Điều kiện không đạt
+    S->>DB: ROLLBACK
+    S-->>C: HTTP conflict / not found
+    C-->>UI: HTTP conflict / not found
+  else Điều kiện đạt
+    S->>DB: Create Payment PAID (paymentMethod may be null)
+    S->>DB: PaymentRequest PENDING -> COMPLETED (if present)
+    S->>DB: DiningSession OPEN -> CLOSED
+    S->>DB: DiningTable OCCUPIED -> AVAILABLE
+    S->>DB: Create AuditLog
+    S->>DB: COMMIT
+    S-->>C: Payment + closed session
+    C-->>UI: Payment + closed session
   end
