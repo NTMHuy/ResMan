@@ -14,6 +14,8 @@ Khách hàng sử dụng tablet được gán trước với một bàn và đă
 
 Các nội dung không thuộc phạm vi MVP theo quyết định nghiệp vụ gồm: đặt bàn trước, chuyển bàn bằng phần mềm, modifier/biến thể món, công thức định mức nguyên liệu, tự động trừ kho theo doanh số, tự động hết món do tồn kho thấp, thanh toán chia nhỏ/nhiều lần và tích hợp cổng thanh toán trực tuyến. AI gợi ý món là hướng phát triển nâng cao, không được coi là điều kiện của luồng nghiệp vụ cốt lõi.
 
+**Căn cứ:** `docs/analysis/requirements-analysis.md:7–9,342`; `docs/11-confirmed-business-rules.md:20–54,200–215`; `backend/src/seed.ts:16–57`.
+
 ### 3.1.2. Nguyên tắc thiết kế
 
 - **Theo vai trò và ngữ cảnh thiết bị:** trải nghiệm khách trên tablet khác giao diện vận hành của nhân viên và quản lý.
@@ -22,6 +24,8 @@ Các nội dung không thuộc phạm vi MVP theo quyết định nghiệp vụ 
 - **Bảo toàn lịch sử:** OrderItem lưu snapshot tên món và giá; lịch sử trạng thái và AuditLog được ghi nhận ở các nghiệp vụ quan trọng.
 - **Transaction cho nghiệp vụ nhiều bước:** gọi món, cập nhật trạng thái, nhập/kiểm kê kho và xác nhận thanh toán có thao tác transaction để hạn chế dữ liệu dở dang.
 - **Tách hiện trạng và định hướng:** chỉ mô tả chức năng đã có bằng chứng; quy tắc chưa triển khai và khuyến nghị được gắn nhãn riêng.
+
+**Căn cứ:** `prisma/schema.prisma:190–208,210–326`; `backend/src/auth/guards/permissions.guard.ts:13–24`; `backend/src/orders/orders.service.ts:165–290,328–374`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/inventory/inventory.service.ts:162–267`; `backend/src/payments/payments.service.ts:85–211`.
 
 ### 3.1.3. Giả định và giới hạn khảo sát
 
@@ -34,6 +38,8 @@ Các mô hình được xây dựng từ branch source được nêu trong phạ
 ResMan được tổ chức theo kiến trúc frontend – backend – database, triển khai theo hướng modular monolith ở backend. Frontend là ứng dụng React Native chạy trên Expo SDK 58, sử dụng Expo Router và các feature module. Lớp repository API đóng gói lời gọi HTTP; context quản lý trạng thái xác thực và điều hướng. Backend sử dụng NestJS, chia module theo nghiệp vụ; Controller tiếp nhận HTTP request, DTO kiểm tra dữ liệu đầu vào và Service thực hiện nghiệp vụ. Prisma Client cùng `PrismaService` truy cập PostgreSQL. Cloudinary là dịch vụ ngoài dùng cho ảnh món ăn.
 
 Đường giao tiếp chính là REST API với global prefix `/api/v1`. Các API nội bộ sử dụng Bearer JWT. Backend dùng `JwtAuthGuard` và `PermissionsGuard` ở các controller/route được khai báo. API đọc thực đơn khách `GET /menu-items/customer/menu` được tách thành `GuestMenuController` không gắn guard ở controller; comment của controller xác định đây là public read-only menu. Thiết kế cho phép khách xem catalog trước khi mở phiên, trong khi mở phiên và gọi món vẫn bắt buộc JWT CUSTOMER cùng permission. Endpoint public không cấp quyền truy cập phiên, đơn hoặc thao tác nghiệp vụ.
+
+**Căn cứ:** `backend/src/menu-items/guest-menu.controller.ts:1–17`; `backend/src/sessions/sessions.controller.ts:20–29`; `backend/src/orders/orders.controller.ts:23–45`; `backend/src/auth/guards/permissions.guard.ts:13–24`.
 
 ### 3.2.2. Thành phần và trách nhiệm
 
@@ -99,6 +105,8 @@ Frontend gọi API thông qua repository. Với API được bảo vệ, request
 **Hình 3.3. Quan hệ phụ thuộc module NestJS theo khai báo hiện tại.**
 
 **Module dependency – mã nguồn:** [module-dependencies.mmd](diagrams/module-dependencies.mmd).
+
+**Căn cứ:** `backend/src/app.module.ts:19–37`; `backend/src/database/database.module.ts:1–10`; `backend/src/tables/tables.module.ts:1–8`; `backend/src/users/users.module.ts:1–13`; `backend/src/sessions/sessions.module.ts:1–13`; `backend/src/orders/orders.module.ts:1–14`; `backend/src/kitchen/kitchen.module.ts:1–12`; `backend/src/payments/payments.module.ts:1–12`; `backend/src/inventory/inventory.module.ts:1–12`; `backend/src/reports/reports.module.ts:1–12`; `backend/src/menu-categories/menu-categories.module.ts:1–12`; `backend/src/menu-items/menu-items.module.ts:1–14`.
 
 ### 3.3.3. Nguyên tắc phân tách trách nhiệm
 
@@ -204,6 +212,8 @@ Khách hàng gửi yêu cầu thanh toán; backend tạo hoặc tái sử dụng
 **Hình 3.7. Activity – Xác nhận thanh toán và đóng phiên.**
 
 **Activity payment – mã nguồn:** [activity-payment.mmd](diagrams/activity-payment.mmd).
+
+**Căn cứ activity:** `backend/src/sessions/sessions.service.ts:10–52,93–118`; `backend/src/orders/orders.service.ts:137–290,328–374,448–500`; `backend/src/kitchen/kitchen.service.ts:44–93`; `backend/src/payments/payments.service.ts:11–45,85–211`.
 
 ### 3.5.4. Thiết kế cập nhật thời gian thực
 
@@ -691,6 +701,8 @@ Các route trên tương ứng 60 thao tác HTTP. Endpoint cập nhật trạng 
 - Upload ảnh chỉ nhận JPG/JPEG/PNG/WEBP, tối đa 5 MB theo cấu hình controller.
 - Không đưa `PATCH /orders/:id/items/status` vào API hợp lệ: frontend ApiOrderRepository đang gọi route này nhưng StaffOrdersController không khai báo. Đây là sai khác hợp đồng, chi tiết ở TD-01.
 
+**Căn cứ:** `backend/src/main.ts:19–67`; `backend/src/orders/dto/create-guest-order-items.dto.ts:1–30`; `backend/src/orders/orders.service.ts:14–35,137–224`; `backend/src/orders/staff-orders.controller.ts:10–47`; `frontend/src/repositories/api/ApiOrderRepository.ts:130–167`.
+
 ### 3.9.4. Thiết kế thanh toán theo mô hình hiện tại
 
 Luồng hiện tại là ghi nhận nhân viên đã thu tiền, không phải xử lý thanh toán trực tuyến. Payment lưu amount, paymentMethod tùy chọn, transactionRef tùy chọn, status, paidAt và recordedBy. ConfirmPaymentDto chỉ chấp nhận CASH, CARD hoặc BANK_TRANSFER; không có API/SDK cổng thanh toán được tìm thấy trong PaymentsService.
@@ -845,6 +857,8 @@ Frontend apiClient.normalizeApiError() còn ánh xạ timeout thành REQUEST_TIM
 ### 3.10.1. Mô hình
 
 RBAC được triển khai bằng Role, Permission và RolePermission. Một User có một Role; Role liên kết nhiều Permission qua bảng nối. AuthService trả permission codes lúc đăng nhập. Với request được bảo vệ, JwtStrategy xác minh chữ ký/hạn JWT, tải lại user đang active cùng role/permission từ database; PermissionsGuard kiểm tra toàn bộ permission được khai báo bằng decorator `@Permissions`. Do đó thay đổi role/permission trong database có hiệu lực ở request tiếp theo sau khi JWT được xác minh.
+
+**Căn cứ:** `backend/src/auth/auth.service.ts:11–60`; `backend/src/auth/strategies/jwt.strategy.ts:19–39`; `backend/src/auth/guards/permissions.guard.ts:13–24`; `prisma/schema.prisma:1–57`.
 
 ### 3.10.2. Ma trận permission theo role
 
